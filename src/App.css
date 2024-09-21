@@ -7,27 +7,40 @@ html, body {
 }
 
 .App {
-  display: flex;                  /* Flexbox para centrar el contenido */
-  justify-content: center;         /* Centra horizontalmente */
-  align-items: center;             /* Centra verticalmente */
-  height: 100vh;  /* Ocupa toda la altura de la pantalla */
-  width: 100vw;   /* Ocupa todo el ancho de la pantalla */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: background-image 1s ease-in-out;  /* Transición suave entre fondos */
+  transition: opacity 1s ease-in-out;  /* Transición suave */
 }
 
+/* Frame 4: Primer fondo */
 .frame4 {
-  background-image: url('./designs/frame4.svg');  /* Primer fondo */
+  background-image: url('./designs/frame4.svg');
+  opacity: 1;  /* Empieza visible */
+  transition: opacity 1s ease-in-out;
 }
 
+/* Frame 0: Segundo fondo (oculto al inicio) */
 .frame0 {
-  height: 110vh;  /* Ajusta la altura a 110% de la pantalla */
   background-image: url('./designs/frame0.svg');
-  background-position: center top 1px;  /* Mueve el fondo hacia abajo */
+  background-position: center top;
+  height: 110vh;
+  opacity: 0;  /* Oculto inicialmente */
+  transition: opacity 1s ease-in-out;
 }
 
+/* Clase que se aplica cuando un frame está activo (desvanecido) */
+.fade-in {
+  opacity: 1;
+}
 
-
+/* Clase que se aplica para ocultar el frame */
+.fade-out {
+  opacity: 0;
+}
 

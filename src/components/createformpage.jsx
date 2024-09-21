@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import './form.css'
 
-const CreateFormPage = () => {
+const CreateFormPage = ({ onGoBack }) => {
   const [gameType, setGameType] = useState('public');  // Estado para controlar si es pública o privada
   const [password, setPassword] = useState('');        // Estado para manejar la contraseña
 
@@ -10,6 +11,8 @@ const CreateFormPage = () => {
   };
 
   return (
+    <div>
+    <button className="back-button" onClick={onGoBack}>←</button>
     <div className="form-container">
       <div className="title">
         <h2>Insertar Información de Partida</h2>
@@ -43,7 +46,7 @@ const CreateFormPage = () => {
               />
               Pública
             </label>
-            <label style={{ marginLeft: '20px' }}>
+            <label>
               <input
                 type="radio"
                 name="gameType"
@@ -75,6 +78,7 @@ const CreateFormPage = () => {
 
         <button type="submit" className="custom-button1">Crear</button>
       </form>
+    </div>
     </div>
   );
 };
