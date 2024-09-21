@@ -1,0 +1,88 @@
+/* Contenedor del título */
+.title {
+     background-color: #eaf2e3;   /* Fondo verde claro */
+     padding: 10px 20px;
+     border-radius: 50px;         /* Bordes redondeados */
+     margin-bottom: 30px;         /* Espacio inferior */
+     text-align: center;
+   }
+   
+   .title h2 {
+     color: #2e8b57;              /* Verde más oscuro */
+     font-size: 24px;
+     margin: 0;
+   }
+   
+   /* Contenedor del formulario */
+   .form-container {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: center;
+     width: 100%;
+     max-width: 400px;            /* Ancho máximo del formulario */
+     padding: 20px;
+     background-color: white;
+     border-radius: 50px;         /* Bordes redondeados */
+     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+     color: #2e8b57;              /* Verde del texto */
+     margin-top: 100px;
+   }
+   
+   /* Estilos del formulario */
+   .custom-form {
+     width: 100%;
+   }
+   
+   .form-group {
+     margin-bottom: 10px;
+   }
+   
+   .form-group label {
+     display: block;
+     font-size: 18px;
+     margin-bottom: 8px;
+     color: #2e8b57;
+   }
+   
+   .input-container {
+     display: flex;
+     align-items: center;
+     background-color: #f0f4f7;   /* Color de fondo suave */
+     border: 1px solid #d1d1d1;   /* Borde gris claro */
+     padding: 10px;
+     border-radius: 8px;
+   }
+   
+   .input-container input {
+     border: none;
+     background-color: transparent;
+     outline: none;
+     flex-grow: 1;
+     font-size: 16px;
+     padding: 10px;
+     color: #333;
+   }
+   
+   /* Botón del formulario */
+   .custom-button1 {
+     background-color: white;      /* Fondo blanco */
+     color: #8CB29F;               /* Texto en verde claro */
+     border: 2px solid #8CB29F;    /* Borde verde claro */
+     padding: 15px 15px;           /* Espaciado interno para el botón */
+     font-size: 20px;              /* Tamaño de letra */
+     border-radius: 50px;          /* Bordes redondeados */
+     cursor: pointer;              /* Cambia el cursor a pointer */
+     transition: background-color 0.3s, color 0.3s; /* Transiciones suaves */
+     width: 100px;                 /* Fija un ancho */
+     text-align: center;           /* Asegura que el texto esté centrado */
+     transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s; /* Transiciones suaves */
+     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra inicial */
+   }
+   
+   .custom-button1:hover {
+     transform: translateY(-5px);     /* Levanta el botón hacia arriba */
+     background-color: #8CB29F;       /* Cambia el fondo a verde claro */
+     color: white;                    /* Cambia el texto a blanco */
+     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
+   }

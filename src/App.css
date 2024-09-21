@@ -1,0 +1,33 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;  /* Deshabilita el scroll */
+  height: 100%;
+  width: 100%;
+}
+
+.App {
+  display: flex;                  /* Flexbox para centrar el contenido */
+  justify-content: center;         /* Centra horizontalmente */
+  align-items: center;             /* Centra verticalmente */
+  height: 100vh;  /* Ocupa toda la altura de la pantalla */
+  width: 100vw;   /* Ocupa todo el ancho de la pantalla */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: background-image 1s ease-in-out;  /* Transición suave entre fondos */
+}
+
+.frame4 {
+  background-image: url('./designs/frame4.svg');  /* Primer fondo */
+}
+
+.frame0 {
+  height: 110vh;  /* Ajusta la altura a 110% de la pantalla */
+  background-image: url('./designs/frame0.svg');
+  background-position: center top 1px;  /* Mueve el fondo hacia abajo */
+}
+
+
+
+
