@@ -20,6 +20,8 @@ function App() {
 
     return () => clearTimeout(timer);  // Limpia el temporizador al desmontar
   }, []);
+
+    
   // Función para cambiar al frame del formulario
   const handleCreateGame = () => {
     setCurrentFrame('form');

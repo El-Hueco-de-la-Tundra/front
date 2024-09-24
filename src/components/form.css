@@ -105,3 +105,51 @@
      color: white;                    /* Cambia el texto a blanco */
      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
    }
+
+   .radio-container {
+    display: flex;         /* Flexbox para alinear elementos en fila */
+    gap: 20px;             /* Espacio entre las opciones */
+    justify-content: flex-start;  /* Alinear a la izquierda */
+  }
+  
+  .radio-container label {
+    display: flex;
+    align-items: center;   /* Alinear el texto con el botón de radio */
+    cursor: pointer;       /* Cambiar el cursor cuando pase por encima */
+  }
+  
+  .radio-container input[type="radio"] {
+    margin-right: 8px;     /* Espacio entre el botón de radio y el texto */
+  }
+
+  .user-name-container {
+    position: absolute;   /* Posición absoluta para colocarlo fuera del formulario */
+    top: 400px;            /* Posición desde arriba */
+    left: 100px;           /* Posición desde la izquierda */
+    background-color: #ffffff;  /* Color de fondo divertido */
+    padding: 20px;        /* Espaciado interno */
+    border-radius: 20px;  /* Bordes redondeados */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra para darle un efecto flotante */
+    text-align: center;
+  }
+  
+  .user-label {
+    font-size: 18px;     /* Tamaño del texto del label */
+    font-weight: bold;   /* Negrita */
+    color: #2e8b57;      /* Verde oscuro para el texto */
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  .user-name-container input {
+    width: 200px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #8CB29F;  /* Borde verde claro */
+    font-size: 16px;
+    outline: none;
+  }
+  
+  .user-name-container input:focus {
+    border-color: #2e8b57;  /* Cambiar borde al enfocarse */
+  }
