@@ -1,0 +1,94 @@
+/* Contenedor del título de la lista de partidas */
+.list-title {
+    background-color: #A1A1A1;   /* Fondo verde claro */
+    padding: 10px 20px;
+    border-radius: 50px;         /* Bordes redondeados */
+    margin-bottom: 30px;         /* Espacio inferior */
+    text-align: center;
+    width: 50%;                  /* Mantiene el 50% de ancho */
+    margin: 0 auto;              /* Centra el contenedor horizontalmente */
+  }
+  
+  .list-title h1 {
+    color: #ffffff;              /* Verde más oscuro */
+    font-size: 24px;
+    margin: 0;
+  }
+  
+  /* Contenedor de la lista de partidas */
+  .partidas-container {
+    background-color: white;     
+    border-radius: 15px;         /* Bordes redondeados */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);  /* Sombra suave */
+    padding: 30px;
+    max-width: 800px;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;              /* Centrar la lista */
+  }
+  
+  /* Estilo de los elementos de la lista */
+  .partidas-list {
+    list-style: none;            /* Quitar las viñetas */
+    padding: 0;
+  }
+  
+  .partidas-list li {
+    background-color: #f0f4f7;   /* Fondo suave */
+    border: 1px solid #d1d1d1;   /* Borde gris claro */
+    border-radius: 8px;          /* Bordes redondeados */
+    padding: 15px;
+    margin-bottom: 10px;
+    color: #A1A1A1;              /* Texto verde */
+    font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Botón Volver */
+  .back-button1 {
+    background-color: white;      /* Fondo blanco */
+    color: #A1A1A1;               /* Texto en verde claro */
+    border: 2px solid #A1A1A1;    /* Borde verde claro */
+    padding: 15px 15px;           /* Espaciado interno para el botón */
+    font-size: 20px;              /* Tamaño de letra */
+    border-radius: 50px;          /* Bordes redondeados */
+    cursor: pointer;              /* Cambia el cursor a pointer */
+    transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s; /* Transiciones suaves */
+    text-align: center;           /* Asegura que el texto esté centrado */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra inicial */
+    margin-top: 20px;             /* Espacio arriba del botón */
+    width: 30%;                   /* Botón toma el 30% del ancho del contenedor */
+  }
+  
+  .back-button1:hover {
+    transform: translateY(-5px);  /* Levanta el botón hacia arriba */
+    background-color: #A1A1A1;    /* Cambia el fondo a verde claro */
+    color: white;                 /* Cambia el texto a blanco */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
+  }
+  
+  /* Botón Unirse */
+  .join-button {
+    background-color: white;      /* Fondo blanco */
+    color: #A1A1A1;               /* Texto en verde claro */
+    border: 2px solid #A1A1A1;    /* Borde verde claro */
+    padding: 5px 5px;             /* Espaciado interno para el botón */
+    font-size: 18px;              /* Tamaño de letra */
+    border-radius: 50px;          /* Bordes redondeados */
+    cursor: pointer;              /* Cambia el cursor a pointer */
+    transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s; /* Transiciones suaves */
+    text-align: center;           /* Asegura que el texto esté centrado */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra inicial */
+    margin-top: 0px;              /* Sin espacio adicional arriba */
+    width: 20%;                   /* Botón toma el 20% del ancho del contenedor */
+  }
+  
+  .join-button:hover {
+    transform: translateY(-5px);  /* Levanta el botón hacia arriba */
+    background-color: #A1A1A1;    /* Cambia el fondo a verde claro */
+    color: white;                 /* Cambia el texto a blanco */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
+  }
+  

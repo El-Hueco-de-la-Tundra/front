@@ -109,8 +109,6 @@ const CreateFormPage = ({ onGoBack }) => {
 
   return (
     <div>
-      {/* Botón para volver */}
-      <button className="back-button" onClick={onGoBack}>←</button>
 
       {/* Campo Nombre de Usuario separado y posicionado */}
       <div className="user-name-container">
@@ -228,6 +226,8 @@ const CreateFormPage = ({ onGoBack }) => {
             </div>
           )}
           <button type="submit" className="custom-button1">Crear</button>
+
+          <button className="back-button" onClick={onGoBack}>Volver</button>
         </form>
       </div>
     </div>
