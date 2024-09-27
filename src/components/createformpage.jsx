@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import useWebSocket from '../hooks/useWebSockets.jsx';
 import './form.css';
 
 const CreateFormPage = ({ onGoBack }) => {
@@ -10,15 +9,30 @@ const CreateFormPage = ({ onGoBack }) => {
   const [password, setPassword] = useState('');        // Estado para manejar la contraseña
   const [userName, setUserName] = useState('');        // Estado para manejar el usuario
 
-
-  // Hook para WebSocket
-  const { sendMessage } = useWebSocket('ws://localhost:8000/ws', (data) => {
-    console.log('Mensaje recibido del backend:', data);
-  });
+  // Estados separados para manejar errores de cada campo
+  const [gameNameError, setGameNameError] = useState('');
+  const [maxPlayersError, setMaxPlayersError] = useState('');
+  const [minPlayersError, setMinPlayersError] = useState('');
 
   // Función para manejar la creación de la partida
-  const handleCreateGame = (e) => {
+  const handleCreateGame = async (e) => {
     e.preventDefault();  // Evita que la página se recargue
+
+    // Validaciones
+    if (gameName.length > 20) {
+      setGameNameError('El nombre de la partida no puede tener más de 20 caracteres');
+      return;
+    }
+
+    if (maxPlayers < 2 || maxPlayers > 4) {
+      setMaxPlayersError('El número máximo de jugadores debe ser entre 2 y 4');
+      return;
+    }
+
+    if (minPlayers < 2 || minPlayers > 4) {
+      setMinPlayersError('El número mínimo de jugadores debe ser entre 2 y 4');
+      return;
+    }
 
     // Prepara los datos del juego
     const gameData = {
@@ -28,10 +42,60 @@ const CreateFormPage = ({ onGoBack }) => {
       minPlayers: parseInt(minPlayers, 10),
       password: gameType === 'private' ? password : null  // Solo enviar la contraseña si es privada
     };
-    console.log('Datos del juego a enviar:', gameData);  // Verificar los datos antes de enviarlos
-    // Envía los datos al servidor WebSocket
-    sendMessage(JSON.stringify({ action: 'create_game', data: gameData }));
-    console.log('Datos enviados al backend:', gameData);
+
+    try {
+      // Realiza la solicitud POST al servidor
+      const response = await fetch('http://localhost:8000/games/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(gameData),  // Enviar los datos como JSON
+      });
+
+      // Manejar la respuesta
+      if (!response.ok) {
+        throw new Error(`Error al crear la partida: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('Partida creada con éxito:', result);  // Manejar la respuesta exitosa
+    } catch (error) {
+      console.error('Error durante la creación del juego:', error);  // Manejar el error
+    }
+  };
+
+  // Función para manejar el cambio en el nombre del juego
+  const handleGameNameChange = (e) => {
+    const value = e.target.value;
+    if (value.length <= 20) {
+      setGameName(value);
+      setGameNameError('');  // Limpia el mensaje de error si está dentro del límite
+    } else {
+      setGameNameError('El nombre de la partida no puede tener más de 20 caracteres');
+    }
+  };
+
+  // Función para manejar el cambio en el número máximo de jugadores
+  const handleMaxPlayersChange = (e) => {
+    const value = e.target.value;
+    if (value >= 2 && value <= 4) {
+      setMaxPlayers(value);
+      setMaxPlayersError('');  // Limpia el mensaje de error si está dentro del límite
+    } else {
+      setMaxPlayersError('El número máximo de jugadores debe ser entre 2 y 4');
+    }
+  };
+
+  // Función para manejar el cambio en el número mínimo de jugadores
+  const handleMinPlayersChange = (e) => {
+    const value = e.target.value;
+    if (value >= 2 && value <= 4) {
+      setMinPlayers(value);
+      setMinPlayersError('');  // Limpia el mensaje de error si está dentro del límite
+    } else {
+      setMinPlayersError('El número mínimo de jugadores debe ser entre 2 y 4');
+    }
   };
 
   // Función para manejar el cambio entre pública y privada
@@ -43,7 +107,7 @@ const CreateFormPage = ({ onGoBack }) => {
     <div>
       {/* Botón para volver */}
       <button className="back-button" onClick={onGoBack}>←</button>
-      
+
       {/* Campo Nombre de Usuario separado y posicionado */}
       <div className="user-name-container">
         <label htmlFor="userName" className="user-label">Nombre de Usuario</label>
@@ -51,7 +115,7 @@ const CreateFormPage = ({ onGoBack }) => {
           <input
             type="text"
             name="userName"
-            id="userName" //Se esta enviando la informacion??
+            id="userName"
             placeholder="Escribe su nombre de usuario"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}  // Maneja el estado del nombre
@@ -76,10 +140,11 @@ const CreateFormPage = ({ onGoBack }) => {
                 id="gameName"
                 placeholder="Escribe el nombre de la partida"
                 value={gameName}
-                onChange={(e) => setGameName(e.target.value)}  // Maneja el estado del nombre
+                onChange={handleGameNameChange}  // Maneja el estado del nombre
                 required
               />
             </div>
+            {gameNameError && <p className="error">{gameNameError}</p>}  {/* Mostrar mensaje de error si existe */}
           </div>
 
           <div className="form-group">
@@ -91,10 +156,11 @@ const CreateFormPage = ({ onGoBack }) => {
                 id="maxPlayers"
                 placeholder="Número máximo de jugadores"
                 value={maxPlayers}
-                onChange={(e) => setMaxPlayers(e.target.value)}  // Maneja el estado de maxPlayers
+                onChange={handleMaxPlayersChange}  // Maneja el estado de maxPlayers
                 required
               />
             </div>
+            {maxPlayersError && <p className="error">{maxPlayersError}</p>}  {/* Mostrar error solo debajo de maxPlayers */}
           </div>
 
           <div className="form-group">
@@ -106,10 +172,11 @@ const CreateFormPage = ({ onGoBack }) => {
                 id="minPlayers"
                 placeholder="Número mínimo de jugadores"
                 value={minPlayers}
-                onChange={(e) => setMinPlayers(e.target.value)}  // Maneja el estado de minPlayers
+                onChange={handleMinPlayersChange}  // Maneja el estado de minPlayers
                 required
               />
             </div>
+            {minPlayersError && <p className="error">{minPlayersError}</p>}  {/* Mostrar error solo debajo de minPlayers */}
           </div>
 
           {/* Opciones de partida pública o privada */}

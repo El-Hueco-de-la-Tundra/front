@@ -10,8 +10,8 @@
    /* Estilos para los botones personalizados */
    .custom-button {
      background-color: white;      /* Fondo blanco */
-     color: #8CB29F;               /* Texto en verde claro */
-     border: 2px solid #8CB29F;    /* Borde verde claro */
+     color: #A1A1A1;               /* Texto en verde claro */
+     border: 2px solid #A1A1A1;    /* Borde verde claro */
      padding: 40px 30px;           /* Espaciado interno para el botón */
      font-size: 50px;              /* Tamaño de letra */
      border-radius: 50px;          /* Bordes redondeados */
@@ -25,7 +25,7 @@
    
    .custom-button:hover {
      transform: translateY(-5px);     /* Levanta el botón hacia arriba */
-     background-color: #8CB29F;       /* Cambia el fondo a verde claro */
+     background-color: #A1A1A1;       /* Cambia el fondo a verde claro */
      color: white;                    /* Cambia el texto a blanco */
      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
    }

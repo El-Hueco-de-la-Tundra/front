@@ -13,12 +13,12 @@
 }
 
 .back-button:hover {
-  color: #8CB29F;  /* Cambia el color al pasar el mouse */
+  color: #A1A1A1;  /* Cambia el color al pasar el mouse */
 }
 
 /* Contenedor del título */
 .title {
-     background-color: #eaf2e3;   /* Fondo verde claro */
+     background-color: #dfdfdfa0;   /* Fondo verde claro */
      padding: 10px 20px;
      border-radius: 50px;         /* Bordes redondeados */
      margin-bottom: 30px;         /* Espacio inferior */
@@ -26,7 +26,7 @@
    }
    
    .title h2 {
-     color: #2e8b57;              /* Verde más oscuro */
+     color: #A1A1A1;              /* Verde más oscuro */
      font-size: 24px;
      margin: 0;
    }
@@ -41,10 +41,10 @@
      width: 100%;
      max-width: 400px;            /* Ancho máximo del formulario */
      padding: 20px;
-     background-color: white;
+     background-color: rgba(255, 255, 255, 0.905);
      border-radius: 50px;         /* Bordes redondeados */
      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);  /* Sombra suave */
-     color: #2e8b57;              /* Verde del texto */
+     color: #a1a1a1;              /* Verde del texto */
      margin-top: 100px;
    }
    
@@ -61,7 +61,7 @@
      display: block;
      font-size: 18px;
      margin-bottom: 8px;
-     color: #2e8b57;
+     color: #A1A1A1;
    }
    
    .input-container {
@@ -86,8 +86,8 @@
    /* Botón del formulario */
    .custom-button1 {
      background-color: white;      /* Fondo blanco */
-     color: #8CB29F;               /* Texto en verde claro */
-     border: 2px solid #8CB29F;    /* Borde verde claro */
+     color: #A1A1A1;               /* Texto en verde claro */
+     border: 2px solid #A1A1A1;    /* Borde verde claro */
      padding: 15px 15px;           /* Espaciado interno para el botón */
      font-size: 20px;              /* Tamaño de letra */
      border-radius: 50px;          /* Bordes redondeados */
@@ -101,7 +101,7 @@
    
    .custom-button1:hover {
      transform: translateY(-5px);     /* Levanta el botón hacia arriba */
-     background-color: #8CB29F;       /* Cambia el fondo a verde claro */
+     background-color: #A1A1A1;       /* Cambia el fondo a verde claro */
      color: white;                    /* Cambia el texto a blanco */
      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
    }
@@ -126,7 +126,7 @@
     position: absolute;   /* Posición absoluta para colocarlo fuera del formulario */
     top: 400px;            /* Posición desde arriba */
     left: 100px;           /* Posición desde la izquierda */
-    background-color: #ffffff;  /* Color de fondo divertido */
+    background-color: #ffffffd1;  /* Color de fondo divertido */
     padding: 20px;        /* Espaciado interno */
     border-radius: 20px;  /* Bordes redondeados */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Sombra para darle un efecto flotante */
@@ -136,7 +136,7 @@
   .user-label {
     font-size: 18px;     /* Tamaño del texto del label */
     font-weight: bold;   /* Negrita */
-    color: #2e8b57;      /* Verde oscuro para el texto */
+    color: #A1A1A1;      /* Verde oscuro para el texto */
     margin-bottom: 10px;
     display: block;
   }
@@ -145,11 +145,17 @@
     width: 200px;
     padding: 10px;
     border-radius: 10px;
-    border: 2px solid #8CB29F;  /* Borde verde claro */
+    border: 2px solid #A1A1A1;  /* Borde verde claro */
     font-size: 16px;
     outline: none;
   }
   
   .user-name-container input:focus {
-    border-color: #2e8b57;  /* Cambiar borde al enfocarse */
+    border-color: #A1A1A1;  /* Cambiar borde al enfocarse */
+  }
+
+  .error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
   }
