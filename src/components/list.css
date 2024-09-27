@@ -1,6 +1,6 @@
 /* Contenedor del título de la lista de partidas */
 .list-title {
-    background-color: #eaf2e3;   /* Fondo verde claro */
+    background-color: #A1A1A1;   /* Fondo verde claro */
     padding: 10px 20px;
     border-radius: 50px;         /* Bordes redondeados */
     margin-bottom: 30px;         /* Espacio inferior */
@@ -10,7 +10,7 @@
   }
   
   .list-title h1 {
-    color: #2e8b57;              /* Verde más oscuro */
+    color: #ffffff;              /* Verde más oscuro */
     font-size: 24px;
     margin: 0;
   }
@@ -39,7 +39,7 @@
     border-radius: 8px;          /* Bordes redondeados */
     padding: 15px;
     margin-bottom: 10px;
-    color: #2e8b57;              /* Texto verde */
+    color: #A1A1A1;              /* Texto verde */
     font-size: 18px;
     display: flex;
     justify-content: space-between;
@@ -49,8 +49,8 @@
   /* Botón Volver */
   .back-button1 {
     background-color: white;      /* Fondo blanco */
-    color: #8CB29F;               /* Texto en verde claro */
-    border: 2px solid #8CB29F;    /* Borde verde claro */
+    color: #A1A1A1;               /* Texto en verde claro */
+    border: 2px solid #A1A1A1;    /* Borde verde claro */
     padding: 15px 15px;           /* Espaciado interno para el botón */
     font-size: 20px;              /* Tamaño de letra */
     border-radius: 50px;          /* Bordes redondeados */
@@ -64,7 +64,7 @@
   
   .back-button1:hover {
     transform: translateY(-5px);  /* Levanta el botón hacia arriba */
-    background-color: #8CB29F;    /* Cambia el fondo a verde claro */
+    background-color: #A1A1A1;    /* Cambia el fondo a verde claro */
     color: white;                 /* Cambia el texto a blanco */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
   }
@@ -72,8 +72,8 @@
   /* Botón Unirse */
   .join-button {
     background-color: white;      /* Fondo blanco */
-    color: #8CB29F;               /* Texto en verde claro */
-    border: 2px solid #8CB29F;    /* Borde verde claro */
+    color: #A1A1A1;               /* Texto en verde claro */
+    border: 2px solid #A1A1A1;    /* Borde verde claro */
     padding: 5px 5px;             /* Espaciado interno para el botón */
     font-size: 18px;              /* Tamaño de letra */
     border-radius: 50px;          /* Bordes redondeados */
@@ -87,7 +87,7 @@
   
   .join-button:hover {
     transform: translateY(-5px);  /* Levanta el botón hacia arriba */
-    background-color: #8CB29F;    /* Cambia el fondo a verde claro */
+    background-color: #A1A1A1;    /* Cambia el fondo a verde claro */
     color: white;                 /* Cambia el texto a blanco */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Aumenta la sombra */
   }
