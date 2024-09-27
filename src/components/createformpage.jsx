@@ -36,13 +36,17 @@ const CreateFormPage = ({ onGoBack }) => {
 
     // Prepara los datos del juego
     const gameData = {
-      name: gameName,
-      userName: userName,
-      maxPlayers: parseInt(maxPlayers, 10),
-      minPlayers: parseInt(minPlayers, 10),
-      password: gameType === 'private' ? password : null  // Solo enviar la contraseña si es privada
+      game: {
+        name: gameName,
+        maxPlayers: parseInt(maxPlayers, 10),
+        minPlayers: parseInt(minPlayers, 10),
+        password: gameType === 'private' ? password : null  // Solo enviar la contraseña si es privada
+      },
+      player: {
+        name: userName  // Nombre del jugador
+      }
     };
-
+    
     try {
       // Realiza la solicitud POST al servidor
       const response = await fetch('http://localhost:8000/games/', {
