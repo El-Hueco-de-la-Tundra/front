@@ -46,10 +46,10 @@ const CreateFormPage = ({ onGoBack }) => {
         name: userName  // Nombre del jugador
       }
     };
-    
+
     try {
       // Realiza la solicitud POST al servidor
-      const response = await fetch('http://localhost:8000/games/', {
+      const response = await fetch('http://localhost:8000/games/new', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
