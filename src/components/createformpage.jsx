@@ -36,13 +36,13 @@ const CreateFormPage = ({ onGoBack }) => {
 
     // Prepara los datos del juego
     const gameData = {
-      game: {
+      game_model_data: {
         name: gameName,
+        password: gameType === 'private' ? password : null,  // Solo enviar la contraseña si es privada
         maxPlayers: parseInt(maxPlayers, 10),
         minPlayers: parseInt(minPlayers, 10),
-        password: gameType === 'private' ? password : null  // Solo enviar la contraseña si es privada
       },
-      player: {
+      player_model_data: {
         name: userName  // Nombre del jugador
       }
     };
