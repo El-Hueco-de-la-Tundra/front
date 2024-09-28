@@ -8,6 +8,7 @@ const CreateFormPage = ({ onGoBack }) => {
   const [minPlayers, setMinPlayers] = useState('');    // Estado para manejar el mínimo de jugadores
   const [password, setPassword] = useState('');        // Estado para manejar la contraseña
   const [userName, setUserName] = useState('');        // Estado para manejar el usuario
+  const [loading, setLoading] = useState(false);
 
   // Estados separados para manejar errores de cada campo
   const [gameNameError, setGameNameError] = useState('');
@@ -16,7 +17,9 @@ const CreateFormPage = ({ onGoBack }) => {
 
   // Función para manejar la creación de la partida
   const handleCreateGame = async (e) => {
+    
     e.preventDefault();  // Evita que la página se recargue
+    setLoading(true);
 
     // Validaciones
     if (gameName.length > 20) {
@@ -63,9 +66,14 @@ const CreateFormPage = ({ onGoBack }) => {
       }
 
       const result = await response.json();
-      console.log('Partida creada con éxito:', result);  // Manejar la respuesta exitosa
+      console.log('Partida creada con éxito:', result);  
+      onGameCreated(); // Manejar la respuesta exitosa
+      
     } catch (error) {
       console.error('Error durante la creación del juego:', error);  // Manejar el error
+      setErrorMessage('Hubo un problema al crear la partida. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -225,11 +233,12 @@ const CreateFormPage = ({ onGoBack }) => {
               </div>
             </div>
           )}
-          <button type="submit" className="custom-button1">Crear</button>
+          <button type="submit" className="custom-button1" disabled={loading} >Crear</button>
 
-          <button className="back-button" onClick={onGoBack}>Volver</button>
+          <button className="back-button" onClick={onGoBack} disabled={loading}>Volver</button>
         </form>
       </div>
+      {errorMessage && <p className="error">{errorMessage}</p>}
     </div>
   );
 };
