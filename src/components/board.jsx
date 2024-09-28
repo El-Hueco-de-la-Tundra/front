@@ -73,6 +73,9 @@ useEffect(() => {
 
   return (
     <div className="board-container">
+
+     <button className="turno-finalizado" >Finalizar Turno</button>
+
       {/* Botón de abandonar partida */}
       <button className="leave-button" onClick={onLeaveGame}>Abandonar Partida</button>
       

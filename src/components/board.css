@@ -58,9 +58,32 @@
    
    .leave-button:hover {
      transform: translateY(-3px);
-     background-color: #a1a1a1;
+     background-color: #a1a1a1f3;
      color: white;
    }
+
+   .turno-finalizado {
+     position: absolute;
+     width: 150px;
+     bottom: 3%;
+     right: 2%;
+     background-color: rgba(255, 255, 255, 0.851);
+     border: 0px solid #ffffffd4;
+     padding: 30px 25px;
+     font-size: 25px;
+     color:#a1a1a1;
+     font-family:Arial, Helvetica, sans-serif;
+     cursor: pointer;
+     transition: transform 0.3s, background-color 0.3s;
+     border-radius: 20px;
+   }
+   
+   .turno-finalizado:hover {
+     transform: translateY(-3px);
+     background-color: #a1a1a1ec;
+     color: white;
+   }
+   
    
    /* Posicionar cartas alrededor del tablero */
    
