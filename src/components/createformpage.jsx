@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import './form.css';
 
-const CreateFormPage = ({ onGoBack }) => {
+const CreateFormPage = ({ onGoBack, onGameCreated}) => {
   const [gameType, setGameType] = useState('public');  // Estado para controlar si es pública o privada
   const [gameName, setGameName] = useState('');        // Estado para manejar el nombre de la partida
   const [maxPlayers, setMaxPlayers] = useState('');    // Estado para manejar el máximo de jugadores
   const [minPlayers, setMinPlayers] = useState('');    // Estado para manejar el mínimo de jugadores
   const [password, setPassword] = useState('');        // Estado para manejar la contraseña
   const [userName, setUserName] = useState('');        // Estado para manejar el usuario
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);        // Estado de carga
+  const [errorMessage, setErrorMessage] = useState(''); // Estado para manejar los mensajes de error
+
 
   // Estados separados para manejar errores de cada campo
   const [gameNameError, setGameNameError] = useState('');

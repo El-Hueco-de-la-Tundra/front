@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-
+import './successpage.css'
 const SuccessPage = ({ onGoToBoard }) => {
   useEffect(() => {
     // Después de 3 segundos, ir a la página del tablero
@@ -12,8 +12,11 @@ const SuccessPage = ({ onGoToBoard }) => {
 
   return (
     <div className="success-container">
-      <h1>Partida creada con éxito</h1>
+    <div className="success-message-box">
+      <h1>¡Partida Creada con Éxito!</h1>
+      <p>Redirigiendo al tablero en 3 segundos...</p>
     </div>
+  </div>
   );
 };
 
