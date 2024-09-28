@@ -34,6 +34,16 @@ html, body {
   transition: opacity 1s ease-in-out;
 }
 
+.frame-board {
+  background-image: url('./designs/frame0 5.svg'); /* Imagen de fondo del tablero */
+  background-position: center;  /* Centra la imagen */
+  background-size: cover;       /* Asegura que la imagen cubra todo el fondo */
+  height: 100vh;                /* Ocupa toda la pantalla */
+  width: 100vw;
+  opacity: 0;  /* Inicialmente oculto */
+  transition: opacity 1s ease-in-out;
+}
+
 /* Clase que se aplica cuando un frame está activo (desvanecido) */
 .fade-in {
   opacity: 1;
