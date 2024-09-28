@@ -17,27 +17,27 @@
    
    /* Cada ficha */
    .token {
-     width: 58px;  /* Ajusta el tamaño según corresponda */
-     height: 58px;
+     width: 66px;  /* Ajusta el tamaño según corresponda */
+     height: 62px;
      border-radius: 0%;  /* Fichas redondas */
      position: absolute;
    }
    
    /* Colores de las fichas */
    .token.red {
-     background-color: rgba(219, 81, 81, 0.955);
-   }
+     background-image: url('./src/designs/A.svg');
+}
    
    .token.blue {
-     background-color: rgba(85, 85, 211, 0.933);
+     background-image: url('./src/designs/D.svg');
    }
    
    .token.green {
-     background-color: rgba(69, 174, 69, 0.966);
+     background-image: url('./src/designs/C.svg');
    }
    
    .token.yellow {
-     background-color: rgba(225, 225, 73, 0.944);
+     background-image: url('./src/designs/B.svg');
    }
    
    /* Botón para abandonar la partida */
