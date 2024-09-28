@@ -88,7 +88,7 @@ useEffect(() => {
       </div>
 
       <div className="turn-info2">
-        <p2>Jugador Activo: Nombre</p2>
+        <p3>Jugador Activo: Nombre</p3>
       </div>
 
       {/* Fichas posicionadas en el tablero */}
