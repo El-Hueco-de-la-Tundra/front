@@ -9,7 +9,7 @@
    }
    
    .success-message-box {
-     background-color: #ffffff;  /* Fondo blanco para el cuadro */
+     background-color: #ffffffe8;  /* Fondo blanco para el cuadro */
      border-radius: 20px;        /* Bordes redondeados */
      padding: 40px 60px;         /* Espaciado interno */
      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
