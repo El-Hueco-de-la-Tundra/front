@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './board.css';
 
 const BoardPage = ({ onLeaveGame }) => {
 const colors = ['red', 'blue', 'green', 'yellow'];
 
+const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
+
 // Función para elegir un color aleatorio de la lista
 const getRandomColor = () => {
      return colors[Math.floor(Math.random() * colors.length)];
 };
-const tokens = [
+const [tokens, setTokens] = useState([]);
+useEffect(() => {
+     const generatedTokens = [
      { id: 1, color: getRandomColor(), position: { top: '22%', left: '43.65%' } },
      { id: 2, color: getRandomColor(), position: { top: '31%', left: '43.65%' } },
      { id: 3, color: getRandomColor(), position: { top: '40.5%', left: '43.65%' } },
@@ -47,10 +51,34 @@ const tokens = [
      { id: 36, color: getRandomColor(), position: { top: '69%', left: '31.60%' } },
    ];
 
+   setTokens(generatedTokens); // Establecer las fichas solo una vez
+  }, []);
+     // Temporizador que cuenta hacia atrás desde 2 minutos
+  useEffect(() => {
+     if (timeLeft > 0) {
+       const timer = setInterval(() => {
+         setTimeLeft(timeLeft - 1);
+       }, 1000); 
+ 
+       return () => clearInterval(timer);
+     }
+   }, [timeLeft]);
+
+     // Formatear tiempo en MM:SS
+  const formatTime = (seconds) => {
+     const minutes = Math.floor(seconds / 60);
+     const secs = seconds % 60;
+     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+   };
+
   return (
     <div className="board-container">
       {/* Botón de abandonar partida */}
       <button className="leave-button" onClick={onLeaveGame}>Abandonar Partida</button>
+      
+      <div className="turn-info">
+        <p>Tiempo restante: {formatTime(timeLeft)}</p>
+      </div>
 
       {/* Fichas posicionadas en el tablero */}
       <div className="tokens-container">
