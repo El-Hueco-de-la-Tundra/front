@@ -12,8 +12,7 @@
 
 .username-container h1 {
   font-size: 24px;
-  position: absolute;
-  top: 43%;
+  position: relative;
   color: #333;
   background-color: #a1a1a1e1;
   border-radius: 10px;
@@ -23,8 +22,7 @@
 
 .username-container input {
   padding: 10px;
-  position: absolute;
-  left: 33%;
+  position: relative;
   font-size: 18px;
   border: 2px solid #A1A1A1;
   border-radius: 10px;
@@ -37,8 +35,7 @@
   padding: 11px 20px;
   font-size: 18px;
   background-color: #A1A1A1;
-  position: absolute;
-  right: 34%;
+  position: relative;
   color: white;
   border: none;
   border-radius: 10px;
