@@ -80,6 +80,14 @@ useEffect(() => {
         <p>Tiempo restante: {formatTime(timeLeft)}</p>
       </div>
 
+      <div className="turn-info1">
+        <p2>Color Bloqueado: Rojo</p2>
+      </div>
+
+      <div className="turn-info2">
+        <p2>Jugador Activo: Nombre</p2>
+      </div>
+
       {/* Fichas posicionadas en el tablero */}
       <div className="tokens-container">
         {tokens.map(token => (
