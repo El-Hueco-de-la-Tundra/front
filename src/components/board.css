@@ -1,0 +1,157 @@
+/* Contenedor del tablero */
+.board-container {
+     background-size: cover;
+     background-position: center;
+     width: 100vw;
+     height: 100vh;
+     position: relative;
+   }
+   
+   /* Contenedor de las fichas */
+   .tokens-container {
+     position: absolute;
+     width: 100%;
+     height: 100%;
+     pointer-events: none;  /* Para evitar que las fichas bloqueen clics */
+   }
+   
+   /* Cada ficha */
+   .token {
+     width: 58px;  /* Ajusta el tamaño según corresponda */
+     height: 58px;
+     border-radius: 0%;  /* Fichas redondas */
+     position: absolute;
+   }
+   
+   /* Colores de las fichas */
+   .token.red {
+     background-color: rgba(219, 81, 81, 0.955);
+   }
+   
+   .token.blue {
+     background-color: rgba(85, 85, 211, 0.933);
+   }
+   
+   .token.green {
+     background-color: rgba(69, 174, 69, 0.966);
+   }
+   
+   .token.yellow {
+     background-color: rgba(225, 225, 73, 0.944);
+   }
+   
+   /* Botón para abandonar la partida */
+   .leave-button {
+     position: absolute;
+     top: 5%;
+     right: 5%;
+     background-color: rgba(255, 255, 255, 0.851);
+     border: 0px solid #ffffffd4;
+     padding: 15px 25px;
+     font-size: 25px;
+     color:#a1a1a1;
+     font-family:Arial, Helvetica, sans-serif;
+     cursor: pointer;
+     transition: transform 0.3s, background-color 0.3s;
+     border-radius: 20px;
+   }
+   
+   .leave-button:hover {
+     transform: translateY(-3px);
+     background-color: #a1a1a1;
+     color: white;
+   }
+   
+   /* Posicionar cartas alrededor del tablero */
+   
+   /* Cartas en la izquierda */
+   .card-left {
+     position: absolute;
+     top: 20%;       /* Alineado en la parte superior */
+     left: 9.5%;       /* Pegado al lado izquierdo */
+     display: flex;
+     flex-direction: column;  /* Para organizar las cartas en columna */
+     gap: 45px;      /* Espacio entre las cartas */
+   }
+   .card-leftdata {
+     background-color: rgba(255, 255, 255, 0.8);
+     padding: 20px;
+     border-radius: 10px;
+     text-align: center;
+     width: 104px;
+     height: 70px;
+   }
+   /* Cartas en la derecha */
+   .card-right {
+     position: absolute;
+     top: 20%;       /* Alineado en la parte superior */
+     right: 11%;      /* Pegado al lado derecho */
+     display: flex;
+     flex-direction: column;
+     gap: 45px;
+   }
+   
+   .card-rightdata {
+     background-color: rgba(255, 255, 255, 0.8);
+     padding: 20px;
+     border-radius: 10px;
+     text-align: center;
+     width: 104px;
+     height: 70px;
+   }
+   /* Cartas en la parte superior */
+   .card-top {
+     position: absolute;
+     top: 0%;        /* Cercano a la parte superior */
+     left: 35%;      /* Alineado al centro */
+     display: flex;
+     gap: 60px;      /* Espacio entre las cartas */
+   }
+   .card-topdata {
+     background-color: rgba(255, 255, 255, 0.8);
+     padding: 20px;
+     border-radius: 10px;
+     text-align: center;
+     width: 70px;
+     height: 98px;
+   }
+   
+   /* Cartas en la parte inferior */
+   .card-bottom {
+     position: absolute;
+     bottom: 0%;     /* Cercano a la parte inferior */
+     left: 37.5%;      /* Alineado al centro */
+     display: flex;
+     gap: 58px;
+   }
+   
+   .card-bottomdata {
+     background-color: rgba(255, 255, 255, 0.8);
+     padding: 20px;
+     border-radius: 10px;
+     text-align: center;
+     width: 70px;
+     height: 92px;
+   }
+   .card-bottommove {
+     position: absolute;
+     bottom: 0%;     /* Cercano a la parte inferior */
+     left: 75%;      /* Alineado al centro */
+     display: flex;
+     gap: 58px;
+   }
+   .card-movedata {
+     background-color: rgba(255, 255, 255, 0.8);
+     padding: 20px;
+     border-radius: 10px;
+     text-align: center;
+     width: 109px;
+     height: 140px;
+   }
+
+   
+   /* Carta de movimiento al lado de las cartas en la parte inferior */
+   .card-bottom .card:last-child {
+     margin-left: 20px; /* Espacio extra para la carta de movimiento */
+   }
+   
