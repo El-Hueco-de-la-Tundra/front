@@ -13,10 +13,6 @@
 .username-container h1 {
   font-size: 24px;
   position: relative;
-<<<<<<< HEAD
-  top: 0%;
-=======
->>>>>>> f3161a99a5f715389b7b89e9f944153be5d55343
   color: #333;
   background-color: #a1a1a1e1;
   border-radius: 10px;
@@ -27,10 +23,6 @@
 .username-container input {
   padding: 10px;
   position: relative;
-<<<<<<< HEAD
-  left: 33%;
-=======
->>>>>>> f3161a99a5f715389b7b89e9f944153be5d55343
   font-size: 18px;
   border: 2px solid #A1A1A1;
   border-radius: 10px;
@@ -44,10 +36,6 @@
   font-size: 18px;
   background-color: #A1A1A1;
   position: relative;
-<<<<<<< HEAD
-  right: 34%;
-=======
->>>>>>> f3161a99a5f715389b7b89e9f944153be5d55343
   color: white;
   border: none;
   border-radius: 10px;
