@@ -10,16 +10,15 @@ import './components/form.css';
 import './components/list.css';
 import './components/board.css'; 
 import './components/successpage.css'; 
+
 function App() {
   const [currentFrame, setCurrentFrame] = useState('initial');  // Controla en qué "frame" estamos
   const [fade, setFade] = useState(false); 
-
 
   useEffect(() => {
     let initialTimer, transitionTimer, boardTimer;
   
     if (currentFrame === 'initial') {
-      // Temporizador para la transición desde el frame inicial a los botones
       initialTimer = setTimeout(() => {
         setFade(true);  // Inicia el fade de frame4
         transitionTimer = setTimeout(() => {
@@ -78,7 +77,7 @@ function App() {
         <CreateFormPage onGoBack={handleGoBack} onGameCreated={handleGameCreated} />
       )}
       {currentFrame === 'list' && (
-        <ListGames onBack={handleGoBack} /> 
+        <ListGames onBack={handleGoBack} onJoinGame={handleGoToBoard} />
       )}
       {currentFrame === 'success' && (
         <SuccessPage onGoToBoard={handleGoToBoard} /> 

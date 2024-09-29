@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ListGames = ({ onBack }) => {
+const ListGames = ({ onBack, onJoinGame }) => {
   const [partidas, setPartidas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -54,7 +54,10 @@ const ListGames = ({ onBack }) => {
       }
 
       const data = await response.json();
-      alert(`Te has unido a la partida: ${data.name}`);
+      
+      // Redirigimos al frame del tablero tras el éxito
+      onJoinGame(); 
+
     } catch (error) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -138,4 +141,3 @@ const ListGames = ({ onBack }) => {
 };
 
 export default ListGames;
-
