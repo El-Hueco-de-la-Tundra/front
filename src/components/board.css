@@ -6,6 +6,55 @@
      align-items: center;
    }
 
+/* Capa oscura que cubre todo el tablero antes de que la partida comience */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Oscurecer la pantalla */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.waiting-message {
+  text-align: center;
+  color: white;
+}
+
+.start-game-button, .leave-button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 18px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.leave-button {
+  background-color: #f44336;
+}
+
+.start-game-button:hover {
+  background-color: #45a049;
+}
+
+.leave-button:hover {
+  background-color: #e53935;
+}
+
+/* Tablero deshabilitado (oscurecido) */
+.board-disabled {
+  opacity: 0.5;
+  pointer-events: none; /* Deshabilitar interacciones */
+}
+
 /* Contenedor del tablero */
 .board-container {
      display: grid;

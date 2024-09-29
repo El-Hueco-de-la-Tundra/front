@@ -1,45 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './board.css';
 
 const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
-  const [isHost, setIsHost] = useState(false); // Estado para saber si el jugador es el host
+  const [isHost, setIsHost] = useState(true); // Estado para saber si el jugador es el host
   const [gameStarted, setGameStarted] = useState(false); // Estado para saber si la partida ha comenzado
+  const ws = useRef(null); // Para manejar el WebSocket
 
   // Función para elegir un color aleatorio
   const getRandomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  const connectWebSocket = async (gameId) => {
-    // Conectar al WebSocket usando el gameId y userId
+  const connectWebSocket = (gameId) => {
     ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
-
-    // Cuando se abre la conexión
+    
     ws.current.onopen = () => {
       console.log('Conectado al WebSocket');
-      // Enviar mensaje de que el usuario se ha unido a la partida
-      const startMessage = {
-        type: 'start',
-        gameId: gameId,     // ID de la partida
-      };
-      ws.current.send(JSON.stringify(startMessage)); // Enviar el evento "start"
     };
-    
-    // Manejar mensajes desde el servidor
+
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log('Mensaje recibido del servidor:', message);
     };
 
-    // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
       console.error('Error en el WebSocket:', error);
     };
 
-    // Cerrar la conexión WebSocket
     ws.current.onclose = () => {
       console.log('Conexión WebSocket cerrada');
     };
@@ -62,11 +52,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
         const data = await response.json();
 
-        // Comparar si el `userId` actual es igual al `host` de la partida
         if (data.host === userId) {
-          setIsHost(true); // El usuario es el host
+          setIsHost(true);
         }
-        // Si la partida ya ha comenzado
+
         if (data.status === 'started') {
           setGameStarted(true);
         }
@@ -94,7 +83,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         throw new Error('Error al iniciar la partida');
       }
 
-      setGameStarted(true); // Marcar que la partida ha comenzado
+      setGameStarted(true);
     } catch (error) {
       console.error(error);
     }
@@ -106,8 +95,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       id: index + 1,
       color: getRandomColor(),
       position: {
-        gridRow: Math.floor(index / 6) + 1, // Fila en la cuadrícula
-        gridColumn: (index % 6) + 1,        // Columna en la cuadrícula
+        gridRow: Math.floor(index / 6) + 1,
+        gridColumn: (index % 6) + 1,
       },
     }));
     setTokens(generatedTokens);
@@ -123,7 +112,6 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     }
   }, [timeLeft, gameStarted]);
 
-  // Formatear tiempo
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -132,25 +120,32 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
   return (
     <div className="game-page">
-      
-      {/* Mostrar el botón "Iniciar Partida" solo si el jugador es el host y la partida no ha comenzado */}
-      {isHost && !gameStarted && (
-        <div className="start-game-container">
-          <button className="start-game-button" onClick={handleStartGame}>
-            Iniciar Partida
-          </button>
+      {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
+      {!gameStarted && (
+        <div className="overlay">
+          <div className="waiting-message">
+            <h2>Esperando jugadores...</h2>
+            {isHost && (
+              <button className="start-game-button" onClick={handleStartGame}>
+                Iniciar Partida
+              </button>
+            )}
+            <button className="leave-button" onClick={onLeaveGame}>
+              Abandonar Partida
+            </button>
+          </div>
         </div>
       )}
 
       {/* Tablero */}
-      <div className="board-container">
+      <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>
         {tokens.map((token) => (
-          <div 
-            key={token.id} 
-            className={`token ${token.color}`} 
-            style={{ 
+          <div
+            key={token.id}
+            className={`token ${token.color}`}
+            style={{
               gridColumn: token.position.gridColumn,
-              gridRow: token.position.gridRow 
+              gridRow: token.position.gridRow,
             }}
           />
         ))}
@@ -158,51 +153,38 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
       {/* Información del turno y cartas */}
       <div className="info-container">
-        {/* Información de turno */}
         <div className="turn-info">
           <p>Tiempo restante: {formatTime(timeLeft)}</p>
-          <p2>Color Bloqueado: Rojo</p2>
-          <p3>Jugador Activo: Nombre</p3>
+          <p>Color Bloqueado: Rojo</p>
+          <p>Jugador Activo: Nombre</p>
         </div>
 
-        {/* Cartas en el tablero */}
         <div className="cards">
           <div className="card-container card-left">
             <div className="card-leftdata">CARTA FIGURA</div>
             <div className="card-leftdata">CARTA FIGURA</div>
             <div className="card-leftdata">CARTA FIGURA</div>
           </div>
-
           <div className="card-container card-right">
             <div className="card-rightdata">CARTA FIGURA</div>
             <div className="card-rightdata">CARTA FIGURA</div>
             <div className="card-rightdata">CARTA FIGURA</div>
           </div>
-
           <div className="card-container card-top">
             <div className="card-topdata">CARTA FIGURA</div>
             <div className="card-topdata">CARTA FIGURA</div>
             <div className="card-topdata">CARTA FIGURA</div>
           </div>
-
           <div className="card-container card-bottom">
             <div className="card-bottomdata">CARTA FIGURA</div>
             <div className="card-bottomdata">CARTA FIGURA</div>
             <div className="card-bottomdata">CARTA FIGURA</div>
           </div>
-
-          <div className="card-container card-bottommove">
-            <div className="card-movedata">CARTA MOVIMIENTO</div>
-          </div>
         </div>
 
-        {/* Botón de finalizar turno */}
         <button className="turno-finalizado" disabled={!gameStarted}>
           Finalizar Turno
         </button>
-
-        {/* Botón para abandonar partida */}
-        <button className="leave-button" onClick={onLeaveGame}>Abandonar Partida</button>
       </div>
     </div>
   );
