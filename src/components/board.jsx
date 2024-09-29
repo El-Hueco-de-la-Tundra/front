@@ -88,6 +88,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         },
       });
 
+      connectWebSocket(gameId);
+
       if (!response.ok) {
         throw new Error('Error al iniciar la partida');
       }
