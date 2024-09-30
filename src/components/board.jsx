@@ -5,7 +5,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
-  const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
+  const [isHost, setIsHost] = useState(true); // Saber si el jugador es el host
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida

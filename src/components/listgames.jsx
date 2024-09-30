@@ -70,7 +70,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   // Función para unirse a una partida con el gameId, userName y password
   const handleJoinGame = async (gameId, password) => {
     setJoining(gameId); // Marcamos la partida a la que se está intentando unir
-
+  
     try {
       const response = await fetch(`http://localhost:8000/games/join`, {
         method: 'PUT',
@@ -83,21 +83,60 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
           password: password || "", // Contraseña (o vacío si no es privada)
         }),
       });
-
-      if (!response.ok) {
-        throw new Error(`Error al unirse a la partida: ${response.statusText}`);
+  
+      // Verificamos si la respuesta es 200
+      if (response.status === 200) {
+        const data = await response.json();
+  
+        // Obtener la lista de jugadores
+        const players = data.users.players;
+  
+        // Verifica si hay jugadores en la lista
+        if (players.length > 0) {
+          // Obtiene el último jugador (último objeto en el array)
+          const lastPlayerObj = players[players.length - 1];
+  
+          // Extrae la ID del último jugador (la clave del objeto)
+          const lastPlayerId = Object.keys(lastPlayerObj)[0];
+          console.log("User ID:", lastPlayerId);
+          userId = lastPlayerId;
+        }
+  
+        // Conectar al WebSocket después de unirse a la partida
+        await connectWebSocket(gameId, userId);
+  
+        // Cambiar al frame del tablero si todo está bien
+        console.log("Entrando al tablero...");
+        onJoinGame(userId); // Cambiar al frame del tablero
+  
+      } 
+      else if (response.status === 403) {
+        // Error de partida llena
+        console.error("Error 403: El juego está lleno.");
+        throw new Error("El juego está lleno. No puedes unirte.");
+      } 
+      else if (response.status === 404) {
+        // Error de juego no encontrado
+        console.error("Error 404: El juego no fue encontrado.");
+        throw new Error("El juego no fue encontrado.");
+      } 
+      else if (response.status === 422) {
+        // Error de validación
+        const errorData = await response.json();
+        console.error("Error 422: Error de validación.");
+        throw new Error(`Error de validación: ${errorData.detail}`);
+      } 
+      else {
+        // Otros errores
+        console.error(`Error ${response.status}: Error inesperado.`);
+        throw new Error(`Error inesperado: ${response.statusText}`);
       }
-
-      const data = await response.json();
-
-      // Conectar al WebSocket después de unirse a la partida
-      connectWebSocket(gameId, userId);
-
-      // Cambiar al frame del tablero
-      onJoinGame();
-
+  
     } catch (error) {
-      console.error(`Error: ${error.message}`);
+      // Mostrar el mensaje de error en la interfaz y detener el flujo
+      console.error("Error capturado:", error.message);
+      setFeedbackMessage(error.message);
+      return; // Asegurarse de retornar aquí para detener completamente el flujo
     } finally {
       setJoining(null); // Restablecemos el estado de "unirse"
     }
@@ -108,13 +147,6 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     if (userNameSubmitted) {
       handleListGames();
     }
-
-    // Limpiar la conexión WebSocket cuando el componente se desmonte
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
   }, [userNameSubmitted]);
 
   // Si el nombre de usuario no se ha ingresado, muestra un formulario para ingresarlo
