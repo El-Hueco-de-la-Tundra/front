@@ -59,6 +59,7 @@ function App() {
 
   const handleGameCreated = (gameId) => {
     setGameId(gameId); // Almacenar el gameId recibido
+    setGameId(userId); // Almacenar el UserID recibido
     setCurrentFrame('success');  // Cambia al frame de éxito cuando la partida ha sido creada
   };
 

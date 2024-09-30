@@ -77,7 +77,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         const data = await response.json();
 
         // Si el userId es igual al host de la partida, se convierte en el host
-        if (data.host === userId) {
+        if (data.host_id === userId) {
           setIsHost(true);
         }
 

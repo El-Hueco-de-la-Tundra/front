@@ -17,6 +17,27 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
   const [maxPlayersError, setMaxPlayersError] = useState('');
   const [minPlayersError, setMinPlayersError] = useState('');
 
+  const fetchHostUserId = async (gameId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/games/${gameId}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener el host del juego');
+      }
+
+      const gameData = await response.json();
+      const userId = gameData.host_id;
+
+      return userId;
+    } catch (error) {
+      console.error('Error al obtener el host del juego:', error);
+      return null;
+    }
+  };
+
   // Función para manejar la creación de la partida
   const handleCreateGame = async (e) => {
     
@@ -70,8 +91,11 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
       const result = await response.json();
       console.log('Partida creada con éxito:', result);  
       const gameId = result.response_model;  // Asumiendo que el backend devuelve el `gameId` en la respuesta
-      onGameCreated(gameId);  // Pasar el `gameId` al componente padre o a la lógica siguiente
-      
+      const userId = await fetchHostUserId(gameId);
+      if (userId) {
+        onGameCreated(gameId, userId); // Pasamos `gameId` y `userId` al componente padre
+      }
+
     } catch (error) {
       console.error('Error durante la creación del juego:', error);  // Manejar el error
       setErrorMessage('Hubo un problema al crear la partida. Inténtalo de nuevo.');
