@@ -69,7 +69,8 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
 
       const result = await response.json();
       console.log('Partida creada con éxito:', result);  
-      onGameCreated(); // Manejar la respuesta exitosa
+      const gameId = result.response_model;  // Asumiendo que el backend devuelve el `gameId` en la respuesta
+      onGameCreated(gameId);  // Pasar el `gameId` al componente padre o a la lógica siguiente
       
     } catch (error) {
       console.error('Error durante la creación del juego:', error);  // Manejar el error

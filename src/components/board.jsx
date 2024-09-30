@@ -5,31 +5,55 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
-  const [isHost, setIsHost] = useState(true); // Estado para saber si el jugador es el host
-  const [gameStarted, setGameStarted] = useState(false); // Estado para saber si la partida ha comenzado
-  const ws = useRef(null); // Para manejar el WebSocket
+  const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
+  const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
+  const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
+  const [gameInfo, setGameInfo] = useState(null); // Información de la partida
+  const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
 
   // Función para elegir un color aleatorio
   const getRandomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  const connectWebSocket = (gameId) => {
+  // Conectar al WebSocket
+  const connectWebSocket = async (gameId, userId) => {
     ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
-    
+
+    // Cuando se abre la conexión
     ws.current.onopen = () => {
       console.log('Conectado al WebSocket');
     };
 
+    // Recibir mensajes del servidor
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log('Mensaje recibido del servidor:', message);
+
+      // Manejar diferentes tipos de mensajes del WebSocket
+      switch (message.type) {
+        case 'status_start':
+          setGameStarted(true);
+          break;
+        case 'join':
+          // Un jugador se ha unido
+          setPlayers((prevPlayers) => [...prevPlayers, message.userId]);
+          break;
+        case 'game_update':
+          // Actualizar la información del juego (ejemplo: cartas, tokens, etc.)
+          setGameInfo(message.gameInfo);
+          break;
+        default:
+          console.warn('Evento no reconocido:', message.type);
+      }
     };
 
+    // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
       console.error('Error en el WebSocket:', error);
     };
 
+    // Cerrar la conexión WebSocket
     ws.current.onclose = () => {
       console.log('Conexión WebSocket cerrada');
     };
@@ -52,13 +76,18 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
         const data = await response.json();
 
+        // Si el userId es igual al host de la partida, se convierte en el host
         if (data.host === userId) {
           setIsHost(true);
         }
 
+        // Si la partida ya ha comenzado
         if (data.status === 'started') {
           setGameStarted(true);
         }
+
+        // Guardar información general del juego
+        setGameInfo(data);
       } catch (error) {
         console.error(error);
       }
@@ -67,7 +96,20 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     fetchGameInfo();
   }, [gameId, userId]);
 
-  // Función para iniciar la partida
+  // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
+  useEffect(() => {
+    if (gameInfo || gameStarted) {
+      connectWebSocket(gameId, userId);
+    }
+
+    return () => {
+      if (ws.current) {
+        ws.current.close(); // Cierra la conexión WebSocket cuando se desmonta
+      }
+    };
+  }, [gameInfo, gameStarted, gameId, userId]);
+
+  // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
     try {
       const response = await fetch(`http://localhost:8000/games/${gameId}/start`, {
@@ -77,13 +119,12 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         },
       });
 
-      connectWebSocket(gameId);
-
       if (!response.ok) {
         throw new Error('Error al iniciar la partida');
       }
 
-      setGameStarted(true);
+      setGameStarted(true); // Marcar que la partida ha comenzado
+      ws.current.send(JSON.stringify({ type: 'start', gameId, userId })); // Notificar mediante WebSocket
     } catch (error) {
       console.error(error);
     }
@@ -95,8 +136,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       id: index + 1,
       color: getRandomColor(),
       position: {
-        gridRow: Math.floor(index / 6) + 1,
-        gridColumn: (index % 6) + 1,
+        gridRow: Math.floor(index / 6) + 1, // Fila en la cuadrícula
+        gridColumn: (index % 6) + 1,        // Columna en la cuadrícula
       },
     }));
     setTokens(generatedTokens);
@@ -112,6 +153,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     }
   }, [timeLeft, gameStarted]);
 
+  // Formatear tiempo
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -180,8 +222,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
             <div className="card-bottomdata">CARTA FIGURA</div>
             <div className="card-bottomdata">CARTA FIGURA</div>
           </div>
-        </div>
-
+          <div className="card-container card-bottommove">
+            <div className="card-movedata">CARTA MOVIMIENTO</div>
+          </div>
+          </div>
         <button className="turno-finalizado" disabled={!gameStarted}>
           Finalizar Turno
         </button>
