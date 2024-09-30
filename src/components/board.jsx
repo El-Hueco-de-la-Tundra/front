@@ -35,11 +35,11 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         case 'status_start':
           setGameStarted(true);
           break;
-        case 'join':
+        case 'status_join':
           // Un jugador se ha unido
           setPlayers((prevPlayers) => [...prevPlayers, message.userId]);
           break;
-        case 'game_update':
+        case 'info':
           // Actualizar la información del juego (ejemplo: cartas, tokens, etc.)
           setGameInfo(message.gameInfo);
           break;
@@ -102,11 +102,11 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       connectWebSocket(gameId, userId);
     }
 
-    return () => {
-      if (ws.current) {
-        ws.current.close(); // Cierra la conexión WebSocket cuando se desmonta
-      }
-    };
+    // return () => {
+    //   if (ws.current) {
+    //     ws.current.close(); // Cierra la conexión WebSocket cuando se desmonta
+    //   }
+    // };
   }, [gameInfo, gameStarted, gameId, userId]);
 
   // Función para iniciar la partida (solo si es el host)

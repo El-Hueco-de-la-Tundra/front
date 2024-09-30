@@ -107,7 +107,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   
         // Cambiar al frame del tablero si todo está bien
         console.log("Entrando al tablero...");
-        onJoinGame(userId); // Cambiar al frame del tablero
+        onJoinGame(userId, gameId); // Cambiar al frame del tablero
   
       } 
       else if (response.status === 403) {
