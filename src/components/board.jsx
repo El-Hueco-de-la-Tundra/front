@@ -42,6 +42,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           break;
         case 'status_leave':
             // Un jugador ha abandonado la partida
+            console.log('Recibido mensaje status_leave:', message); // Agregar log aquí
             const leavingPlayerId = message.userId;
             setLeaveMessage(`Jugador ${leavingPlayerId} ha abandonado la partida`);
             setPlayers((prevPlayers) => prevPlayers.filter((p) => p.userId !== message.userId));
@@ -129,23 +130,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
   // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/games/${gameId}/start`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al iniciar la partida');
-      }
-
       setGameStarted(true); // Marcar que la partida ha comenzado
       ws.current.send(JSON.stringify({ type: 'start', gameId, userId })); // Notificar mediante WebSocket
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   // Generar posiciones de las fichas
@@ -254,7 +240,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         <button className="turno-finalizado" disabled={!gameStarted}>
           Finalizar Turno
         </button>
-        <button className="leave-button" onClick={onLeaveGame}>
+        <button className="leave-button" onClick={handleLeaveGame}>
               Abandonar Partida
             </button>
       </div>
