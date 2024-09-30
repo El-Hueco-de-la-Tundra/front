@@ -12,6 +12,7 @@ import './components/board.css';
 import './components/successpage.css'; 
 
 function App() {
+  const [currentGameId, setCurrentGameId] = useState(null); // Almacena el gameId
   const [currentFrame, setCurrentFrame] = useState('initial');  // Controla en qué "frame" estamos
   const [fade, setFade] = useState(false); 
 
@@ -56,6 +57,7 @@ function App() {
   };
 
   const handleGameCreated = () => {
+    setCurrentGameId(gameId); // Almacenar el gameId recibido
     setCurrentFrame('success');  // Cambia al frame de éxito cuando la partida ha sido creada
   };
 
@@ -83,7 +85,7 @@ function App() {
         <SuccessPage onGoToBoard={handleGoToBoard} /> 
       )}
       {currentFrame === 'board' && (
-        <BoardPage onLeaveGame={handleLeaveGame} />
+        <BoardPage gameId={currentGameId} onLeaveGame={handleLeaveGame} />
       )}
     </div>
   );
