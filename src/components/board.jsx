@@ -9,6 +9,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
+  const [playerCards, setPlayerCards] = useState([]); // Cartas del jugador actual
+
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
 
   // Función para elegir un color aleatorio
@@ -101,12 +103,6 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     if (gameInfo || gameStarted) {
       connectWebSocket(gameId, userId);
     }
-
-    // return () => {
-    //   if (ws.current) {
-    //     ws.current.close(); // Cierra la conexión WebSocket cuando se desmonta
-    //   }
-    // };
   }, [gameInfo, gameStarted, gameId, userId]);
 
   // Función para iniciar la partida (solo si es el host)
