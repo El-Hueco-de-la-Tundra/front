@@ -57,9 +57,9 @@ function App() {
     setCurrentFrame('buttons');  // Volver al frame de los botones
   };
 
-  const handleGameCreated = (gameId) => {
+  const handleGameCreated = (gameId, userId) => {
     setGameId(gameId); // Almacenar el gameId recibido
-    setGameId(userId); // Almacenar el UserID recibido
+    setUserId(userId); // Almacenar el UserID recibido
     setCurrentFrame('success');  // Cambia al frame de éxito cuando la partida ha sido creada
   };
 
@@ -86,7 +86,7 @@ function App() {
         <ListGames onBack={handleGoBack} onJoinGame={handleGoToBoard} />
       )}
       {currentFrame === 'success' && (
-        <SuccessPage onGoToBoard={handleGoToBoard} /> 
+        <SuccessPage gameId={gameId} userId={userId} onGoToBoard={handleGoToBoard} /> 
       )}
       {currentFrame === 'board' && (
         <BoardPage gameId={gameId} userId={userId} onLeaveGame={handleLeaveGame} />

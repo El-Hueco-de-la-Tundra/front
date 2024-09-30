@@ -18,6 +18,10 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
   const [minPlayersError, setMinPlayersError] = useState('');
 
   const fetchHostUserId = async (gameId) => {
+    if (!gameId) {
+      console.error('gameId está undefined');
+      return;
+    }
     try {
       const response = await fetch(`http://localhost:8000/games/${gameId}`, {
         method: 'GET',
@@ -90,10 +94,10 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
 
       const result = await response.json();
       console.log('Partida creada con éxito:', result);  
-      const gameId = result.response_model;  // Asumiendo que el backend devuelve el `gameId` en la respuesta
+      const gameId = result.id; 
       const userId = await fetchHostUserId(gameId);
       if (userId) {
-        onGameCreated(gameId, userId); // Pasamos `gameId` y `userId` al componente padre
+        onGameCreated(gameId, userId);
       }
 
     } catch (error) {

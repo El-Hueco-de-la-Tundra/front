@@ -5,7 +5,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
-  const [isHost, setIsHost] = useState(true); // Saber si el jugador es el host
+  const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
@@ -41,7 +41,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           break;
         case 'info':
           // Actualizar la información del juego (ejemplo: cartas, tokens, etc.)
-          setGameInfo(message.gameInfo);
+          setGameInfo(message.game_info);
           break;
         default:
           console.warn('Evento no reconocido:', message.type);
@@ -192,7 +192,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           />
         ))}
       </div>
-
+      
       {/* Información del turno y cartas */}
       <div className="info-container">
         <div className="turn-info">
@@ -229,6 +229,9 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         <button className="turno-finalizado" disabled={!gameStarted}>
           Finalizar Turno
         </button>
+        <button className="leave-button" onClick={onLeaveGame}>
+              Abandonar Partida
+            </button>
       </div>
     </div>
   );
