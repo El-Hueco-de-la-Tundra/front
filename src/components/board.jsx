@@ -10,6 +10,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
   const [leaveMessage, setLeaveMessage] = useState(''); // Estado para el mensaje de abandono
+  const [winnerMessage, setWinnerMessage] = useState(''); // Estado para el mensaje de ganador
+
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
 
   // Función para elegir un color aleatorio
@@ -38,22 +40,24 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           break;
         case 'status_join':
           // Un jugador se ha unido
-          setPlayers((prevPlayers) => [...prevPlayers, message.userId]);
+          setPlayers((prevPlayers) => [...prevPlayers, userId]);
           break;
         case 'status_leave':
-            // Un jugador ha abandonado la partida
-            console.log('Recibido mensaje status_leave:', message); // Agregar log aquí
-            const leavingPlayerId = message.userId;
-            setLeaveMessage(`Jugador ${leavingPlayerId} ha abandonado la partida`);
-            setPlayers((prevPlayers) => prevPlayers.filter((p) => p.userId !== message.userId));
-            // Eliminar el mensaje después de 3 segundos
+          // Un jugador ha abandonado la partida
+          console.log('Recibido mensaje status_leave:', message); // Agregar log aquí
+          const leavingPlayerId = userId;
+          setLeaveMessage(`Jugador ${leavingPlayerId} ha abandonado la partida`);
+          setPlayers((prevPlayers) => prevPlayers.filter((p) => p.userId !== userId));
+          // Eliminar el mensaje después de 3 segundos
           setTimeout(() => {
             setLeaveMessage('');
           }, 3000);
           break;
-          
-        break;
-          // Manejar otros eventos como status_winner, status_no_players, etc
+        case 'status_winner':
+          // Notificar quién ha ganado la partida
+          setWinnerMessage(`Ha ganado la partida!`);
+          break;
+        // Manejar otros eventos como status_winner, status_no_players, etc
         case 'info':
           // Actualizar la información del juego (ejemplo: cartas, tokens, etc.)
           setGameInfo(message.game_info);
@@ -122,7 +126,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   // Función para abandonar la partida
   const handleLeaveGame = () => {
     if (ws.current) {
-      ws.current.send(JSON.stringify({ type:'leave', gameId, userId }));
+      ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
       ws.current.close();
     }
     onLeaveGame();
@@ -130,8 +134,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
   // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
-      setGameStarted(true); // Marcar que la partida ha comenzado
-      ws.current.send(JSON.stringify({ type: 'start', gameId, userId })); // Notificar mediante WebSocket
+    setGameStarted(true); // Marcar que la partida ha comenzado
+    ws.current.send(JSON.stringify({ type: 'start', gameId, userId })); // Notificar mediante WebSocket
   };
 
   // Generar posiciones de las fichas
@@ -182,13 +186,18 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           </div>
         </div>
       )}
-        {/* Mostrar mensaje cuando un jugador abandona */}
-        {leaveMessage && (
+      {/* Mostrar mensaje cuando un jugador abandona */}
+      {leaveMessage && (
         <div className="leave-notification">
           {leaveMessage}
         </div>
       )}
-
+      {/* Mostrar mensaje de ganador */}
+      {winnerMessage && (
+        <div className="winner-notification">
+          {winnerMessage}
+        </div>
+      )}
 
       {/* Tablero */}
       <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>
@@ -203,7 +212,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           />
         ))}
       </div>
-      
+
       {/* Información del turno y cartas */}
       <div className="info-container">
         <div className="turn-info">
@@ -236,13 +245,13 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           <div className="card-container card-bottommove">
             <div className="card-movedata">CARTA MOVIMIENTO</div>
           </div>
-          </div>
+        </div>
         <button className="turno-finalizado" disabled={!gameStarted}>
           Finalizar Turno
         </button>
         <button className="leave-button" onClick={handleLeaveGame}>
-              Abandonar Partida
-            </button>
+          Abandonar Partida
+        </button>
       </div>
     </div>
   );
