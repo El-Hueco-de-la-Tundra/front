@@ -123,6 +123,50 @@
      color: white;
    }
 
+   .leave-notification {
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 18px;
+    z-index: 1000;
+    transition: opacity 0.5s ease-in-out;
+  }
+
+  .winner-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #28a745; /* Color verde de éxito */
+    color: white;
+    padding: 30px 50px;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -60%);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+  
+
+
     /* Botón para iniciar la partida */
     .start-game-button {
       position: absolute;
