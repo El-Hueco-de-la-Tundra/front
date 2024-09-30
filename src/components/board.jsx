@@ -9,6 +9,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
+  const [leaveMessage, setLeaveMessage] = useState(''); // Estado para el mensaje de abandono
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
 
   // Función para elegir un color aleatorio
@@ -39,6 +40,19 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           // Un jugador se ha unido
           setPlayers((prevPlayers) => [...prevPlayers, message.userId]);
           break;
+        case 'status_leave':
+            // Un jugador ha abandonado la partida
+            const leavingPlayerId = message.userId;
+            setLeaveMessage(`Jugador ${leavingPlayerId} ha abandonado la partida`);
+            setPlayers((prevPlayers) => prevPlayers.filter((p) => p.userId !== message.userId));
+            // Eliminar el mensaje después de 3 segundos
+          setTimeout(() => {
+            setLeaveMessage('');
+          }, 3000);
+          break;
+          
+        break;
+          // Manejar otros eventos como status_winner, status_no_players, etc
         case 'info':
           // Actualizar la información del juego (ejemplo: cartas, tokens, etc.)
           setGameInfo(message.game_info);
@@ -102,12 +116,16 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       connectWebSocket(gameId, userId);
     }
 
-    // return () => {
-    //   if (ws.current) {
-    //     ws.current.close(); // Cierra la conexión WebSocket cuando se desmonta
-    //   }
-    // };
   }, [gameInfo, gameStarted, gameId, userId]);
+
+  // Función para abandonar la partida
+  const handleLeaveGame = () => {
+    if (ws.current) {
+      ws.current.send(JSON.stringify({ type:'leave', gameId, userId }));
+      ws.current.close();
+    }
+    onLeaveGame();
+  };
 
   // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
@@ -172,12 +190,19 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
                 Iniciar Partida
               </button>
             )}
-            <button className="leave-button" onClick={onLeaveGame}>
+            <button className="leave-button" onClick={handleLeaveGame}>
               Abandonar Partida
             </button>
           </div>
         </div>
       )}
+        {/* Mostrar mensaje cuando un jugador abandona */}
+        {leaveMessage && (
+        <div className="leave-notification">
+          {leaveMessage}
+        </div>
+      )}
+
 
       {/* Tablero */}
       <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>
