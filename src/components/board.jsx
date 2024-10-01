@@ -328,12 +328,17 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
   // Función para abandonar la partida
   const handleLeaveGame = () => {
-
-    ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
-    ws.current.close();
-    onLeaveGame();
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
+  
+      setTimeout(() => {
+        ws.current.close();
+        onLeaveGame();
+      }, 100); // Espera 100 milisegundos
+    } else {
+      onLeaveGame();
+    }
   };
-
   // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
     if (isHost && !gameStarted) {
@@ -515,12 +520,12 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         </div>
 
 
-        {myTurn && (<button className="turno-finalizado" disabled={!gameStarted || !myTurn} onClick={handleEndTurn}>
-          Finalizar Turno
-        </button>)}
         <button className="leave-button" onClick={handleLeaveGame}>
           Abandonar Partida
         </button>
+        {myTurn && (<button className="turno-finalizado" disabled={!gameStarted || !myTurn} onClick={handleEndTurn}>
+          Finalizar Turno
+        </button>)}
       </div>
     </div>
   );
