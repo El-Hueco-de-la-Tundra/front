@@ -5,7 +5,16 @@
      justify-content: space-between;
      align-items: center;
    }
-
+   
+   .card-leftdata img,
+   .card-rightdata img,
+   .card-topdata img,
+   .card-bottomdata img {
+     width: 100%; /* Ajusta la imagen al 100% del contenedor */
+     height: auto; /* Mantén la relación de aspecto */
+     display: block; /* Elimina el espacio debajo de la imagen */
+     object-fit: contain; /* Asegura que la imagen mantenga sus proporciones */
+   }
 /* Capa oscura que cubre todo el tablero antes de que la partida comience */
 .overlay {
   position: absolute;

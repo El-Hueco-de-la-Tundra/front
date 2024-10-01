@@ -39,34 +39,29 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
       const data = await response.json();
 
-      // Extraemos la lista de jugadores desde `users.players`
       const playersFromServer = data.users.players.map(playerObj => {
-        const [userId, userName] = Object.entries(playerObj)[0]; // Obtenemos userId y userName
+        const [userId, userName] = Object.entries(playerObj)[0];
         return { userId: parseInt(userId), userName };
       });
-      if (playersFromServer.length > 0) {
-        setPlayers(playersFromServer); // Solo actualiza el estado si hay jugadores válidos
-        console.log('Lista de jugadores obtenida de fetchGameInfo:', playersFromServer);
-      }
 
-      const expectedCount = data.expected_players || playersFromServer.length; // Si no está definido, usamos la cantidad actual de jugadores
-      setExpectedPlayersCount(expectedCount);
-      // Si el userId es igual al host de la partida, se convierte en el host
+      console.log('Lista de jugadores obtenida de fetchGameInfo:', playersFromServer);
+
+      setPlayers(playersFromServer);  // Actualiza el estado de los jugadores
+
       if (data.host_id === userId) {
         setIsHost(true);
       }
 
-      // Si la partida ya ha comenzado
       if (data.status === 'started') {
         setGameStarted(true);
       }
 
-      // Guardar información general del juego
-      setGameInfo(data);
+      setGameInfo(data); // Guarda información del juego
     } catch (error) {
       console.error(error);
     }
   };
+
   // Función para elegir un color aleatorio
   const getRandomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
@@ -103,7 +98,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
             fetchGameInfo();
           }
           break;
-    
+
 
         case 'status_leave':
           console.log('Recibido mensaje status_leave:', message);
@@ -142,6 +137,14 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   };
 
   useEffect(() => {
+    if (players.length > 0 && gameStarted) {
+      console.log('Players actualizados, obteniendo cartas...');
+      fetchAllFigureCards(players);  // Llamamos a la función cuando players tiene datos
+    }
+  }, [players, gameStarted]);
+
+
+  useEffect(() => {
     fetchGameInfo();
   }, [gameId, userId]);
 
@@ -162,9 +165,11 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         throw new Error('Error al obtener las cartas de figura');
       }
 
+
       const data = await response.json();
-      console.log(`Cartas recibidas para el jugador ${userId}:`, cards); // Log para verificar las cartas
-      return data.cards;
+      console.log(`Respuesta completa para el jugador ${userId}:`, data);
+      console.log(`Cartas recibidas para el jugador ${userId}:`, data);
+      return data.cards || [];
 
     } catch (error) {
       console.error(error);
@@ -173,7 +178,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   };
 
   // Obtener las cartas de figura de todos los jugadores
-  const fetchAllFigureCards = async () => {
+  const fetchAllFigureCards = async (playersList) => {
     try {
       const cardsMap = {
         left: [],
@@ -181,27 +186,27 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         top: [],
         bottom: [],
       };
-      console.log('Jugadores OBTENIDOS:', players);
+      console.log('Jugadores OBTENIDOS:', playersList);
 
-      for (let i = 0; i < players.length; i++) {
-        const player = players[i];
+      for (let i = 0; i < playersList.length; i++) {
+        const player = playersList[i];
         const playerUserId = player.userId;
 
         const cards = await fetchUserFigureCards(playerUserId);
         if (cards.length > 0) {
           console.log(`Cartas recibidas para el jugador ${playerUserId}:`, cards);
-        if (i === 0) {
-          cardsMap.bottom = cards;
-        } else if (i === 1) {
-          cardsMap.left = cards;
-        } else if (i === 2) {
-          cardsMap.right = cards;
-        } else if (i === 3) {
-          cardsMap.top = cards;
+          if (i === 0) {
+            cardsMap.bottom = cards;
+          } else if (i === 1) {
+            cardsMap.left = cards;
+          } else if (i === 2) {
+            cardsMap.right = cards;
+          } else if (i === 3) {
+            cardsMap.top = cards;
+          }
+        } else {
+          console.log(`No se encontraron cartas para el jugador ${playerUserId}`);
         }
-      } else {
-        console.log(`No se encontraron cartas para el jugador ${playerUserId}`);
-      }
       }
       setFigureCards(cardsMap);
       console.log('Cartas mapeadas correctamente:', cardsMap);
@@ -230,12 +235,6 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     onLeaveGame();
   };
 
-  useEffect(() => {
-    if (expectedPlayersCount && players.length === expectedPlayersCount) {
-      console.log('Todos los jugadores han sido obtenidos, procediendo a obtener las cartas.');
-      fetchAllFigureCards();
-    }
-  }, [players, expectedPlayersCount]);
   // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
     if (isHost && !gameStarted) {
@@ -276,9 +275,9 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   };
 
 
-  
-  const cardImages = import.meta.glob('./designs/*.svg', { eager: true });
-  
+
+  const cardImages = import.meta.glob('/src/designs/*.svg', { eager: true });
+
   return (
     <div className="game-page">
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
@@ -305,29 +304,29 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         <div className="card-container card-left">
           {figureCards.left.map((card) => (
             <div key={card.id} className="card-leftdata">
-              <img src={cardImages[card.type]} alt={card.type} />
+              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
             </div>
           ))}
         </div>
         <div className="card-container card-right">
           {figureCards.right.map((card) => (
             <div key={card.id} className="card-rightdata">
-              <img src={cardImages[card.type]} alt={card.type} />
-            </div>
+              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
+              </div>
           ))}
         </div>
         <div className="card-container card-top">
           {figureCards.top.map((card) => (
             <div key={card.id} className="card-topdata">
-              <img src={cardImages[card.type]} alt={card.type} />
-            </div>
+              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
+              </div>
           ))}
         </div>
         <div className="card-container card-bottom">
           {figureCards.bottom.map((card) => (
             <div key={card.id} className="card-bottomdata">
-              <img src={cardImages[card.type]} alt={card.type} />
-            </div>
+              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
+              </div>
           ))}
         </div>
       </div>
