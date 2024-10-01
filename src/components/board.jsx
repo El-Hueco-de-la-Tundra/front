@@ -449,6 +449,12 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           </div>
         ))}
       </div>
+      <div className="card-movedata" onClick={() => {
+        console.log('Carta de movimiento clickeada');
+        setShowAllMovementCards(!showAllMovementCards);
+      }}>
+        <img src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+      </div>
 
       {/* Tablero */}
       <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>
