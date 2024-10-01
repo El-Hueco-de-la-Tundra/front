@@ -152,7 +152,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           setGameInfo(message.game_info);
           break;
 
-        case 'statu_endturn':
+        case 'status_endturn':
           fetchTurnInfo();
           setTimeLeft(120);
           break;
@@ -429,31 +429,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           <p>Jugador Activo: {myTurn ? 'Tu turno' : `Jugador ${turnInfo?.actualPlayer_id}`}</p>
         </div>
 
-        {/* <div className="cards">
-          <div className="card-container card-left">
-            <div className="card-leftdata">CARTA FIGURA</div>
-            <div className="card-leftdata">CARTA FIGURA</div>
-            <div className="card-leftdata">CARTA FIGURA</div>
-          </div>
-          <div className="card-container card-right">
-            <div className="card-rightdata">CARTA FIGURA</div>
-            <div className="card-rightdata">CARTA FIGURA</div>
-            <div className="card-rightdata">CARTA FIGURA</div>
-          </div>
-          <div className="card-container card-top">
-            <div className="card-topdata">CARTA FIGURA</div>
-            <div className="card-topdata">CARTA FIGURA</div>
-            <div className="card-topdata">CARTA FIGURA</div>
-          </div>
-          <div className="card-container card-bottom">
-            <div className="card-bottomdata">CARTA FIGURA</div>
-            <div className="card-bottomdata">CARTA FIGURA</div>
-            <div className="card-bottomdata">CARTA FIGURA</div>
-          </div>
-          <div className="card-container card-bottommove">
-            <div className="card-movedata">CARTA MOVIMIENTO</div>
-          </div>
-        </div> */}
+        
         <button className="turno-finalizado" disabled={!gameStarted || !myTurn} onClick={handleEndTurn}>
           Finalizar Turno
         </button>
