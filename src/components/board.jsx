@@ -144,6 +144,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
             fetchGameInfo();
             fetchAllFigureCards();
             fetchAndSetTokens();
+            fetchTurnInfo();
 
           }
           break;
@@ -330,7 +331,9 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const handleLeaveGame = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
-  
+      console.log('SE MANDO LEAVE');
+
+
       setTimeout(() => {
         ws.current.close();
         onLeaveGame();
@@ -444,7 +447,12 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       {/* Mostrar mensaje cuando un jugador abandona */}
       {leaveMessage && (<div className="leave-notification"> {leaveMessage} </div>)}
       {/* Mostrar mensaje de ganador */}
-      {winnerMessage && (<div className="winner-notification">{winnerMessage}</div>)}
+      {winnerMessage && (<div className="winner-notification">{winnerMessage}
+        <button
+          className="ok-button" onClick={handleLeaveGame}>OK
+        </button>
+      </div>)}
+
       <div className="cards">
         <div className="card-container card-left">
           {figureCards.left.map((card) => (
@@ -516,7 +524,9 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         <div className="turn-info">
           <p>Tiempo restante: {formatTime(timeLeft)}</p>
           <p>Color Bloqueado: </p>
-          <p>Jugador Activo: {myTurn ? 'Tu turno' : `Jugador ${turnInfo?.actualPlayer_id}`}</p>
+          <p>
+            Jugador Activo: {myTurn ? 'Tu turno' : turnInfo?.actualPlayer_id ? `Jugador ${turnInfo.actualPlayer_id}` : 'Desconocido'}
+          </p>
         </div>
 
 
