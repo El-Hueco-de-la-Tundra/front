@@ -12,7 +12,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
   const [turnInfo, setTurnInfo] = useState(null); // Información de la partida
-  const [myTurn, setMyTurn] = useState(true); // Información de la partida
+  const [myTurn, setMyTurn] = useState(false); // Información de la partida
   const [leaveMessage, setLeaveMessage] = useState(''); // Estado para el mensaje de abandono
   const [winnerMessage, setWinnerMessage] = useState(''); // Estado para el mensaje de ganador
   const [figureCards, setFigureCards] = useState({
@@ -21,9 +21,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     top: [],
     bottom: [],
   });
+  const [showAllMovementCards, setShowAllMovementCards] = useState(false);
+  const [movementCards, setMovementCards] = useState([]);
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
   const hasConnected = useRef(false); // Nueva bandera para controlar la conexión WebSocket
-  const [expectedPlayersCount, setExpectedPlayersCount] = useState(null); // Añadimos el número esperado de jugadores
 
 
   const fetchGameInfo = async () => {
@@ -188,6 +189,30 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     fetchGameInfo();
   }, [gameId, userId]);
 
+  const fetchUserMovementCards = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/game/${gameId}/${userId}/movements`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Error al obtener las cartas de movimiento');
+      }
+
+      const data = await response.json();
+      console.log(`Cartas de movimiento recibidas para el jugador ${userId}:`, data);
+      return data.cards || [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
   // Obtener cartas de los jugadores
   const fetchUserFigureCards = async (userId) => {
     try {
@@ -228,9 +253,9 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       };
       console.log('Jugadores OBTENIDOS:', playersList);
       const currentPlayerIndex = players.findIndex(player => player.userId === userId);
-    
+
       console.log('Jugador actual:', userId, 'en la posición', currentPlayerIndex);
-  
+
       // Reorganiza los jugadores de modo que el jugador actual siempre esté primero (en bottom)
       const reorderedPlayers = [
         ...players.slice(currentPlayerIndex),   // Jugadores después del jugador actual
@@ -273,13 +298,19 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     }
   }, [gameId, userId]);
 
+  useEffect(() => {
+    if (gameStarted) {
+      fetchUserMovementCards().then((cards) => {
+        setMovementCards(cards);
+      });
+    }
+  }, [gameStarted]);
 
   // Función para abandonar la partida
   const handleLeaveGame = () => {
-    if (ws.current) {
-      ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
-      ws.current.close();
-    }
+
+    ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
+    ws.current.close();
     onLeaveGame();
   };
 
@@ -312,7 +343,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   }, [turnInfo, myTurn]);
 
   // Generar posiciones de las fichas
-  useEffect(() => { 
+  useEffect(() => {
     const generatedTokens = Array.from({ length: 36 }, (_, index) => ({
       id: index + 1,
       color: getRandomColor(),
@@ -324,18 +355,17 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     setTokens(generatedTokens);
   }, []);
 
-
   useEffect(() => {
     let timer;
-    if (gameStarted && myTurn) {
-      if (timeLeft > 0) {
-        timer = setTimeout(() => {
-          setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
-        }, 1000);
-      } else {
-        handleEndTurn();
-      }
+
+    if (gameStarted && timeLeft > 0) {
+      timer = setTimeout(() => {
+        setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && myTurn) {
+      handleEndTurn();
     }
+
     return () => {
       if (timer) {
         clearTimeout(timer);
@@ -380,31 +410,44 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         <div className="card-container card-left">
           {figureCards.left.map((card) => (
             <div key={card.id} className="card-leftdata">
-        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
-        </div>
+              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+            </div>
           ))}
         </div>
         <div className="card-container card-right">
           {figureCards.right.map((card) => (
             <div key={card.id} className="card-rightdata">
-        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
-        </div>
+              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+            </div>
           ))}
         </div>
         <div className="card-container card-top">
           {figureCards.top.map((card) => (
             <div key={card.id} className="card-topdata">
-        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
-        </div>
+              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+            </div>
           ))}
         </div>
         <div className="card-container card-bottom">
           {figureCards.bottom.map((card) => (
             <div key={card.id} className="card-bottomdata">
-        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
-        </div>
+              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+            </div>
           ))}
         </div>
+      </div>
+
+      <div className="card-container card-bottommove">
+        {movementCards.length > 0 && (
+          <div className="card-movedata" onClick={() => setShowAllMovementCards(!showAllMovementCards)}>
+            <img src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+          </div>
+        )}
+        {showAllMovementCards && movementCards.slice(1).map((card) => (
+          <div key={card.id} className="card-movedata">
+            <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
+          </div>
+        ))}
       </div>
 
       {/* Tablero */}
@@ -429,10 +472,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           <p>Jugador Activo: {myTurn ? 'Tu turno' : `Jugador ${turnInfo?.actualPlayer_id}`}</p>
         </div>
 
-        
-        <button className="turno-finalizado" disabled={!gameStarted || !myTurn} onClick={handleEndTurn}>
+
+        {myTurn && (<button className="turno-finalizado" disabled={!gameStarted || !myTurn} onClick={handleEndTurn}>
           Finalizar Turno
-        </button>
+        </button>)}
         <button className="leave-button" onClick={handleLeaveGame}>
           Abandonar Partida
         </button>
