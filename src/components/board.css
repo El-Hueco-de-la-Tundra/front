@@ -73,8 +73,8 @@
      width: 80vw;
      height: 80vh;
      position: relative;
-     top: 10vh;
-     left: 53vh;
+     top: 10.5vh;
+     left: 58vh;
      margin: 0 auto;
    }
    
@@ -113,7 +113,7 @@
    /* Botón para abandonar la partida */
    .leave-button {
      position: absolute;
-     top: 5%;
+     top: 2%;
      right: 5%;
      background-color: rgba(255, 255, 255, 0.851);
      border: 0px solid #ffffffd4;
@@ -226,19 +226,19 @@
    /* Cartas en la izquierda */
    .card-left {
      position: absolute;
-     top: 20%;       /* Alineado en la parte superior */
+     top: 11%;       /* Alineado en la parte superior */
      left: 9.5%;       /* Pegado al lado izquierdo */
      display: flex;
      flex-direction: column;  /* Para organizar las cartas en columna */
-     gap: 45px;      /* Espacio entre las cartas */
+     gap: 7px;      /* Espacio entre las cartas */
    }
    .card-leftdata {
      background-color: rgba(255, 255, 255, 0);
      padding: 20px;
      border-radius: 10px;
      text-align: center;
-     width: 104px;
-     height: 70px;
+     width: 125px;
+     height: 125px;
    }
    /* Cartas en la derecha */
    .card-right {
@@ -278,10 +278,10 @@
    /* Cartas en la parte inferior */
    .card-bottom {
      position: absolute;
-     bottom: 5%;     /* Cercano a la parte inferior */
-     left: 39%;      /* Alineado al centro */
+     bottom: 0%;     /* Cercano a la parte inferior */
+     left: 36%;      /* Alineado al centro */
      display: flex;
-     gap: 58px;
+     gap: 42px;
    }
    
    .card-bottomdata {
@@ -289,8 +289,8 @@
      padding: 0px;
      border-radius: 10px;
      text-align: center;
-     width: 100px;
-     height: 70px;
+     width: 125px;
+     height: 125px;
    }
    .card-bottommove {
      position: absolute;
