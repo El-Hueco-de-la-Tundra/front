@@ -187,9 +187,17 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         bottom: [],
       };
       console.log('Jugadores OBTENIDOS:', playersList);
-
-      for (let i = 0; i < playersList.length; i++) {
-        const player = playersList[i];
+      const currentPlayerIndex = players.findIndex(player => player.userId === userId);
+    
+      console.log('Jugador actual:', userId, 'en la posición', currentPlayerIndex);
+  
+      // Reorganiza los jugadores de modo que el jugador actual siempre esté primero (en bottom)
+      const reorderedPlayers = [
+        ...players.slice(currentPlayerIndex),   // Jugadores después del jugador actual
+        ...players.slice(0, currentPlayerIndex) // Jugadores antes del jugador actual
+      ];
+      for (let i = 0; i < reorderedPlayers.length; i++) {
+        const player = reorderedPlayers[i];
         const playerUserId = player.userId;
 
         const cards = await fetchUserFigureCards(playerUserId);
@@ -304,29 +312,29 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         <div className="card-container card-left">
           {figureCards.left.map((card) => (
             <div key={card.id} className="card-leftdata">
-              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
-            </div>
+        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+        </div>
           ))}
         </div>
         <div className="card-container card-right">
           {figureCards.right.map((card) => (
             <div key={card.id} className="card-rightdata">
-              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
-              </div>
+        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+        </div>
           ))}
         </div>
         <div className="card-container card-top">
           {figureCards.top.map((card) => (
             <div key={card.id} className="card-topdata">
-              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
-              </div>
+        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+        </div>
           ))}
         </div>
         <div className="card-container card-bottom">
           {figureCards.bottom.map((card) => (
             <div key={card.id} className="card-bottomdata">
-              <img src={cardImages[`./src/designs/${card.type}.svg`]} alt={card.type} />
-              </div>
+        <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+        </div>
           ))}
         </div>
       </div>
