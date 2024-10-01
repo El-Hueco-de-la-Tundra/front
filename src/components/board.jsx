@@ -253,7 +253,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   };
 
   // Generar posiciones de las fichas
-  useEffect(() => {
+  useEffect(() => { 
     const generatedTokens = Array.from({ length: 36 }, (_, index) => ({
       id: index + 1,
       color: getRandomColor(),
