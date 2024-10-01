@@ -96,10 +96,28 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       console.error(error);
     }
   };
+  const fetchGameTokens = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/tokens`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-  // Función para elegir un color aleatorio
-  const getRandomColor = () => {
-    return colors[Math.floor(Math.random() * colors.length)];
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error al obtener las fichas del juego:', errorData.detail);
+        throw new Error(errorData.detail || 'Error al obtener las fichas del juego');
+      }
+
+      const data = await response.json();
+      console.log('Tokens recibidos del servidor:', data);
+      return data.tokens || [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   };
 
   // Conectar al WebSocket
@@ -125,6 +143,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
             setGameStarted(true);
             fetchGameInfo();
             fetchAllFigureCards();
+            fetchAndSetTokens();
+
           }
           break;
 
@@ -323,6 +343,31 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       ws.current.send(JSON.stringify({ type: 'start', gameId, userId }));
     }
   };
+  const fetchAndSetTokens = async () => {
+    console.log('Fetching tokens...');
+    const tokensData = await fetchGameTokens();
+    console.log('tokensData:', tokensData);
+
+    const fetchedTokens = tokensData.map((token, index) => {
+      const mappedToken = {
+        id: token.id || index + 1,
+        color: token.color,
+        position: {
+          gridRow: token.y_coordinate,
+          gridColumn: token.x_coordinate,
+        },
+      };
+      console.log('Mapped token:', mappedToken);
+      return mappedToken;
+    });
+    console.log('fetchedTokens:', fetchedTokens);
+    setTokens(fetchedTokens);
+    console.log('Tokens state updated.');
+  };
+
+  useEffect(() => {
+    console.log('Tokens state changed:', tokens);
+  }, [tokens]);
 
   const handleEndTurn = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
@@ -342,18 +387,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     console.log("Es mi turno:", myTurn);
   }, [turnInfo, myTurn]);
 
-  // Generar posiciones de las fichas
-  useEffect(() => {
-    const generatedTokens = Array.from({ length: 36 }, (_, index) => ({
-      id: index + 1,
-      color: getRandomColor(),
-      position: {
-        gridRow: Math.floor(index / 6) + 1, // Fila en la cuadrícula
-        gridColumn: (index % 6) + 1,        // Columna en la cuadrícula
-      },
-    }));
-    setTokens(generatedTokens);
-  }, []);
+
 
   useEffect(() => {
     let timer;
@@ -438,35 +472,38 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       </div>
 
       <div className="card-container card-bottommove">
-  {movementCards.length > 0 && (
-    <>
-      <div className="card-movedata" >
-        <img onClick={() => {
-        console.log('Carta de movimiento clickeada');
-        setShowAllMovementCards(!showAllMovementCards);
-      }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+        {movementCards.length > 0 && (
+          <>
+            <div className="card-movedata" >
+              <img onClick={() => {
+                console.log('Carta de movimiento clickeada');
+                setShowAllMovementCards(!showAllMovementCards);
+              }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+            </div>
+            {showAllMovementCards && movementCards.slice(1).map((card) => (
+              <div key={card.id} className="card-movedata">
+                <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
+              </div>
+            ))}
+          </>
+        )}
       </div>
-      {showAllMovementCards && movementCards.slice(1).map((card) => (
-        <div key={card.id} className="card-movedata">
-          <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
-        </div>
-      ))}
-    </>
-  )}
-</div>
-
       {/* Tablero */}
       <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>
-        {tokens.map((token) => (
-          <div
-            key={token.id}
-            className={`token ${token.color}`}
-            style={{
-              gridColumn: token.position.gridColumn,
-              gridRow: token.position.gridRow,
-            }}
-          />
-        ))}
+        {tokens.length > 0 ? (
+          tokens.map((token) => (
+            <div
+              key={token.id}
+              className={`token ${token.color}`}
+              style={{
+                gridColumn: token.position.gridColumn,
+                gridRow: token.position.gridRow,
+              }}
+            />
+          ))
+        ) : (
+          gameStarted && <p>No hay fichas para mostrar.</p>
+        )}
       </div>
 
       {/* Información del turno y cartas */}

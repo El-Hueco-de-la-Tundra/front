@@ -59,24 +59,21 @@
 }
 
 /* Tablero deshabilitado (oscurecido) */
-.board-disabled {
-  opacity: 0.5;
-  pointer-events: none; /* Deshabilitar interacciones */
-}
+
 
 /* Contenedor del tablero */
 .board-container {
-     display: grid;
-     grid-template-columns: repeat(6, 0fr);  /* 6 columnas */
-     grid-template-rows: repeat(6, 0fr);     /* 6 filas */
-     gap: 16px;  /* Espacio entre las fichas */
-     width: 80vw;
-     height: 80vh;
-     position: relative;
-     top: 10.5vh;
-     left: 58vh;
-     margin: 0 auto;
-   }
+  display: grid;
+  grid-template-columns: repeat(6, 7%);  /* 6 columnas */
+  grid-template-rows: repeat(6,11%);     /* 6 filas */
+  gap: 10px;  /* Espacio entre las fichas */
+  width: 80vw;
+  height: 80vh;
+  position: relative;
+  top: 10.5vh;
+  left: 58vh;
+  margin: 0 auto;
+}
    
    /* Contenedor de las fichas */
    .tokens-container {
@@ -94,19 +91,19 @@
    }
    
    /* Colores de las fichas */
-   .token.red {
+   .token.RED {
      background-image: url('./src/designs/A.svg');
 }
    
-   .token.blue {
+   .token.BLUE {
      background-image: url('./src/designs/D.svg');
    }
    
-   .token.green {
+   .token.GREEN {
      background-image: url('./src/designs/C.svg');
    }
    
-   .token.yellow {
+   .token.YELLOW {
      background-image: url('./src/designs/B.svg');
    }
    
