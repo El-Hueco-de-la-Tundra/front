@@ -33,39 +33,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     }
   };
 
-  // Función para conectarse al WebSocket con game_id y user_id
-  const connectWebSocket = async (gameId, userId) => {
-    // Conectar al WebSocket usando el gameId y userId
-    ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
 
-    // Cuando se abre la conexión
-    ws.current.onopen = () => {
-      console.log('Conectado al WebSocket');
-      // Enviar mensaje de que el usuario se ha unido a la partida
-      const joinMessage = {
-        type: 'join',
-        userId: userId, // Nombre del usuario
-        gameId: gameId,     // ID de la partida
-      };
-      ws.current.send(JSON.stringify(joinMessage)); // Enviar el evento "join"
-    };
-    
-    // Manejar mensajes desde el servidor
-    ws.current.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log('Mensaje recibido del servidor:', message);
-    };
-
-    // Manejar errores en la conexión WebSocket
-    ws.current.onerror = (error) => {
-      console.error('Error en el WebSocket:', error);
-    };
-
-    // Cerrar la conexión WebSocket
-    ws.current.onclose = () => {
-      console.log('Conexión WebSocket cerrada');
-    };
-  };
 
   // Función para unirse a una partida con el gameId, userName y password
   const handleJoinGame = async (gameId, password) => {
@@ -101,11 +69,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
           console.log("User ID:", lastPlayerId);
           userId = lastPlayerId;
         }
-  
-        // Conectar al WebSocket después de unirse a la partida
-        await connectWebSocket(gameId, userId);
-  
-        // Cambiar al frame del tablero si todo está bien
+          // Cambiar al frame del tablero si todo está bien
         console.log("Entrando al tablero...");
         onJoinGame(userId, gameId); // Cambiar al frame del tablero
   

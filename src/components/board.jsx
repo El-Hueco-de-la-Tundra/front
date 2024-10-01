@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './board.css';
 
 const GamePage = ({ onLeaveGame, gameId, userId }) => {
+  // Función para elegir un color aleatorio
+
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
@@ -11,9 +13,60 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
   const [leaveMessage, setLeaveMessage] = useState(''); // Estado para el mensaje de abandono
   const [winnerMessage, setWinnerMessage] = useState(''); // Estado para el mensaje de ganador
-
+  const [figureCards, setFigureCards] = useState({
+    left: [],
+    right: [],
+    top: [],
+    bottom: [],
+  });
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
+  const hasConnected = useRef(false); // Nueva bandera para controlar la conexión WebSocket
+  const [expectedPlayersCount, setExpectedPlayersCount] = useState(null); // Añadimos el número esperado de jugadores
 
+
+  const fetchGameInfo = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/games/${gameId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener la información de la partida');
+      }
+
+      const data = await response.json();
+
+      // Extraemos la lista de jugadores desde `users.players`
+      const playersFromServer = data.users.players.map(playerObj => {
+        const [userId, userName] = Object.entries(playerObj)[0]; // Obtenemos userId y userName
+        return { userId: parseInt(userId), userName };
+      });
+      if (playersFromServer.length > 0) {
+        setPlayers(playersFromServer); // Solo actualiza el estado si hay jugadores válidos
+        console.log('Lista de jugadores obtenida de fetchGameInfo:', playersFromServer);
+      }
+
+      const expectedCount = data.expected_players || playersFromServer.length; // Si no está definido, usamos la cantidad actual de jugadores
+      setExpectedPlayersCount(expectedCount);
+      // Si el userId es igual al host de la partida, se convierte en el host
+      if (data.host_id === userId) {
+        setIsHost(true);
+      }
+
+      // Si la partida ya ha comenzado
+      if (data.status === 'started') {
+        setGameStarted(true);
+      }
+
+      // Guardar información general del juego
+      setGameInfo(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   // Función para elegir un color aleatorio
   const getRandomColor = () => {
     return colors[Math.floor(Math.random() * colors.length)];
@@ -21,13 +74,14 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
 
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
-    ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
+    if (!hasConnected.current) {
+      ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
+      hasConnected.current = true; // Marcamos que ya está conectado
 
-    // Cuando se abre la conexión
-    ws.current.onopen = () => {
-      console.log('Conectado al WebSocket');
+      ws.current.onopen = () => {
+        console.log('Conectado al WebSocket', userId);
+      };
     };
-
     // Recibir mensajes del servidor
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
@@ -36,32 +90,39 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       // Manejar diferentes tipos de mensajes del WebSocket
       switch (message.type) {
         case 'status_start':
-          setGameStarted(true);
+          if (!gameStarted) {
+            console.log('Partida iniciada, obteniendo jugadores y cartas...');
+            setGameStarted(true);
+            fetchGameInfo();
+            fetchAllFigureCards();
+          }
           break;
+
         case 'status_join':
-          // Un jugador se ha unido
-          setPlayers((prevPlayers) => [...prevPlayers, userId]);
+          if (!gameStarted) {
+            fetchGameInfo();
+          }
           break;
+    
+
         case 'status_leave':
-          // Un jugador ha abandonado la partida
-          console.log('Recibido mensaje status_leave:', message); // Agregar log aquí
-          const leavingPlayerId = userId;
+          console.log('Recibido mensaje status_leave:', message);
+          const leavingPlayerId = message.user_left;
+          fetchGameInfo();
           setLeaveMessage(`Jugador ${leavingPlayerId} ha abandonado la partida`);
-          setPlayers((prevPlayers) => prevPlayers.filter((p) => p.userId !== userId));
-          // Eliminar el mensaje después de 3 segundos
           setTimeout(() => {
             setLeaveMessage('');
           }, 3000);
           break;
+
         case 'status_winner':
-          // Notificar quién ha ganado la partida
-          setWinnerMessage(`Ha ganado la partida!`);
+          setWinnerMessage(`¡El jugador ${userId} ha ganado la partida!`);
           break;
-        // Manejar otros eventos como status_winner, status_no_players, etc
+
         case 'info':
-          // Actualizar la información del juego (ejemplo: cartas, tokens, etc.)
           setGameInfo(message.game_info);
           break;
+
         default:
           console.warn('Evento no reconocido:', message.type);
       }
@@ -75,53 +136,90 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     // Cerrar la conexión WebSocket
     ws.current.onclose = () => {
       console.log('Conexión WebSocket cerrada');
+      hasConnected.current = false; // Permitimos reconexión en caso de cierre
+
     };
   };
 
-  // Obtener información de la partida para saber quién es el host
   useEffect(() => {
-    const fetchGameInfo = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/games/${gameId}`, {
+    fetchGameInfo();
+  }, [gameId, userId]);
+
+  // Obtener cartas de los jugadores
+  const fetchUserFigureCards = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/games/${gameId}/${userId}/figure-cards`,
+        {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-        });
-
-        if (!response.ok) {
-          throw new Error('Error al obtener la información de la partida');
         }
+      );
 
-        const data = await response.json();
-
-        // Si el userId es igual al host de la partida, se convierte en el host
-        if (data.host_id === userId) {
-          setIsHost(true);
-        }
-
-        // Si la partida ya ha comenzado
-        if (data.status === 'started') {
-          setGameStarted(true);
-        }
-
-        // Guardar información general del juego
-        setGameInfo(data);
-      } catch (error) {
-        console.error(error);
+      if (!response.ok) {
+        throw new Error('Error al obtener las cartas de figura');
       }
-    };
 
-    fetchGameInfo();
-  }, [gameId, userId]);
+      const data = await response.json();
+      console.log(`Cartas recibidas para el jugador ${userId}:`, cards); // Log para verificar las cartas
+      return data.cards;
+
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  // Obtener las cartas de figura de todos los jugadores
+  const fetchAllFigureCards = async () => {
+    try {
+      const cardsMap = {
+        left: [],
+        right: [],
+        top: [],
+        bottom: [],
+      };
+      console.log('Jugadores OBTENIDOS:', players);
+
+      for (let i = 0; i < players.length; i++) {
+        const player = players[i];
+        const playerUserId = player.userId;
+
+        const cards = await fetchUserFigureCards(playerUserId);
+        if (cards.length > 0) {
+          console.log(`Cartas recibidas para el jugador ${playerUserId}:`, cards);
+        if (i === 0) {
+          cardsMap.bottom = cards;
+        } else if (i === 1) {
+          cardsMap.left = cards;
+        } else if (i === 2) {
+          cardsMap.right = cards;
+        } else if (i === 3) {
+          cardsMap.top = cards;
+        }
+      } else {
+        console.log(`No se encontraron cartas para el jugador ${playerUserId}`);
+      }
+      }
+      setFigureCards(cardsMap);
+      console.log('Cartas mapeadas correctamente:', cardsMap);
+      console.log('Cartas de los jugadores:', cardsMap);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
 
   // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
   useEffect(() => {
-    if (gameInfo || gameStarted) {
+    if (!hasConnected.current) {
       connectWebSocket(gameId, userId);
     }
+  }, [gameId, userId]);
 
-  }, [gameInfo, gameStarted, gameId, userId]);
 
   // Función para abandonar la partida
   const handleLeaveGame = () => {
@@ -132,10 +230,19 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     onLeaveGame();
   };
 
+  useEffect(() => {
+    if (expectedPlayersCount && players.length === expectedPlayersCount) {
+      console.log('Todos los jugadores han sido obtenidos, procediendo a obtener las cartas.');
+      fetchAllFigureCards();
+    }
+  }, [players, expectedPlayersCount]);
   // Función para iniciar la partida (solo si es el host)
   const handleStartGame = async () => {
-    setGameStarted(true); // Marcar que la partida ha comenzado
-    ws.current.send(JSON.stringify({ type: 'start', gameId, userId })); // Notificar mediante WebSocket
+    if (isHost && !gameStarted) {
+      console.log('Iniciando partida como host...');
+      setGameStarted(true);
+      ws.current.send(JSON.stringify({ type: 'start', gameId, userId }));
+    }
   };
 
   // Generar posiciones de las fichas
@@ -168,6 +275,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+
+  
+  const cardImages = import.meta.glob('./designs/*.svg', { eager: true });
+  
   return (
     <div className="game-page">
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
@@ -187,17 +298,39 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
         </div>
       )}
       {/* Mostrar mensaje cuando un jugador abandona */}
-      {leaveMessage && (
-        <div className="leave-notification">
-          {leaveMessage}
-        </div>
-      )}
+      {leaveMessage && (<div className="leave-notification"> {leaveMessage} </div>)}
       {/* Mostrar mensaje de ganador */}
-      {winnerMessage && (
-        <div className="winner-notification">
-          {winnerMessage}
+      {winnerMessage && (<div className="winner-notification">{winnerMessage}</div>)}
+      <div className="cards">
+        <div className="card-container card-left">
+          {figureCards.left.map((card) => (
+            <div key={card.id} className="card-leftdata">
+              <img src={cardImages[card.type]} alt={card.type} />
+            </div>
+          ))}
         </div>
-      )}
+        <div className="card-container card-right">
+          {figureCards.right.map((card) => (
+            <div key={card.id} className="card-rightdata">
+              <img src={cardImages[card.type]} alt={card.type} />
+            </div>
+          ))}
+        </div>
+        <div className="card-container card-top">
+          {figureCards.top.map((card) => (
+            <div key={card.id} className="card-topdata">
+              <img src={cardImages[card.type]} alt={card.type} />
+            </div>
+          ))}
+        </div>
+        <div className="card-container card-bottom">
+          {figureCards.bottom.map((card) => (
+            <div key={card.id} className="card-bottomdata">
+              <img src={cardImages[card.type]} alt={card.type} />
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Tablero */}
       <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>
@@ -221,7 +354,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           <p>Jugador Activo: Nombre</p>
         </div>
 
-        <div className="cards">
+        {/* <div className="cards">
           <div className="card-container card-left">
             <div className="card-leftdata">CARTA FIGURA</div>
             <div className="card-leftdata">CARTA FIGURA</div>
@@ -245,7 +378,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           <div className="card-container card-bottommove">
             <div className="card-movedata">CARTA MOVIMIENTO</div>
           </div>
-        </div>
+        </div> */}
         <button className="turno-finalizado" disabled={!gameStarted}>
           Finalizar Turno
         </button>
