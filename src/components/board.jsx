@@ -11,6 +11,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
+  const [turnInfo, setTurnInfo] = useState(null); // Información de la partida
+  const [myTurn, setMyTurn] = useState(true); // Información de la partida
   const [leaveMessage, setLeaveMessage] = useState(''); // Estado para el mensaje de abandono
   const [winnerMessage, setWinnerMessage] = useState(''); // Estado para el mensaje de ganador
   const [figureCards, setFigureCards] = useState({
@@ -57,6 +59,38 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       }
 
       setGameInfo(data); // Guarda información del juego
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchTurnInfo = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/turn`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al obtener la información de turno');
+      }
+
+      const data = await response.json();
+
+      setTurnInfo(data);
+
+      const current_turn = data?.actualPlayer_id;
+      console.log("Actual Player ID:", current_turn);
+      console.log("Actual User ID:", userId);
+
+      if (parseInt(current_turn) == parseInt(userId)) {
+        setMyTurn(true);
+      } else {
+        setMyTurn(false);
+      }
+
     } catch (error) {
       console.error(error);
     }
@@ -118,8 +152,14 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           setGameInfo(message.game_info);
           break;
 
+        case 'statu_endturn':
+          fetchTurnInfo();
+          setTimeLeft(120);
+          break;
+
         default:
           console.warn('Evento no reconocido:', message.type);
+          console.log(message);
       }
     };
 
@@ -248,9 +288,28 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     if (isHost && !gameStarted) {
       console.log('Iniciando partida como host...');
       setGameStarted(true);
+      fetchTurnInfo();
       ws.current.send(JSON.stringify({ type: 'start', gameId, userId }));
     }
   };
+
+  const handleEndTurn = () => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      // Solo enviar si el WebSocket está en estado OPEN
+      ws.current.send(JSON.stringify({ type: 'endturn', gameId, userId }));
+      console.log("Turno finalizado, mensaje enviado.");
+      fetchGameInfo();
+    } else if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
+      console.error("El WebSocket aún se está conectando. Intenta de nuevo en unos momentos.");
+    } else {
+      console.error("El WebSocket no está disponible. Estado:", ws.current ? ws.current.readyState : "desconocido");
+    }
+  };
+
+  useEffect(() => {
+    console.log("TurnInfo:", turnInfo);
+    console.log("Es mi turno:", myTurn);
+  }, [turnInfo, myTurn]);
 
   // Generar posiciones de las fichas
   useEffect(() => { 
@@ -265,15 +324,24 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     setTokens(generatedTokens);
   }, []);
 
-  // Temporizador
+
   useEffect(() => {
-    if (gameStarted && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
-      }, 1000);
-      return () => clearInterval(timer);
+    let timer;
+    if (gameStarted && myTurn) {
+      if (timeLeft > 0) {
+        timer = setTimeout(() => {
+          setTimeLeft((prevTimeLeft) => prevTimeLeft - 1);
+        }, 1000);
+      } else {
+        handleEndTurn();
+      }
     }
-  }, [timeLeft, gameStarted]);
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [timeLeft, gameStarted, myTurn]);
 
   // Formatear tiempo
   const formatTime = (seconds) => {
@@ -357,8 +425,8 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       <div className="info-container">
         <div className="turn-info">
           <p>Tiempo restante: {formatTime(timeLeft)}</p>
-          <p>Color Bloqueado: Rojo</p>
-          <p>Jugador Activo: Nombre</p>
+          <p>Color Bloqueado: </p>
+          <p>Jugador Activo: {myTurn ? 'Tu turno' : `Jugador ${turnInfo?.actualPlayer_id}`}</p>
         </div>
 
         {/* <div className="cards">
@@ -386,7 +454,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
             <div className="card-movedata">CARTA MOVIMIENTO</div>
           </div>
         </div> */}
-        <button className="turno-finalizado" disabled={!gameStarted}>
+        <button className="turno-finalizado" disabled={!gameStarted || !myTurn} onClick={handleEndTurn}>
           Finalizar Turno
         </button>
         <button className="leave-button" onClick={handleLeaveGame}>
