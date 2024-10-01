@@ -438,23 +438,22 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       </div>
 
       <div className="card-container card-bottommove">
-        {movementCards.length > 0 && (
-          <div className="card-movedata" onClick={() => setShowAllMovementCards(!showAllMovementCards)}>
-            <img src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
-          </div>
-        )}
-        {showAllMovementCards && movementCards.slice(1).map((card) => (
-          <div key={card.id} className="card-movedata">
-            <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
-          </div>
-        ))}
-      </div>
-      <div className="card-movedata" onClick={() => {
+  {movementCards.length > 0 && (
+    <>
+      <div className="card-movedata" >
+        <img onClick={() => {
         console.log('Carta de movimiento clickeada');
         setShowAllMovementCards(!showAllMovementCards);
-      }}>
-        <img src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+      }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
       </div>
+      {showAllMovementCards && movementCards.slice(1).map((card) => (
+        <div key={card.id} className="card-movedata">
+          <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
+        </div>
+      ))}
+    </>
+  )}
+</div>
 
       {/* Tablero */}
       <div className={`board-container ${!gameStarted ? 'board-disabled' : ''}`}>

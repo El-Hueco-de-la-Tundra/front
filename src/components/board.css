@@ -306,9 +306,22 @@
      text-align: center;
      width: 130px;
      height: 170px;
+     cursor: pointer;
    }
-
-
+   .card-movedata img {
+    width: 130px;
+    height: auto;
+    pointer-events: auto; /* Asegura que los eventos de puntero están habilitados */
+  }
+  .card-container.card-bottommove {
+    position: absolute;
+    bottom: 10px;
+    right: 205px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    z-index: 10; /* Asegura que este contenedor está por encima de otros elementos */
+  }
    /* Carta de movimiento al lado de las cartas en la parte inferior */
    .card-bottom .card:last-child {
      margin-left: 20px; /* Espacio extra para la carta de movimiento */
