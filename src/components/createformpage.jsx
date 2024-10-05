@@ -10,6 +10,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
   const [userName, setUserName] = useState('');        // Estado para manejar el usuario
   const [loading, setLoading] = useState(false);        // Estado de carga
   const [errorMessage, setErrorMessage] = useState(''); // Estado para manejar los mensajes de error
+  const [userNameError, setUserNameError] = useState('');  // Estado para el error del nombre de usuario
 
 
   // Estados separados para manejar errores de cada campo
@@ -49,6 +50,13 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
     setLoading(true);
 
     // Validaciones
+
+    if (!userName) {
+      setUserNameError('El nombre de usuario es obligatorio');
+      setLoading(false);  // Detener la carga si hay un error
+      return;
+    }
+
     if (gameName.length > 20) {
       setGameNameError('El nombre de la partida no puede tener más de 20 caracteres');
       return;
@@ -107,6 +115,15 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
       setLoading(false);
     }
   };
+  
+  const handleUserNameChange = (e) => {
+    setUserName(e.target.value);
+  
+    // Limpiar el error si el usuario empieza a escribir
+    if (e.target.value) {
+      setUserNameError('');
+    }
+  };
 
   // Función para manejar el cambio en el nombre del juego
   const handleGameNameChange = (e) => {
@@ -159,10 +176,11 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
             id="userName"
             placeholder="Escribe su nombre de usuario"
             value={userName}
-            onChange={(e) => setUserName(e.target.value)}  // Maneja el estado del nombre
+            onChange={handleUserNameChange}
             required
           />
         </div>
+        {userNameError && <p className="error">{userNameError}</p>}  {/* Mostrar error si está vacío */}
       </div>
 
       {/* Formulario de crear partida */}
@@ -185,7 +203,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 required
               />
             </div>
-            {gameNameError && <p className="error">{gameNameError}</p>}  {/* Mostrar mensaje de error si existe */}
+            {gameNameError && <p className="error">{gameNameError}</p>}
           </div>
 
           <div className="form-group">
@@ -201,7 +219,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 required
               />
             </div>
-            {maxPlayersError && <p className="error">{maxPlayersError}</p>}  {/* Mostrar error solo debajo de maxPlayers */}
+            {maxPlayersError && <p className="error">{maxPlayersError}</p>} 
           </div>
 
           <div className="form-group">
@@ -217,7 +235,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 required
               />
             </div>
-            {minPlayersError && <p className="error">{minPlayersError}</p>}  {/* Mostrar error solo debajo de minPlayers */}
+            {minPlayersError && <p className="error">{minPlayersError}</p>} 
           </div>
 
           {/* Opciones de partida pública o privada */}
@@ -247,7 +265,6 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
             </div>
           </div>
 
-          {/* Si la partida es privada, mostramos el campo de contraseña */}
           {gameType === 'private' && (
             <div className="form-group">
               <label htmlFor="password">Contraseña</label>
