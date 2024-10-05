@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,  // Allows usage of expect without importing
+    reporters: ['verbose'], // Muestra más detalles
     environment: 'jsdom', // Simulates a browser-like environment for React components
     setupFiles: '/src/setupTests.js', // Optional: Add if you have a setup file
   },
