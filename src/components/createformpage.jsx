@@ -189,7 +189,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
           <h2>Insertar Información de Partida</h2>
         </div>
 
-        <form className="custom-form" onSubmit={handleCreateGame}>
+        <form className="custom-form" onSubmit={handleCreateGame} data-testid="create-form">
           <div className="form-group">
             <label htmlFor="gameName">Nombre de la partida</label>
             <div className="input-container">
@@ -252,7 +252,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 />
                 Pública
               </label>
-              <label>
+              {/* <label>
                 <input
                   type="radio"
                   name="gameType"
@@ -261,7 +261,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                   onChange={handleGameTypeChange}
                 />
                 Privada
-              </label>
+              </label> */}
             </div>
           </div>
 
@@ -280,7 +280,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 />
               </div>
             </div>
-          )}
+          )} */}
           <button type="submit" className="custom-button1" disabled={loading} >Crear</button>
 
           <button className="back-button" onClick={onGoBack} disabled={loading}>Volver</button>

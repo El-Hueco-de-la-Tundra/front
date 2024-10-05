@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './board.css';
 
-const GamePage = ({ onLeaveGame, gameId, userId }) => {
+const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Función para elegir un color aleatorio
 
   const colors = ['red', 'blue', 'green', 'yellow'];
@@ -541,4 +541,4 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   );
 };
 
-export default GamePage;
+export default BoardPage;
