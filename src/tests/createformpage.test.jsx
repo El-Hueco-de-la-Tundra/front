@@ -54,3 +54,29 @@ test("It only enables submit when all fields are filled", async () => {
     expect(mockOnGameCreated).toHaveBeenCalled();
   });
 });
+test("It requires a user name before submitting", async () => {
+     const mockOnGameCreated = vi.fn();
+   
+     render(
+       <CreateFormPage onGameCreated={mockOnGameCreated} onGoBack={() => {}} />
+     );
+   
+     // Intentar enviar sin nombre de usuario
+     const submitButton = screen.getByText("Crear");
+     await userEvent.click(submitButton);
+   
+     // Verificamos que el submit no haya ocurrido porque falta el nombre
+     expect(mockOnGameCreated).not.toHaveBeenCalled();
+     
+     // Simulamos que el usuario ingresa un nombre y ahora debería funcionar
+     await userEvent.type(screen.getByLabelText('Nombre de Usuario'), "Tomás");
+     await userEvent.type(screen.getByLabelText('Nombre de la partida'), "Mi Partida");
+     await userEvent.type(screen.getByLabelText('Máximo de jugadores'), "4");
+     await userEvent.type(screen.getByLabelText('Mínimo de jugadores'), "2");
+   
+     // Ahora clickeamos "Crear" y el onGameCreated debería ser llamado
+     await userEvent.click(submitButton);
+     await waitFor(() => {
+       expect(mockOnGameCreated).toHaveBeenCalled();
+     });
+   });
