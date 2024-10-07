@@ -71,6 +71,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
         }
           // Cambiar al frame del tablero si todo está bien
         console.log("Entrando al tablero...");
+        console.log("User ID: %d Game ID: %d",userId,gameId);
         onJoinGame(userId, gameId); // Cambiar al frame del tablero
   
       } 
@@ -99,7 +100,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     } catch (error) {
       // Mostrar el mensaje de error en la interfaz y detener el flujo
       console.error("Error capturado:", error.message);
-      setFeedbackMessage(error.message);
+      //setFeedbackMessage(error.message);
       return; // Asegurarse de retornar aquí para detener completamente el flujo
     } finally {
       setJoining(null); // Restablecemos el estado de "unirse"
@@ -108,10 +109,10 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
 
   // Ejecuta la función de obtener partidas al montar el componente
   useEffect(() => {
-    if (userNameSubmitted) {
+    if (userNameSubmitted && userName.trim()) {
       handleListGames();
     }
-  }, [userNameSubmitted]);
+  }, [userNameSubmitted, userName]);
 
   // Si el nombre de usuario no se ha ingresado, muestra un formulario para ingresarlo
   if (!userNameSubmitted) {
@@ -155,7 +156,8 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
         {partidas.map((partida) => (
           <li key={partida.id}>
             <h3>{partida.name}</h3> {/* Muestra el nombre de la partida */}
-            <p>Jugadores: {partida.users.min} - {partida.users.max}</p> {/* Muestra el rango de jugadores */}
+            <p>Min/Max: {partida.users.min} - {partida.users.max}</p> {/* Muestra el rango de jugadores */}
+            <p>Jugadores: {partida.users.players.length}</p>
             <p>Partida {partida.is_private ? 'Privada' : 'Pública'}</p> {/* Muestra si es privada o pública */}
             {partida.is_private && (
               <input
