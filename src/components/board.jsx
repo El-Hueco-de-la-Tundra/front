@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './board.css';
+import Movement from './movement';
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Función para elegir un color aleatorio
@@ -25,6 +26,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [movementCards, setMovementCards] = useState([]);
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
   const hasConnected = useRef(false); // Nueva bandera para controlar la conexión WebSocket
+  const { handleCardClick, handleTokenClick } = Movement({
+    gameId,
+    userId,
+    movementCards,
+  });
 
 
   const fetchGameInfo = async () => {
@@ -494,7 +500,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
               }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
             </div>
             {showAllMovementCards && movementCards.slice(1).map((card) => (
-              <div key={card.id} className="card-movedata">
+              <div 
+                key={card.id}
+                className="card-movedata" 
+                disabled={!myTurn} 
+                onClick={() => handleCardClick(card)}>
                 <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
               </div>
             ))}
@@ -508,6 +518,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             <div
               key={token.id}
               className={`token ${token.color}`}
+              disabled={!myTurn}
+              onClick={() => handleTokenClick(token.id)}
               style={{
                 gridColumn: token.position.gridColumn,
                 gridRow: token.position.gridRow,
