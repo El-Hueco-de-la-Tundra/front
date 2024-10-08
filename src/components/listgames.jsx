@@ -19,6 +19,14 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
         },
       });
 
+      if (response.status === 404) {
+        // Si es un 404, significa que no hay partidas disponibles, pero sigue siendo un caso esperado
+        console.warn('No se encontraron partidas disponibles.');
+        setPartidas([]);  // Muestra el listado vacío
+        setLoading(false);
+        return;  // Salimos del bloque para no lanzar un error
+      }
+
       if (!response.ok) {
         throw new Error(`Error al obtener partidas: ${response.statusText}`);
       }
