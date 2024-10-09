@@ -493,18 +493,18 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       <div className="card-container card-bottommove">
         {movementCards.length > 0 && (
           <>
-            <div className="card-movedata" >
-              <img onClick={() => {
-                console.log('Carta de movimiento clickeada');
-                setShowAllMovementCards(!showAllMovementCards);
-              }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
-            </div>
-            {showAllMovementCards && movementCards.slice(1).map((card) => (
+          <button
+              className="arrow-button"
+              onClick={() => setShowAllMovementCards(!showAllMovementCards)}
+            >
+              {showAllMovementCards ? '▲' : '▼'}
+            </button>
+            
+            {showAllMovementCards && movementCards.slice(0).map((card) => (
               <div 
                 key={card.id}
                 className="card-movedata" 
-                disabled={!myTurn} 
-                onClick={() => handleCardClick(card)}>
+                onClick={() => myTurn && handleCardClick(card)}>
                 <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
               </div>
             ))}
@@ -518,8 +518,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             <div
               key={token.id}
               className={`token ${token.color}`}
-              disabled={!myTurn}
-              onClick={() => handleTokenClick(token.id)}
+              onClick={() => myTurn && handleTokenClick(token.id)}
               style={{
                 gridColumn: token.position.gridColumn,
                 gridRow: token.position.gridRow,
