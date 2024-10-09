@@ -1,8 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import './movement.css';
 
 const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedTokens, setSelectedTokens] = useState([]);
+  const [tokens, setTokens] = useState([]); // Estado actual de las fichas
+  // const [previousTokens, setPreviousTokens] = useState([]); // Estado anterior de las fichas
+  const ws = useRef(null); // Referencia del WebSocket
+  const hasConnected = useRef(false); // Evita múltiples conexiones WebSocket
+
+// Funcion que actualiza el tablero cada vez que hay un movimiento o recibe el tablero inicial
+  const fetchGameTokens = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/tokens`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error al obtener las fichas del juego:', errorData.detail);
+        throw new Error(errorData.detail || 'Error al obtener las fichas del juego');
+      }
+
+      const data = await response.json();
+      console.log('Tokens recibidos del servidor:', data);
+      setTokens(tokens);
+      return data.tokens || [];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+
 
   // Función para seleccionar una carta de movimiento
   const handleCardClick = (card) => {
@@ -10,38 +43,38 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
       setSelectedCard(card); // Seleccionamos la carta
       console.log('Carta seleccionada:', card);
     } else {
-        console.log('Deselecciona token o termina movimiento');
-        //algo que diga que primero deseleccione tokens o termine el movimiento
+      console.log('Deselecciona token o termina movimiento');
+      //algo que diga que primero deseleccione tokens o termine el movimiento
     }
   };
 
   // Función para seleccionar una ficha
   const handleTokenClick = (tokenId) => {
     if (!selectedCard) {
-        console.log('No hay carta seleccionada');
+      console.log('No hay carta seleccionada');
       return;
     }
 
     if (selectedTokens.includes(tokenId)) {
-        console.log('Deseleccionando token', tokenId);
-        setSelectedTokens((prev) => prev.filter((id) => id !== tokenId));
+      console.log('Deseleccionando token', tokenId);
+      setSelectedTokens((prev) => prev.filter((id) => id !== tokenId));
       return;
     }
-    
+
     if (parseInt(selectedTokens.length) == 0) {
-        console.log('Token seleccionado:',tokenId);
-        selectedTokens[0] = tokenId;
-        return;
+      console.log('Token seleccionado:', tokenId);
+      selectedTokens[0] = tokenId;
+      return;
     }
 
     if (parseInt(selectedTokens.length) == 1) {
-        console.log('Token seleccionado:',tokenId);
-        selectedTokens[1] = tokenId;
+      console.log('Token seleccionado:', tokenId);
+      selectedTokens[1] = tokenId;
     }
 
     // Si ya hay dos fichas seleccionadas, proceder al movimiento
     if (parseInt(selectedTokens.length) == 2) {
-        console.log('Ejecutando movimiento:', selectedCard.card_id);
+      console.log('Ejecutando movimiento:', selectedCard.card_id);
       executeMove(selectedCard.card_id, selectedTokens[0], selectedTokens[1]);
     }
   };
@@ -85,6 +118,8 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
   return {
     handleCardClick,
     handleTokenClick,
+    tokens,
+    fetchGameTokens,
   };
 };
 

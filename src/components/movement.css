@@ -1,0 +1,18 @@
+/* Animación cuando las fichas cambian de posición */
+.token-move {
+     animation: moveToken 0.5s ease-in-out;
+   }
+   
+   @keyframes moveToken {
+     0% {
+       transform: scale(1.2); /* Aumenta de tamaño */
+     }
+     100% {
+       transform: scale(1); /* Vuelve a su tamaño original */
+     }
+   }
+   
+   /* Transición suave entre cambios de estado para las fichas */
+   .token {
+     transition: transform 0.5s ease, background-color 0.5s ease;
+   }
