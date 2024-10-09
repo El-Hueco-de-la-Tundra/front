@@ -499,8 +499,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             >
               {showAllMovementCards ? '▲' : '▼'}
             </button>
+
+            <div className="card-movedata">
+              <img
+                onClick={() => handleCardClick(movementCards[0])}
+                src={`./src/designs/${movementCards[0].mov_type}.svg`}
+                alt={movementCards[0].mov_type}
+              />
+            </div>
             
-            {showAllMovementCards && movementCards.slice(0).map((card) => (
+            {showAllMovementCards && movementCards.slice(1).map((card) => (
               <div 
                 key={card.id}
                 className="card-movedata" 
