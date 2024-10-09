@@ -3,9 +3,7 @@ import './board.css';
 import Movement from './movement';
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
-  // Función para elegir un color aleatorio
   const { fetchGameTokens } = Movement({ gameId, userId });
-  
   const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
@@ -104,30 +102,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.error(error);
     }
   };
-  // const fetchGameTokens = async () => {
-  //   try {
-  //     const response = await fetch(`http://localhost:8000/game/${gameId}/tokens`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       console.error('Error al obtener las fichas del juego:', errorData.detail);
-  //       throw new Error(errorData.detail || 'Error al obtener las fichas del juego');
-  //     }
-
-  //     const data = await response.json();
-  //     console.log('Tokens recibidos del servidor:', data);
-  //     return data.tokens || [];
-  //   } catch (error) {
-  //     console.error(error);
-  //     return [];
-  //   }
-  // };
-
+  
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
     if (!hasConnected.current) {
@@ -322,8 +297,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-
-
   // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
   useEffect(() => {
     if (!hasConnected.current) {
@@ -452,9 +425,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-
-
-  const cardImages = import.meta.glob('/src/designs/*.svg', { eager: true });
 
   return (
     <div className="game-page">
