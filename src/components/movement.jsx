@@ -10,6 +10,7 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
       setSelectedCard(card); // Seleccionamos la carta
       console.log('Carta seleccionada:', card);
     } else {
+        console.log('Deselecciona token o termina movimiento');
         //algo que diga que primero deseleccione tokens o termine el movimiento
     }
   };
@@ -17,20 +18,31 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
   // Función para seleccionar una ficha
   const handleTokenClick = (tokenId) => {
     if (!selectedCard) {
+        console.log('No hay carta seleccionada');
       return;
     }
 
     if (selectedTokens.includes(tokenId)) {
+        console.log('Deseleccionando token', tokenId);
+        setSelectedTokens((prev) => prev.filter((id) => id !== tokenId));
       return;
     }
+    
+    if (parseInt(selectedTokens.length) == 0) {
+        console.log('Token seleccionado:',tokenId);
+        selectedTokens[0] = tokenId;
+        return;
+    }
 
-    if (selectedTokens.length < 2) {
-      setSelectedTokens((prev) => [...prev, tokenId]);
+    if (parseInt(selectedTokens.length) == 1) {
+        console.log('Token seleccionado:',tokenId);
+        selectedTokens[1] = tokenId;
     }
 
     // Si ya hay dos fichas seleccionadas, proceder al movimiento
-    if (selectedTokens.length === 1) {
-      executeMove(selectedCard.id, selectedTokens[0], tokenId);
+    if (parseInt(selectedTokens.length) == 2) {
+        console.log('Ejecutando movimiento:', selectedCard.card_id);
+      executeMove(selectedCard.card_id, selectedTokens[0], selectedTokens[1]);
     }
   };
 
@@ -63,10 +75,8 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
 
       const data = await response.json();
       console.log('Movimiento ejecutado con éxito:', data);
-      alert('Movimiento ejecutado con éxito');
       setSelectedCard(null);
       setSelectedTokens([]);
-      onMoveCompleted(); // Notificar al Board que el movimiento fue completado
     } catch (error) {
       console.error('Error al ejecutar el movimiento:', error);
     }
