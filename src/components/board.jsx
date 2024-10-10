@@ -3,7 +3,7 @@ import './board.css';
 import Movement from './movement';
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
-  const { fetchGameTokens } = Movement({ gameId, userId });
+  const { fetchGameTokens} = Movement({ gameId, userId});
   const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
@@ -31,6 +31,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     userId,
     movementCards,
   });
+
 
 
   const fetchGameInfo = async () => {
@@ -340,16 +341,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     console.log('Fetching tokens...');
   
     const tokensData = await fetchGameTokens(); 
-  
+    
     if (!tokensData || tokensData.length === 0) {
       console.error('No se recibieron fichas del servidor o el array está vacío');
       return
     }
     console.log('tokensData:', tokensData); // Verifica lo que llega
-
+    
     const fetchedTokens = tokensData.map((token, index) => {
       const mappedToken = {
-        id: token.id || index + 1,
+        id: token.id,
         color: token.color,
         position: {
           gridRow: token.y_coordinate,
@@ -359,11 +360,20 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.log('Mapped token:', mappedToken);
       return mappedToken;
     });
-
-    setPreviousTokens(tokens); 
-    setTokens(fetchedTokens); 
+    if (tokens.length > 0) {
+      console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
+      setPreviousTokens([...tokens]);  // Guarda los tokens actuales antes de actualizarlos
+    } 
+    setTokens([...fetchedTokens]);
     console.log('Tokens state updated:', fetchedTokens);
   };
+  
+  useEffect(() => {
+    if (tokens.length > 0) {
+      console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
+      setPreviousTokens([...tokens]); // Actualiza previousTokens cuando tokens cambia
+    }
+  }, [tokens]);
 
   useEffect(() => {
     console.log('Tokens state changed:', tokens);
@@ -388,16 +398,30 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   }, [turnInfo, myTurn]);
 
 
-  // Función para determinar si una ficha ha cambiado de posición
+ 
+  // Función para comparar posiciones de tokens y aplicar la clase de animación si la posición cambió
   const getMovementClass = (token) => {
-    const previousToken = previousTokens.find((prevToken) => prevToken.id === token.id);
+    if (previousTokens.length === 0) {
+      console.log('No hay tokens anteriores para comparar');
+      return '';
+    }
+    const previousToken = previousTokens.find((prevToken) => prevToken.id == token.id);
+    console.log('Comparando el token actual:', token);
+    console.log('Token anterior:', previousToken);
     if (
       previousToken &&
-      (previousToken.position.gridRow !== token.position.gridRow || previousToken.position.gridColumn !== token.position.gridColumn)
+      (previousToken.position.gridRow !== token.position.gridRow || 
+      previousToken.position.gridColumn !== token.position.gridColumn)
     ) {
-      return 'token-move'; // Clase que aplicará la animación
+      console.log(`El token con id ${token.id} se ha movido de posición`);
+      setTimeout(() => {
+        document.querySelector(`.token-${token.id}`).classList.remove('token-move');
+        document.querySelector(`.token-${token.id}`).offsetWidth; // Fuerza el reflow
+        document.querySelector(`.token-${token.id}`).classList.add('token-move');
+      }, 10);
+      return `token-${token.id} token-move`; 
     }
-    return '';
+    return `token-${token.id}`; 
   };
 
   useEffect(() => {

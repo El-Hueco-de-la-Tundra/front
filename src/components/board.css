@@ -107,25 +107,45 @@
      width: 66px;  /* Ajusta el tamaño según corresponda */
      height: 66px;
      border-radius: 0%; 
-   }
+     transition: transform 0.5s ease-in-out, background-image 0.5s ease-in-out;
+    }
    
    /* Colores de las fichas */
    .token.RED {
      background-image: url('./src/designs/A.svg');
+
 }
    
    .token.BLUE {
      background-image: url('./src/designs/D.svg');
+
    }
    
    .token.GREEN {
      background-image: url('./src/designs/C.svg');
+
    }
    
    .token.YELLOW {
      background-image: url('./src/designs/B.svg');
+
    }
    
+   /* Animación cuando las fichas cambian de posición */
+   .token-move {
+    animation: tokenMove 0.5s ease-in-out;
+  }
+  
+  @keyframes tokenMove {
+    0% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+
    /* Botón para abandonar la partida */
    .leave-button {
      position: absolute;
