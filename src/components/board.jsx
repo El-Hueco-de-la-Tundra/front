@@ -142,6 +142,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case 'status_move':
           console.log('Movimiento detectado, actualizando fichas...');
           fetchAndSetTokens();
+          fetchUserMovementCards().then((cards) => {
+          setMovementCards(cards);})
           break;
 
         case 'status_leave':
@@ -298,7 +300,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-  // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
   useEffect(() => {
     if (!hasConnected.current) {
       connectWebSocket(gameId, userId);
@@ -371,7 +372,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   useEffect(() => {
     if (tokens.length > 0) {
       console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
-      setPreviousTokens([...tokens]); // Actualiza previousTokens cuando tokens cambia
+      setPreviousTokens([...tokens]);
     }
   }, [tokens]);
 
