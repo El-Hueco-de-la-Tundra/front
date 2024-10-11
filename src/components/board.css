@@ -89,7 +89,7 @@
   width: 80vw;
   height: 80vh;
   position: relative;
-  top: 10.5vh;
+  top: 10vh;
   left: 58vh;
   margin: 0 auto;
 }
@@ -104,30 +104,36 @@
    
    /* Cada ficha */
    .token {
-     width: 66px;  /* Ajusta el tamaño según corresponda */
-     height: 66px;
-     border-radius: 0%; 
+     width: 69px;  /* Ajusta el tamaño según corresponda */
+     height: 69px;
+     background-size: cover; /* Ajusta el fondo para cubrir todo el contenedor */
+     background-position: center;
      transition: transform 0.5s ease-in-out, background-image 0.5s ease-in-out;
     }
    
    /* Colores de las fichas */
    .token.RED {
      background-image: url('./src/designs/A.svg');
+    
+     /* background-color:#E36530; */
 
 }
    
    .token.BLUE {
      background-image: url('./src/designs/D.svg');
+     /* background-color:#2F4E5A; */
 
    }
    
    .token.GREEN {
      background-image: url('./src/designs/C.svg');
+     /* background-color:#93B98F; */
 
    }
    
    .token.YELLOW {
      background-image: url('./src/designs/B.svg');
+     /* background-color:#FACA5C; */
 
    }
    
