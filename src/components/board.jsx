@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './board.css';
+import Movement from './movement';
 
-const GamePage = ({ onLeaveGame, gameId, userId }) => {
-  // Función para elegir un color aleatorio
-
+const BoardPage = ({ onLeaveGame, gameId, userId }) => {
+  const { fetchGameTokens } = Movement({ gameId, userId });
+  const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
@@ -25,6 +26,11 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   const [movementCards, setMovementCards] = useState([]);
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
   const hasConnected = useRef(false); // Nueva bandera para controlar la conexión WebSocket
+  const { handleCardClick, handleTokenClick } = Movement({
+    gameId,
+    userId,
+    movementCards,
+  });
 
 
   const fetchGameInfo = async () => {
@@ -96,30 +102,7 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       console.error(error);
     }
   };
-  const fetchGameTokens = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/game/${gameId}/tokens`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error al obtener las fichas del juego:', errorData.detail);
-        throw new Error(errorData.detail || 'Error al obtener las fichas del juego');
-      }
-
-      const data = await response.json();
-      console.log('Tokens recibidos del servidor:', data);
-      return data.tokens || [];
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  };
-
+  
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
     if (!hasConnected.current) {
@@ -155,6 +138,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           }
           break;
 
+        case 'status_move':
+          console.log('Movimiento detectado, actualizando fichas...');
+          fetchAndSetTokens();
+          break;
 
         case 'status_leave':
           console.log('Recibido mensaje status_leave:', message);
@@ -310,8 +297,6 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-
-
   // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
   useEffect(() => {
     if (!hasConnected.current) {
@@ -353,8 +338,14 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   };
   const fetchAndSetTokens = async () => {
     console.log('Fetching tokens...');
-    const tokensData = await fetchGameTokens();
-    console.log('tokensData:', tokensData);
+  
+    const tokensData = await fetchGameTokens(); 
+  
+    if (!tokensData || tokensData.length === 0) {
+      console.error('No se recibieron fichas del servidor o el array está vacío');
+      return
+    }
+    console.log('tokensData:', tokensData); // Verifica lo que llega
 
     const fetchedTokens = tokensData.map((token, index) => {
       const mappedToken = {
@@ -368,9 +359,10 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
       console.log('Mapped token:', mappedToken);
       return mappedToken;
     });
-    console.log('fetchedTokens:', fetchedTokens);
-    setTokens(fetchedTokens);
-    console.log('Tokens state updated.');
+
+    setPreviousTokens(tokens); 
+    setTokens(fetchedTokens); 
+    console.log('Tokens state updated:', fetchedTokens);
   };
 
   useEffect(() => {
@@ -396,6 +388,17 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   }, [turnInfo, myTurn]);
 
 
+  // Función para determinar si una ficha ha cambiado de posición
+  const getMovementClass = (token) => {
+    const previousToken = previousTokens.find((prevToken) => prevToken.id === token.id);
+    if (
+      previousToken &&
+      (previousToken.position.gridRow !== token.position.gridRow || previousToken.position.gridColumn !== token.position.gridColumn)
+    ) {
+      return 'token-move'; // Clase que aplicará la animación
+    }
+    return '';
+  };
 
   useEffect(() => {
     let timer;
@@ -422,9 +425,6 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-
-
-  const cardImages = import.meta.glob('/src/designs/*.svg', { eager: true });
 
   return (
     <div className="game-page">
@@ -494,7 +494,11 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
               }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
             </div>
             {showAllMovementCards && movementCards.slice(1).map((card) => (
-              <div key={card.id} className="card-movedata">
+              <div
+                key={card.id}
+                className="card-movedata"
+                disabled={!myTurn}
+                onClick={() => handleCardClick(card)}>
                 <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
               </div>
             ))}
@@ -507,7 +511,9 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
           tokens.map((token) => (
             <div
               key={token.id}
-              className={`token ${token.color}`}
+              className={`token ${token.color} ${getMovementClass(token)} `}
+              disabled={!myTurn}
+              onClick={() => handleTokenClick(token.id)}
               style={{
                 gridColumn: token.position.gridColumn,
                 gridRow: token.position.gridRow,
@@ -541,4 +547,4 @@ const GamePage = ({ onLeaveGame, gameId, userId }) => {
   );
 };
 
-export default GamePage;
+export default BoardPage;
