@@ -198,6 +198,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             setMovementCards(cards);
           })
           setTriggerFetchFigures(prev => prev + 1);
+          setMoveCount(prev => prev + 1);
 
           break;
 
@@ -643,7 +644,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           <button
             className="cancel-move-button"
             onClick={() => {handleUndoMove(gameId, userId); setUndoCount((prev) => prev + 1)}}
-            disabled={!myTurn || moveCount < undoCount}  // Habilitado solo si es el turno del jugador
+            disabled={!myTurn || moveCount <= undoCount}  // Habilitado solo si es el turno del jugador
           >
             ⟲
           </button>
