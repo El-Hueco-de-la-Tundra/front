@@ -3,7 +3,7 @@ import './board.css';
 import Movement from './movement';
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
-  const { fetchGameTokens } = Movement({ gameId, userId });
+  const { fetchGameTokens} = Movement({ gameId, userId});
   const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ['red', 'blue', 'green', 'yellow'];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
@@ -31,6 +31,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     userId,
     movementCards,
   });
+
 
 
   const fetchGameInfo = async () => {
@@ -141,6 +142,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case 'status_move':
           console.log('Movimiento detectado, actualizando fichas...');
           fetchAndSetTokens();
+          fetchUserMovementCards().then((cards) => {
+          setMovementCards(cards);})
           break;
 
         case 'status_leave':
@@ -297,7 +300,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-  // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
   useEffect(() => {
     if (!hasConnected.current) {
       connectWebSocket(gameId, userId);
@@ -340,16 +342,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     console.log('Fetching tokens...');
   
     const tokensData = await fetchGameTokens(); 
-  
+    
     if (!tokensData || tokensData.length === 0) {
       console.error('No se recibieron fichas del servidor o el array está vacío');
       return
     }
     console.log('tokensData:', tokensData); // Verifica lo que llega
-
+    
     const fetchedTokens = tokensData.map((token, index) => {
       const mappedToken = {
-        id: token.id || index + 1,
+        id: token.id,
         color: token.color,
         position: {
           gridRow: token.y_coordinate,
@@ -359,11 +361,20 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.log('Mapped token:', mappedToken);
       return mappedToken;
     });
-
-    setPreviousTokens(tokens); 
-    setTokens(fetchedTokens); 
+    if (tokens.length > 0) {
+      console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
+      setPreviousTokens([...tokens]);  // Guarda los tokens actuales antes de actualizarlos
+    } 
+    setTokens([...fetchedTokens]);
     console.log('Tokens state updated:', fetchedTokens);
   };
+  
+  useEffect(() => {
+    if (tokens.length > 0) {
+      console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
+      setPreviousTokens([...tokens]);
+    }
+  }, [tokens]);
 
   useEffect(() => {
     console.log('Tokens state changed:', tokens);
@@ -388,16 +399,30 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   }, [turnInfo, myTurn]);
 
 
-  // Función para determinar si una ficha ha cambiado de posición
+ 
+  // Función para comparar posiciones de tokens y aplicar la clase de animación si la posición cambió
   const getMovementClass = (token) => {
-    const previousToken = previousTokens.find((prevToken) => prevToken.id === token.id);
+    if (previousTokens.length === 0) {
+      console.log('No hay tokens anteriores para comparar');
+      return '';
+    }
+    const previousToken = previousTokens.find((prevToken) => prevToken.id == token.id);
+    console.log('Comparando el token actual:', token);
+    console.log('Token anterior:', previousToken);
     if (
       previousToken &&
-      (previousToken.position.gridRow !== token.position.gridRow || previousToken.position.gridColumn !== token.position.gridColumn)
+      (previousToken.position.gridRow !== token.position.gridRow || 
+      previousToken.position.gridColumn !== token.position.gridColumn)
     ) {
-      return 'token-move'; // Clase que aplicará la animación
+      console.log(`El token con id ${token.id} se ha movido de posición`);
+      setTimeout(() => {
+        document.querySelector(`.token-${token.id}`).classList.remove('token-move');
+        document.querySelector(`.token-${token.id}`).offsetWidth; // Fuerza el reflow
+        document.querySelector(`.token-${token.id}`).classList.add('token-move');
+      }, 10);
+      return `token-${token.id} token-move`; 
     }
-    return '';
+    return `token-${token.id}`; 
   };
 
   useEffect(() => {
@@ -487,18 +512,26 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       <div className="card-container card-bottommove">
         {movementCards.length > 0 && (
           <>
-            <div className="card-movedata" >
-              <img onClick={() => {
-                console.log('Carta de movimiento clickeada');
-                setShowAllMovementCards(!showAllMovementCards);
-              }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+          <button
+              className="arrow-button"
+              onClick={() => setShowAllMovementCards(!showAllMovementCards)}
+            >
+              {showAllMovementCards ? '▲' : '▼'}
+            </button>
+
+            <div className="card-movedata">
+              <img
+                onClick={() => handleCardClick(movementCards[0])}
+                src={`./src/designs/${movementCards[0].mov_type}.svg`}
+                alt={movementCards[0].mov_type}
+              />
             </div>
+            
             {showAllMovementCards && movementCards.slice(1).map((card) => (
-              <div
+              <div 
                 key={card.id}
-                className="card-movedata"
-                disabled={!myTurn}
-                onClick={() => handleCardClick(card)}>
+                className="card-movedata" 
+                onClick={() => myTurn && handleCardClick(card)}>
                 <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
               </div>
             ))}
@@ -512,8 +545,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             <div
               key={token.id}
               className={`token ${token.color} ${getMovementClass(token)} `}
-              disabled={!myTurn}
-              onClick={() => handleTokenClick(token.id)}
+              onClick={() => myTurn && handleTokenClick(token.id)}
               style={{
                 gridColumn: token.position.gridColumn,
                 gridRow: token.position.gridRow,
