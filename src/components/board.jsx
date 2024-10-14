@@ -32,7 +32,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     userId,
     movementCards,
   });
-  const [highlightedTokens, setHighlightedTokens] = useState([]);
   const [selectedFigure, setSelectedFigure] = useState(null);
   const [tokensh, setTokensh] = useState([]); 
   const [triggerFetchFigures, setTriggerFetchFigures] = useState(0); // Disparador para volver a fetchear figuras
@@ -46,11 +45,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Función para manejar las figuras obtenidas y resaltar todos los tokens inicialmente
   const handleFiguresFetched = (figures) => {
     setFetchedFigures(figures);
-    
-  
     const allTokensh = figures.flatMap(figure => figure.tokens.flat());
     setTokensh(allTokensh); 
   };
+
   // Función para manejar la selección de una figura específica
   const handleFigureSelected = (figure) => {
     console.log('Figura seleccionada:', figure);
@@ -69,9 +67,14 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-  // Función para verificar si un token debe estar resaltado
   const isTokenHighlighted = (tokenId) => {
-    return tokensh.some(token => token.id === tokenId);  
+    console.log(`Verificando tokenId: ${tokenId}`);
+    const result = tokensh.some(token => {
+      console.log(`Comparando token.id: ${token.id} con tokenId: ${tokenId}`);
+      return token.id === tokenId;
+    });
+    console.log(`Resultado para tokenId ${tokenId}:`, result);
+    return result;
   };
 
 
@@ -192,9 +195,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case 'status_move':
           console.log('Movimiento detectado, actualizando fichas...');
           fetchAndSetTokens();
+          setTokensh([]);
+          handleFiguresFetched();
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           })
+
           setTriggerFetchFigures(prev => prev + 1);
 
           break;
@@ -219,7 +225,13 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case 'status_endturn':
           fetchTurnInfo();
+          fetchGameInfo();
+          fetchAllFigureCards();
+          fetchAndSetTokens();
           setTimeLeft(120);
+          handleFiguresFetched();
+          setTriggerFetchFigures(prev => prev + 1);
+      
           break;
 
         default:
@@ -254,6 +266,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   }, [gameId, userId]);
 
   const fetchUserMovementCards = async () => {
+    console.log('Valores usados en la petición:', { gameId, userId });
+
     try {
       const response = await fetch(
         `http://localhost:8000/game/${gameId}/${userId}/movements`,
@@ -264,10 +278,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           },
         }
       );
+      console.log('Respuesta del servidor:', response);
 
-      if (!response.ok) {
-        throw new Error('Error al obtener las cartas de movimiento');
-      }
+      // if (!response.ok) {
+      //   throw new Error('Error al obtener las cartas de movimiento');
+      // }
 
       const data = await response.json();
       console.log(`Cartas de movimiento recibidas para el jugador ${userId}:`, data);
@@ -439,6 +454,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       ws.current.send(JSON.stringify({ type: 'endturn', gameId, userId }));
       console.log("Turno finalizado, mensaje enviado.");
       fetchGameInfo();
+      fetchUserMovementCards().then((cards) => {
+        setMovementCards(cards);
+      });
+      handleFiguresFetched();
     } else if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
       console.error("El WebSocket aún se está conectando. Intenta de nuevo en unos momentos.");
     } else {
@@ -604,7 +623,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           tokens.map((token) => (
             <div
               key={token.id}
-              className={`token ${token.color} ${getMovementClass(token)} ${tokensh.some(t => t.id === token.id) ? 'highlighted' : ''} `}
+              className={`token ${token.color} ${getMovementClass(token)} ${isTokenHighlighted(token.id) ? 'highlighted' : ''} `}
               onClick={() => myTurn && handleTokenClick(token.id)}
               style={{
                 gridColumn: token.position.gridColumn,
