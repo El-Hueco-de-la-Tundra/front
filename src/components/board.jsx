@@ -229,6 +229,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case 'status_last_movement_undone':
           console.log('Movimiento cancelado, actualizando fichas...');
           fetchAndSetTokens();
+          fetchUserMovementCards().then((cards) => {
+            setMovementCards(cards);
+          })
           break;
 
         default:
