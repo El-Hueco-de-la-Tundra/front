@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './movement.css';
 
 const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
   const [selectedCard, setSelectedCard] = useState(null);
@@ -27,7 +26,7 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
 
       const data = await response.json();
       console.log('Tokens recibidos del servidor:', data);
-      setTokens(tokens);
+      setTokens(data.tokens || []);
       return data.tokens || [];
     } catch (error) {
       console.error(error);
@@ -48,37 +47,33 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
     }
   };
 
-  // Función para seleccionar una ficha
   const handleTokenClick = (tokenId) => {
     if (!selectedCard) {
       console.log('No hay carta seleccionada');
       return;
     }
-
+  
     if (selectedTokens.includes(tokenId)) {
       console.log('Deseleccionando token', tokenId);
       setSelectedTokens((prev) => prev.filter((id) => id !== tokenId));
       return;
     }
-
-    if (parseInt(selectedTokens.length) == 0) {
+  
+    if (selectedTokens.length === 0) {
       console.log('Token seleccionado:', tokenId);
-      selectedTokens[0] = tokenId;
+      setSelectedTokens([tokenId]); // Seleccionar el primer token
       return;
     }
-
-    if (parseInt(selectedTokens.length) == 1) {
+  
+    if (selectedTokens.length === 1) {
       console.log('Token seleccionado:', tokenId);
-      selectedTokens[1] = tokenId;
-    }
-
-    // Si ya hay dos fichas seleccionadas, proceder al movimiento
-    if (parseInt(selectedTokens.length) == 2) {
-      console.log('Ejecutando movimiento:', selectedCard.card_id);
-      executeMove(selectedCard.card_id, selectedTokens[0], selectedTokens[1]);
+      setSelectedTokens((prev) => [...prev, tokenId]); // Seleccionar el segundo token
+  
+      // Ejecutar el movimiento cuando haya dos tokens seleccionados
+      executeMove(selectedCard.card_id, selectedTokens[0], tokenId);
     }
   };
-
+  
   // Función para ejecutar el movimiento
   const executeMove = async (moveId, token1Id, token2Id) => {
     try {
@@ -119,6 +114,8 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
     handleCardClick,
     handleTokenClick,
     tokens,
+    selectedCard,
+    selectedTokens,
     fetchGameTokens,
   };
 };
