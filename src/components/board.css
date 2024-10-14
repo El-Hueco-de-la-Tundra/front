@@ -406,3 +406,24 @@
      font-size: 20px;
      color: #666;
    }
+
+   .cancel-move-button {
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 0;
+    padding: 15px 25px;
+    font-size: 20px;
+    color: #0e0000;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 10px;
+  }
+  
+  .cancel-move-button:hover {
+    background-color: #a1a1a1f3;
+    transform: translateY(-3px);
+  }
+  

@@ -14,6 +14,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
   const [turnInfo, setTurnInfo] = useState(null); // Información de la partida
   const [myTurn, setMyTurn] = useState(false); // Información de la partida
+  const [moveCount, setMoveCount] = useState(0);
+  const [undoCount, setUndoCount] = useState(0);
   const [leaveMessage, setLeaveMessage] = useState(''); // Estado para el mensaje de abandono
   const [winnerMessage, setWinnerMessage] = useState(''); // Estado para el mensaje de ganador
   const [figureCards, setFigureCards] = useState({
@@ -26,7 +28,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [movementCards, setMovementCards] = useState([]);
   const ws = useRef(null); // Usamos `useRef` para almacenar la conexión WebSocket
   const hasConnected = useRef(false); // Nueva bandera para controlar la conexión WebSocket
-  const { handleCardClick, handleTokenClick } = Movement({
+  const { handleCardClick, handleTokenClick, handleUndoMove } = Movement({
     gameId,
     userId,
     movementCards,
@@ -164,6 +166,13 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case 'status_endturn':
           fetchTurnInfo();
           setTimeLeft(120);
+          setMoveCount(0);
+          setUndoCount(0);
+          break;
+
+        case 'status_last_movement_undone':
+          console.log('Movimiento cancelado, actualizando fichas...');
+          fetchAndSetTokens();
           break;
 
         default:
@@ -535,6 +544,15 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           </p>
         </div>
 
+        {myTurn && (
+          <button
+            className="cancel-move-button"
+            onClick={() => {handleUndoMove(gameId, userId); setUndoCount((prev) => prev + 1)}}
+            disabled={!myTurn || moveCount < undoCount}  // Habilitado solo si es el turno del jugador
+          >
+            ⟲
+          </button>
+        )}
 
         <button className="leave-button" onClick={handleLeaveGame}>
           Abandonar Partida
