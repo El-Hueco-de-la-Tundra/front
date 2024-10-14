@@ -48,8 +48,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Función para manejar las figuras obtenidas y resaltar todos los tokens inicialmente
   const handleFiguresFetched = (figures) => {
     setFetchedFigures(figures);
-    
-  
     const allTokensh = figures.flatMap(figure => figure.tokens.flat());
     setTokensh(allTokensh); 
   };
@@ -197,6 +195,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           })
+          setTokensh([]);
+          handleFiguresFetched();
           setTriggerFetchFigures(prev => prev + 1);
           setMoveCount(prev => prev + 1);
 
@@ -617,7 +617,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           tokens.map((token) => (
             <div
               key={token.id}
-              className={`token ${token.color} ${getMovementClass(token)} ${tokensh.some(t => t.id === token.id) ? 'highlighted' : ''} `}
+              className={`token ${token.color} ${getMovementClass(token)} ${isTokenHighlighted(token.id) ? 'highlighted' : ''} `}
               onClick={() => myTurn && handleTokenClick(token.id)}
               style={{
                 gridColumn: token.position.gridColumn,
