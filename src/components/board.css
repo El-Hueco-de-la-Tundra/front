@@ -86,10 +86,9 @@
   grid-template-columns: repeat(6, 1);  /* 6 columnas */
   grid-template-rows: repeat(6,1);     /* 6 filas */
   gap: 13px;  /* Espacio entre las fichas */
-  position: relative;
-  bottom: 3px;
-  right: 31px;
-  margin: 0 auto;
+  position:fixed;
+  bottom: 175px;
+  right: 422px;
 }
    
    /* Contenedor de las fichas */
@@ -104,9 +103,11 @@
    .token {
      width: 69px;  /* Ajusta el tamaño según corresponda */
      height: 69px;
+     border: none;
      background-size: cover; /* Ajusta el fondo para cubrir todo el contenedor */
      background-position: center;
      transition: transform 0.5s ease-in-out, background-image 0.5s ease-in-out;
+     transform: translateX(0); /* O asegúrate de que las transformaciones no afecten la posición */
     }
    
    /* Colores de las fichas */
@@ -396,7 +397,6 @@
     cursor: pointer;
     position: absolute;
     right: 18vh; 
-    margin-bottom: 10px;
   }
   
 
