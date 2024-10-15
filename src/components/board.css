@@ -89,13 +89,13 @@
   position: relative;
   bottom: 3px;
   right: 31px;
-  margin: 0 auto;
 }
    
    /* Contenedor de las fichas */
    .tokens-container {
      position: relative;
      width: 100%;
+     background-color:#28a745;
      height: 100%;
      pointer-events: none;  /* Para evitar que las fichas bloqueen clics */
    }
@@ -108,6 +108,7 @@
      background-size: cover; /* Ajusta el fondo para cubrir todo el contenedor */
      background-position: center;
      transition: transform 0.5s ease-in-out, background-image 0.5s ease-in-out;
+     transform: translateX(0); /* O asegúrate de que las transformaciones no afecten la posición */
     }
    
    /* Colores de las fichas */
