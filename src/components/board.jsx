@@ -39,6 +39,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [triggerFetchFigures, setTriggerFetchFigures] = useState(0); // Disparador para volver a fetchear figuras
   const [fetchedFigures, setFetchedFigures] = useState([]);  // Estado para guardar todas las figuras fetcheadas
   const [selectedfiguretoken, setSelectedfiguretoken] = useState(null);
+  const [highlightedTokens, setHighlightedTokens] = useState([]);
 
 
 
@@ -88,21 +89,25 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       // Fuerza un reset de los tokens para asegurarse de que las posiciones se recalculen
       fetchGameInfo();
       setTokensh([]);
-      fetchAndSetTokens();
       handleFiguresFetched();
       setTokens([]);
-      
+      fetchAndSetTokens();
     } else {
       alert('Por favor selecciona una figura y tokens');
     }
   };
-  // Función para manejar las figuras obtenidas y resaltar todos los tokens inicialmente
-  const handleFiguresFetched = (figures) => {
-    setFetchedFigures(figures);
-    const allTokensh = figures.flatMap(figure => figure.tokens.flat());
-    setTokensh(allTokensh);
-  };
 
+  const handleFiguresFetched = (figures) => {
+    if (figures && Array.isArray(figures)) {
+      setFetchedFigures(figures);
+      
+      const allTokensh = figures.flatMap(figure => Array.isArray(figure.tokens) ? figure.tokens.flat() : []);
+      setTokensh(allTokensh);
+    } else {
+      console.error('No se recibieron figuras o no es un array');
+      setTokensh([]);
+    }
+  };
   // Función para manejar la selección de una figura específica
   const handleFigureSelected = (figure) => {
     console.log('Figura seleccionada:', figure);
@@ -277,6 +282,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchAndSetTokens();
           setTokensh([]);
           handleFiguresFetched();
+          
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           })
@@ -374,9 +380,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       );
       console.log('Respuesta del servidor:', response);
 
-      // if (!response.ok) {
-      //   throw new Error('Error al obtener las cartas de movimiento');
-      // }
+      if (!response.ok) {
+        throw new Error('Error al obtener las cartas de movimiento');
+      }
 
       const data = await response.json();
       console.log(`Cartas de movimiento recibidas para el jugador ${userId}:`, data);
@@ -692,7 +698,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             >
               {showAllMovementCards ? '▲' : '▼'}
             </button>
-
             <div className="card-movedata">
               <img
                 onClick={() => handleCardClick(movementCards[0])}
@@ -700,7 +705,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 alt={movementCards[0].mov_type}
               />
             </div>
-
             {showAllMovementCards && movementCards.slice(1).map((card) => (
               <div
                 key={card.id}
@@ -722,7 +726,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 token 
                 ${token.color} 
                 ${getMovementClass(token)} 
-                ${isTokenHighlighted(token.id) ? 'highlighted' : ''}                ${highlightedTokens.includes(token.id) ? 'high' : ''} `}
+                ${isTokenHighlighted(token.id) ? 'highlighted' : ''}  ${highlightedTokens.includes(token.id) ? 'high' : ''} `}
               onClick={() => {
                 if (myTurn) {
                   handleTokenClickHigh(token.id); 
