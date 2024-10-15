@@ -42,6 +42,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
 
   //===================== Resaltado de figuras =============================//
+  
   const useFigureCard = async (figureId, tokensid) => {
     console.log("Token IDs:", tokensid);
     console.log("Figure IDs:", figureId);
@@ -83,8 +84,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       useFigureCard(selectedFigure.id, token.id); // Llamamos a la función de `Figuras`
       setSelectedFigure(null);
       // Fuerza un reset de los tokens para asegurarse de que las posiciones se recalculen
-      setTokens([]);
+      fetchGameInfo();
+      setTokensh([]);
       fetchAndSetTokens();
+      handleFiguresFetched();
+      setTokens([]);
+      
     } else {
       alert('Por favor selecciona una figura y tokens');
     }
@@ -288,9 +293,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           setTriggerFetchFigures(prev => prev + 1);
           setMoveCount(prev => prev + 1);
           setTimeLeft(120);
-          handleFiguresFetched();
-          setTriggerFetchFigures(prev => prev + 1);
-      
+    
           break;
 
         default:
@@ -686,12 +689,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
               className={`token ${token.color} ${getMovementClass(token)} ${isTokenHighlighted(token.id) ? 'highlighted' : ''} `}
               onClick={() => {
                 if (myTurn) {
-                  handleTokenClick(token.id);  // Llama a la primera función
+                  handleTokenClick(token.id); 
                 }
                 if (myTurn && selectedFigure) {
                   handleUseFigure(token);
                 }
-
               }} style={{
                 gridColumn: token.position.gridColumn,
                 gridRow: token.position.gridRow,
@@ -717,7 +719,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           <button
             className="cancel-move-button"
             onClick={() => { handleUndoMove(gameId, userId); setUndoCount((prev) => prev + 1) }}
-            disabled={!myTurn || moveCount <= undoCount}  // Habilitado solo si es el turno del jugador
+            // disabled={!myTurn || moveCount <= undoCount}  // Habilitado solo si es el turno del jugador
           >
             ⟲
           </button>

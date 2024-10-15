@@ -86,16 +86,15 @@
   grid-template-columns: repeat(6, 1);  /* 6 columnas */
   grid-template-rows: repeat(6,1);     /* 6 filas */
   gap: 13px;  /* Espacio entre las fichas */
-  position: relative;
-  bottom: 3px;
-  right: 31px;
+  position:fixed;
+  bottom: 175px;
+  right: 422px;
 }
    
    /* Contenedor de las fichas */
    .tokens-container {
      position: relative;
      width: 100%;
-     background-color:#28a745;
      height: 100%;
      pointer-events: none;  /* Para evitar que las fichas bloqueen clics */
    }
@@ -398,7 +397,6 @@
     cursor: pointer;
     position: absolute;
     right: 18vh; 
-    margin-bottom: 10px;
   }
   
 
