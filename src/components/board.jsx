@@ -48,8 +48,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Función para manejar las figuras obtenidas y resaltar todos los tokens inicialmente
   const handleFiguresFetched = (figures) => {
     setFetchedFigures(figures);
-    
-  
     const allTokensh = figures.flatMap(figure => figure.tokens.flat());
     setTokensh(allTokensh); 
   };
@@ -216,6 +214,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           })
+          setTokensh([]);
+          handleFiguresFetched();
           setTriggerFetchFigures(prev => prev + 1);
           setMoveCount(prev => prev + 1);
 
