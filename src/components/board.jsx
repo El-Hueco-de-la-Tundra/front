@@ -135,6 +135,25 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   }, [tokens]);
   //======================================================================//
 
+  const handleTokenClickHigh = async (tokenId) => {
+    if (highlightedTokens < 2){
+
+      setHighlightedTokens([...highlightedTokens, tokenId]);
+
+    } else if(highlightedTokens.includes(tokenId)) {
+
+      setHighlightedTokens(highlightedTokens.filter(id => id !== tokenId));
+
+    }
+    if(highlightedTokens.length == 1){
+
+      setHighlightedTokens([]);
+    }
+    handleTokenClick(tokenId); // Llamar a la función original para gestionar el clic
+    console.log('Tokens resaltados', highlightedTokens);
+
+  };
+
   const fetchGameInfo = async () => {
     try {
       const response = await fetch(`http://localhost:8000/games/${gameId}`, {
@@ -699,10 +718,14 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           tokens.map((token) => (
             <div
               key={token.id}
-              className={`token ${token.color} ${getMovementClass(token)} ${isTokenHighlighted(token.id) ? 'highlighted' : ''} `}
+              className={`
+                token 
+                ${token.color} 
+                ${getMovementClass(token)} 
+                ${isTokenHighlighted(token.id) ? 'highlighted' : ''}                ${highlightedTokens.includes(token.id) ? 'high' : ''} `}
               onClick={() => {
                 if (myTurn) {
-                  handleTokenClick(token.id); 
+                  handleTokenClickHigh(token.id); 
                 }
                 if (myTurn && selectedFigure) {
                   handleUseFigure(token);

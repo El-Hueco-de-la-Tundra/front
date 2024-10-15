@@ -156,6 +156,12 @@
     position: relative;
   }
 
+  .token.high {
+    outline: 5px solid rgb(6, 201, 207);  /* Resalta los tokens con un outline */
+    box-shadow: 0px 0px 25px 10px rgb(6, 201, 207);
+    position: relative;
+  }
+
 
    /* Botón para abandonar la partida */
    .leave-button {
