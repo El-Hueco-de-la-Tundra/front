@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './board.css';
 import Movement from './movement';
+import Figuras from './figuras';
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const { fetchGameTokens } = Movement({ gameId, userId });
@@ -31,7 +32,106 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     userId,
     movementCards,
   });
+  const [selectedFigure, setSelectedFigure] = useState(null);
+  const [tokensh, setTokensh] = useState([]);
+  const [triggerFetchFigures, setTriggerFetchFigures] = useState(0); // Disparador para volver a fetchear figuras
+  const [fetchedFigures, setFetchedFigures] = useState([]);  // Estado para guardar todas las figuras fetcheadas
+  const [selectedfiguretoken, setSelectedfiguretoken] = useState(null);
 
+
+
+
+  //===================== Resaltado de figuras =============================//
+  
+  const useFigureCard = async (figureId, tokensid) => {
+    console.log("Token IDs:", tokensid);
+    console.log("Figure IDs:", figureId);
+
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/use_figure`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          game_id: gameId,
+          player_id: userId,
+          figure_id: figureId,   // ID de la carta figura seleccionada
+          token_id: tokensid      // Lista de tokens asociados a la figura
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error al usar carta figura:', errorData.detail);
+        alert(`Error: ${errorData.detail}`);
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Carta figura usada con éxito:', data);
+
+      // Refrescar las cartas figura después de usar una
+    } catch (error) {
+      console.error('Error al usar la carta figura:', error);
+    }
+  };
+
+
+  // Función para usar la carta figura
+  const handleUseFigure = (token) => {
+    if (selectedFigure) {
+      useFigureCard(selectedFigure.id, token.id); // Llamamos a la función de `Figuras`
+      setSelectedFigure(null);
+      // Fuerza un reset de los tokens para asegurarse de que las posiciones se recalculen
+      fetchGameInfo();
+      setTokensh([]);
+      fetchAndSetTokens();
+      handleFiguresFetched();
+      setTokens([]);
+      
+    } else {
+      alert('Por favor selecciona una figura y tokens');
+    }
+  };
+  // Función para manejar las figuras obtenidas y resaltar todos los tokens inicialmente
+  const handleFiguresFetched = (figures) => {
+    setFetchedFigures(figures);
+    const allTokensh = figures.flatMap(figure => figure.tokens.flat());
+    setTokensh(allTokensh);
+  };
+
+  // Función para manejar la selección de una figura específica
+  const handleFigureSelected = (figure) => {
+    console.log('Figura seleccionada:', figure);
+    console.log('FetchedFigures:', fetchedFigures);
+    const selectedFigureData = fetchedFigures.find(f => f.figure.id === figure.id);
+    console.log('Datos de la figura seleccionada en fetchedFigures:', selectedFigureData);  // Depuración de la figura seleccionada
+
+    if (selectedFigureData && selectedFigureData.tokens && Array.isArray(selectedFigureData.tokens)) {
+      // Extraemos los tokens de la figura seleccionada
+      const tokensForSelectedFigure = selectedFigureData.tokens.flat();
+      setTokensh(tokensForSelectedFigure);  // Resaltamos solo los tokens de esa figura
+
+    } else {
+      console.error('La figura seleccionada no tiene tokens definidos o no es un array');
+    }
+    setSelectedFigure(figure);
+    console.log('SELECIONO A:', selectedFigure);
+  };
+
+  const isTokenHighlighted = (tokenId) => {
+    return tokensh.some(token => token.id === tokenId);
+  };
+
+
+  useEffect(() => {
+    if (tokens.length > 0) {
+      console.log('Tokens actualizados, disparando el fetch de figuras...');
+      setTriggerFetchFigures(prev => prev + 1);
+    }
+  }, [tokens]);
+  //======================================================================//
 
   const fetchGameInfo = async () => {
     try {
@@ -102,7 +202,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.error(error);
     }
   };
-  
+
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
     if (!hasConnected.current) {
@@ -128,6 +228,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             fetchAllFigureCards();
             fetchAndSetTokens();
             fetchTurnInfo();
+            setTriggerFetchFigures(prev => prev + 1);
 
           }
           break;
@@ -138,9 +239,29 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           }
           break;
 
+        case 'status_used_figure':
+          console.log('Figura usada, actualizando estado...');
+          fetchTurnInfo();
+          fetchAndSetTokens();
+          fetchAllFigureCards();
+          setTokens([]);
+          fetchGameInfo();
+          setTokensh([]);
+          handleFiguresFetched();
+          setTriggerFetchFigures(prev => prev + 1);
+          break;
+
         case 'status_move':
           console.log('Movimiento detectado, actualizando fichas...');
           fetchAndSetTokens();
+          setTokensh([]);
+          handleFiguresFetched();
+          fetchUserMovementCards().then((cards) => {
+            setMovementCards(cards);
+          })
+
+          setTriggerFetchFigures(prev => prev + 1);
+
           break;
 
         case 'status_leave':
@@ -163,7 +284,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case 'status_endturn':
           fetchTurnInfo();
+          fetchAndSetTokens();
+          fetchUserMovementCards().then((cards) => {
+            setMovementCards(cards);
+          })
+          setTokensh([]);
+          handleFiguresFetched();
+          setTriggerFetchFigures(prev => prev + 1);
+          setMoveCount(prev => prev + 1);
           setTimeLeft(120);
+    
           break;
 
         default:
@@ -198,6 +328,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   }, [gameId, userId]);
 
   const fetchUserMovementCards = async () => {
+    console.log('Valores usados en la petición:', { gameId, userId });
+
     try {
       const response = await fetch(
         `http://localhost:8000/game/${gameId}/${userId}/movements`,
@@ -208,10 +340,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           },
         }
       );
+      console.log('Respuesta del servidor:', response);
 
-      if (!response.ok) {
-        throw new Error('Error al obtener las cartas de movimiento');
-      }
+      // if (!response.ok) {
+      //   throw new Error('Error al obtener las cartas de movimiento');
+      // }
 
       const data = await response.json();
       console.log(`Cartas de movimiento recibidas para el jugador ${userId}:`, data);
@@ -297,7 +430,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-  // Conectar al WebSocket cuando la partida empiece o cuando el usuario entre
   useEffect(() => {
     if (!hasConnected.current) {
       connectWebSocket(gameId, userId);
@@ -316,7 +448,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const handleLeaveGame = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'leave', gameId, userId }));
-      console.log('SE MANDO LEAVE');
 
 
       setTimeout(() => {
@@ -338,9 +469,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   };
   const fetchAndSetTokens = async () => {
     console.log('Fetching tokens...');
-  
-    const tokensData = await fetchGameTokens(); 
-  
+
+    const tokensData = await fetchGameTokens();
+
     if (!tokensData || tokensData.length === 0) {
       console.error('No se recibieron fichas del servidor o el array está vacío');
       return
@@ -349,7 +480,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
     const fetchedTokens = tokensData.map((token, index) => {
       const mappedToken = {
-        id: token.id || index + 1,
+        id: token.id,
         color: token.color,
         position: {
           gridRow: token.y_coordinate,
@@ -359,11 +490,20 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.log('Mapped token:', mappedToken);
       return mappedToken;
     });
-
-    setPreviousTokens(tokens); 
-    setTokens(fetchedTokens); 
+    if (tokens.length > 0) {
+      console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
+      setPreviousTokens([...tokens]);  // Guarda los tokens actuales antes de actualizarlos
+    }
+    setTokens([...fetchedTokens]);
     console.log('Tokens state updated:', fetchedTokens);
   };
+
+  useEffect(() => {
+    if (tokens.length > 0) {
+      console.log('ACTUALIZANDO previousTokens antes de cambiar los tokens');
+      setPreviousTokens([...tokens]);
+    }
+  }, [tokens]);
 
   useEffect(() => {
     console.log('Tokens state changed:', tokens);
@@ -375,6 +515,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       ws.current.send(JSON.stringify({ type: 'endturn', gameId, userId }));
       console.log("Turno finalizado, mensaje enviado.");
       fetchGameInfo();
+      fetchUserMovementCards().then((cards) => {
+        setMovementCards(cards);
+      });
+      fetchAndSetTokens();
+      setTokensh([]);
+      handleFiguresFetched();
     } else if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
       console.error("El WebSocket aún se está conectando. Intenta de nuevo en unos momentos.");
     } else {
@@ -388,16 +534,27 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   }, [turnInfo, myTurn]);
 
 
-  // Función para determinar si una ficha ha cambiado de posición
+
+  // Función para comparar posiciones de tokens y aplicar la clase de animación si la posición cambió
   const getMovementClass = (token) => {
-    const previousToken = previousTokens.find((prevToken) => prevToken.id === token.id);
+    if (previousTokens.length === 0) {
+      return '';
+    }
+    const previousToken = previousTokens.find((prevToken) => prevToken.id == token.id);
+
     if (
       previousToken &&
-      (previousToken.position.gridRow !== token.position.gridRow || previousToken.position.gridColumn !== token.position.gridColumn)
+      (previousToken.position.gridRow !== token.position.gridRow ||
+        previousToken.position.gridColumn !== token.position.gridColumn)
     ) {
-      return 'token-move'; // Clase que aplicará la animación
+      setTimeout(() => {
+        document.querySelector(`.token-${token.id}`).classList.remove('token-move');
+        document.querySelector(`.token-${token.id}`).offsetWidth; // Fuerza el reflow
+        document.querySelector(`.token-${token.id}`).classList.add('token-move');
+      }, 10);
+      return `token-${token.id} token-move`;
     }
-    return '';
+    return `token-${token.id}`;
   };
 
   useEffect(() => {
@@ -428,6 +585,13 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   return (
     <div className="game-page">
+      {/* Component Figuras para manejar la lógica */}
+      <Figuras
+        gameId={gameId}
+        onFiguresFetched={handleFiguresFetched}
+        triggerFetch={triggerFetchFigures}
+      />
+
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
       {!gameStarted && (
         <div className="overlay">
@@ -477,7 +641,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         </div>
         <div className="card-container card-bottom">
           {figureCards.bottom.map((card) => (
-            <div key={card.id} className="card-bottomdata">
+            <div key={card.id}
+              className={`card-bottomdata ${selectedFigure?.id === card.id ? 'selected' : ''}`}
+              onClick={() => handleFigureSelected(card)}
+            >
               <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
             </div>
           ))}
@@ -487,18 +654,26 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       <div className="card-container card-bottommove">
         {movementCards.length > 0 && (
           <>
-            <div className="card-movedata" >
-              <img onClick={() => {
-                console.log('Carta de movimiento clickeada');
-                setShowAllMovementCards(!showAllMovementCards);
-              }} src={`./src/designs/${movementCards[0].mov_type}.svg`} alt={movementCards[0].mov_type} />
+            <button
+              className="arrow-button"
+              onClick={() => setShowAllMovementCards(!showAllMovementCards)}
+            >
+              {showAllMovementCards ? '▲' : '▼'}
+            </button>
+
+            <div className="card-movedata">
+              <img
+                onClick={() => handleCardClick(movementCards[0])}
+                src={`./src/designs/${movementCards[0].mov_type}.svg`}
+                alt={movementCards[0].mov_type}
+              />
             </div>
+
             {showAllMovementCards && movementCards.slice(1).map((card) => (
               <div
                 key={card.id}
                 className="card-movedata"
-                disabled={!myTurn}
-                onClick={() => handleCardClick(card)}>
+                onClick={() => myTurn && handleCardClick(card)}>
                 <img src={`./src/designs/${card.mov_type}.svg`} alt={card.mov_type} />
               </div>
             ))}
@@ -511,10 +686,15 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           tokens.map((token) => (
             <div
               key={token.id}
-              className={`token ${token.color} ${getMovementClass(token)} `}
-              disabled={!myTurn}
-              onClick={() => handleTokenClick(token.id)}
-              style={{
+              className={`token ${token.color} ${getMovementClass(token)} ${isTokenHighlighted(token.id) ? 'highlighted' : ''} `}
+              onClick={() => {
+                if (myTurn) {
+                  handleTokenClick(token.id); 
+                }
+                if (myTurn && selectedFigure) {
+                  handleUseFigure(token);
+                }
+              }} style={{
                 gridColumn: token.position.gridColumn,
                 gridRow: token.position.gridRow,
               }}
@@ -535,6 +715,15 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           </p>
         </div>
 
+        {myTurn && (
+          <button
+            className="cancel-move-button"
+            onClick={() => { handleUndoMove(gameId, userId); setUndoCount((prev) => prev + 1) }}
+            // disabled={!myTurn || moveCount <= undoCount}  // Habilitado solo si es el turno del jugador
+          >
+            ⟲
+          </button>
+        )}
 
         <button className="leave-button" onClick={handleLeaveGame}>
           Abandonar Partida

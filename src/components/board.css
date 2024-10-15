@@ -83,20 +83,17 @@
 /* Contenedor del tablero */
 .board-container {
   display: grid;
-  grid-template-columns: repeat(6, 7%);  /* 6 columnas */
-  grid-template-rows: repeat(6,11%);     /* 6 filas */
-  gap: 10px;  /* Espacio entre las fichas */
-  width: 80vw;
-  height: 80vh;
-  position: relative;
-  top: 10.5vh;
-  left: 58vh;
-  margin: 0 auto;
+  grid-template-columns: repeat(6, 1);  /* 6 columnas */
+  grid-template-rows: repeat(6,1);     /* 6 filas */
+  gap: 13px;  /* Espacio entre las fichas */
+  position:fixed;
+  bottom: 175px;
+  right: 422px;
 }
    
    /* Contenedor de las fichas */
    .tokens-container {
-     position: absolute;
+     position: relative;
      width: 100%;
      height: 100%;
      pointer-events: none;  /* Para evitar que las fichas bloqueen clics */
@@ -104,28 +101,62 @@
    
    /* Cada ficha */
    .token {
-     width: 66px;  /* Ajusta el tamaño según corresponda */
-     height: 66px;
-     border-radius: 0%; 
-   }
+     width: 69px;  /* Ajusta el tamaño según corresponda */
+     height: 69px;
+     border: none;
+     background-size: cover; /* Ajusta el fondo para cubrir todo el contenedor */
+     background-position: center;
+     transition: transform 0.5s ease-in-out, background-image 0.5s ease-in-out;
+     transform: translateX(0); /* O asegúrate de que las transformaciones no afecten la posición */
+    }
    
    /* Colores de las fichas */
    .token.RED {
      background-image: url('./src/designs/A.svg');
+    
+     /* background-color:#E36530; */
+
 }
    
    .token.BLUE {
      background-image: url('./src/designs/D.svg');
+     /* background-color:#2F4E5A; */
+
    }
    
    .token.GREEN {
      background-image: url('./src/designs/C.svg');
+     /* background-color:#93B98F; */
+
    }
    
    .token.YELLOW {
      background-image: url('./src/designs/B.svg');
+     /* background-color:#FACA5C; */
+
    }
    
+   /* Animación cuando las fichas cambian de posición */
+   .token-move {
+    animation: tokenMove 1s ease-in-out;
+  }
+  
+  @keyframes tokenMove {
+    0% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .token.highlighted {
+    outline: 5px solid rgb(136, 138, 128);  /* Resalta los tokens con un outline */
+    box-shadow: 0px 0px 25px 10px rgba(110, 110, 107, 0.7);  /* Sombra amarilla */
+    position: relative;
+  }
+
+
    /* Botón para abandonar la partida */
    .leave-button {
      position: absolute;
@@ -258,21 +289,21 @@
    }
    /* Cartas en la derecha */
    .card-right {
-     position: absolute;
-     top: 20%;       /* Alineado en la parte superior */
-     right: 11%;      /* Pegado al lado derecho */
-     display: flex;
-     flex-direction: column;
-     gap: 45px;
+    position: absolute;
+    top: 11%;       /* Alineado en la parte superior */
+    right: 8%;       /* Pegado al lado izquierdo */
+    display: flex;
+    flex-direction: column;  /* Para organizar las cartas en columna */
+    gap: 7px;
    }
    
    .card-rightdata {
-     background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0);
      padding: 20px;
      border-radius: 10px;
      text-align: center;
-     width: 104px;
-     height: 70px;
+     width: 125px;
+     height: 125px;
    }
    /* Cartas en la parte superior */
    .card-top {
@@ -293,11 +324,11 @@
    
    /* Cartas en la parte inferior */
    .card-bottom {
-     position: absolute;
-     bottom: 0%;     /* Cercano a la parte inferior */
-     left: 36%;      /* Alineado al centro */
+     position: relative;
+     top: 42vh;     /* Cercano a la parte inferior */
+     left: 61vh;      /* Alineado al centro */
      display: flex;
-     gap: 42px;
+     gap: 80px;
    }
    
    .card-bottomdata {
@@ -307,7 +338,20 @@
      text-align: center;
      width: 125px;
      height: 125px;
+     cursor: pointer;
    }
+
+   .card-bottomdata img {
+    width: 100%;  /* Asegúrate de que la imagen ocupe todo el espacio disponible */
+    height: auto;
+  }
+
+   .card-container.card-bottom {
+    display: flex;  /* Distribuye las cartas horizontalmente */
+    justify-content: space-between;  /* Espacio entre las cartas */
+    gap: 40px; /* Espaciado entre las cartas */
+  }
+
    .card-bottommove {
      position: absolute;
      bottom: 1%;     /* Cercano a la parte inferior */
@@ -342,6 +386,19 @@
    .card-bottom .card:last-child {
      margin-left: 20px; /* Espacio extra para la carta de movimiento */
    }
+
+   .arrow-button {
+    background-color: rgba(255, 255, 255, 0.84);
+    padding: 10px 10px;
+    border-radius: 10px;
+    border: transparent;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 24px;
+    cursor: pointer;
+    position: absolute;
+    right: 18vh; 
+  }
+  
 
    .info-container {
      display: flex;
