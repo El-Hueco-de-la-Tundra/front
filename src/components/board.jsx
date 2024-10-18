@@ -40,6 +40,60 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [fetchedFigures, setFetchedFigures] = useState([]); // Estado para guardar todas las figuras fetcheadas
   const [selectedfiguretoken, setSelectedfiguretoken] = useState(null);
   const [highlightedTokens, setHighlightedTokens] = useState([]);
+  const [playersReady, setPlayersReady] = useState(false);
+
+  const reorderPlayers = (players, currentUserId) => {
+    if (!players || players.length === 0) {
+      console.warn("Lista de jugadores vacía o indefinida.");
+      return [null, null, null, null]; // Devuelve cuatro posiciones vacías si no hay jugadores
+    }
+
+    // Asegúrate de que currentUserId es un número
+    const normalizedCurrentUserId = Number(currentUserId);
+
+    // Encuentra al jugador actual y su índice
+    const currentUserIndex = players.findIndex(
+      (player) => player.userId === normalizedCurrentUserId
+    );
+
+    if (currentUserIndex === -1) {
+      console.error(
+        `No se encontró al usuario actual (ID: ${normalizedCurrentUserId}) en la lista de jugadores. Jugadores recibidos:`,
+        players
+      );
+      return [null, null, null, null]; // Devolver una lista vacía si no encuentra al usuario actual
+    }
+
+    console.log(
+      `Jugador actual: ${normalizedCurrentUserId} en la posición ${currentUserIndex}`
+    );
+
+    // Colocar al jugador actual en la posición `bottom`
+    const reordered = [players[currentUserIndex]];
+
+    // Reorganizar el resto de los jugadores en las posiciones izquierda, derecha y arriba
+    let remainingPlayers = [
+      ...players.slice(currentUserIndex + 1),
+      ...players.slice(0, currentUserIndex),
+    ];
+
+    // Asignar jugadores a las posiciones left, right, y top
+    for (let i = 0; i < 3; i++) {
+      if (remainingPlayers[i]) {
+        reordered.push(remainingPlayers[i]);
+      } else {
+        reordered.push(null); // Rellenar con null si hay menos de 4 jugadores
+      }
+    }
+
+    console.log("Jugadores reordenados:", reordered);
+    return reordered;
+  };
+  //!!!!!!!!!!!!!NO MOVER DE LUGAR!!!!!!!!!!!!!!!!! funciona por magia :p
+  const reorderedPlayers = React.useMemo(
+    () => reorderPlayers(players, userId),
+    [players, userId]
+  );
 
   //===================== Resaltado de figuras =============================//
 
@@ -233,7 +287,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       } else {
         setMyTurn(false);
       }
-
     } catch (error) {
       console.error(error);
     }
@@ -261,7 +314,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             console.log("Partida iniciada, obteniendo jugadores y cartas...");
             setGameStarted(true);
             fetchGameInfo();
-            fetchAllFigureCards();
             fetchAndSetTokens();
             fetchTurnInfo();
             setTriggerFetchFigures((prev) => prev + 1);
@@ -452,36 +504,37 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         currentPlayerIndex
       );
 
-      // Reorganiza los jugadores de modo que el jugador actual siempre esté primero (en bottom)
-      const reorderedPlayers = [
-        ...players.slice(currentPlayerIndex), // Jugadores después del jugador actual
-        ...players.slice(0, currentPlayerIndex), // Jugadores antes del jugador actual
-      ];
       for (let i = 0; i < reorderedPlayers.length; i++) {
         const player = reorderedPlayers[i];
-        const playerUserId = player.userId;
 
-        const cards = await fetchUserFigureCards(playerUserId);
-        if (cards.length > 0) {
-          console.log(
-            `Cartas recibidas para el jugador ${playerUserId}:`,
-            cards
-          );
-          if (i === 0) {
-            cardsMap.bottom = cards;
-          } else if (i === 1) {
-            cardsMap.left = cards;
-          } else if (i === 2) {
-            cardsMap.right = cards;
-          } else if (i === 3) {
-            cardsMap.top = cards;
+        if (player != null) {
+          const playerUserId = player.userId;
+          const cards = await fetchUserFigureCards(playerUserId);
+          if (cards.length > 0) {
+            console.log(
+              `Cartas recibidas para el jugador ${playerUserId}:`,
+              cards
+            );
+            if (i === 0) {
+              cardsMap.bottom = cards;
+            } else if (i === 1) {
+              cardsMap.left = cards;
+            } else if (i === 2) {
+              cardsMap.right = cards;
+            } else if (i === 3) {
+              cardsMap.top = cards;
+            }
+          } else {
+            console.log(
+              `No se encontraron cartas para el jugador ${playerUserId}`
+            );
           }
         } else {
-          console.log(
-            `No se encontraron cartas para el jugador ${playerUserId}`
-          );
+          console.log(`Posición ${i} no tiene jugador.`);
         }
       }
+      console.log("Jugadores ordenados", reorderedPlayers);
+      setPlayersReady(true);
       setFigureCards(cardsMap);
       console.log("Cartas mapeadas correctamente:", cardsMap);
       console.log("Cartas de los jugadores:", cardsMap);
@@ -660,7 +713,30 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
-
+      {playersReady && (
+        <>
+          {reorderedPlayers[1] && (
+            <div className="player-name-left">
+              {reorderedPlayers[1]?.userName || ""}
+            </div>
+          )}
+          {reorderedPlayers[2] && (
+            <div className="player-name-right">
+              {reorderedPlayers[2]?.userName || ""}
+            </div>
+          )}
+          {reorderedPlayers[3] && (
+            <div className="player-name-top">
+              {reorderedPlayers[3]?.userName || ""}
+            </div>
+          )}
+          {reorderedPlayers[0] && (
+            <div className="player-name-bottom">
+              {reorderedPlayers[0]?.userName || ""}
+            </div>
+          )}
+        </>
+      )}
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
       {!gameStarted && (
         <div className="overlay">
@@ -690,43 +766,50 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           </button>
         </div>
       )}
-
-      <div className="cards">
-        <div className="card-container card-left">
-          {figureCards.left.map((card) => (
-            <div key={card.id} className="card-leftdata">
-              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+      {playersReady && (
+        <div className="cards">
+          {reorderedPlayers[1] && (
+            <div className="card-container card-left">
+              {figureCards.left.map((card) => (
+                <div key={card.id} className="card-leftdata">
+                  <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="card-container card-right">
-          {figureCards.right.map((card) => (
-            <div key={card.id} className="card-rightdata">
-              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+          )}
+          {reorderedPlayers[2] && (
+            <div className="card-container card-right">
+              {figureCards.right.map((card) => (
+                <div key={card.id} className="card-rightdata">
+                  <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="card-container card-top">
-          {figureCards.top.map((card) => (
-            <div key={card.id} className="card-topdata">
-              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+          )}
+          {reorderedPlayers[3] && (
+            <div className="card-container card-top">
+              {figureCards.top.map((card) => (
+                <div key={card.id} className="card-topdata">
+                  <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          <div className="card-container card-bottom">
+            {figureCards.bottom.map((card) => (
+              <div
+                key={card.id}
+                className={`card-bottomdata ${
+                  selectedFigure?.id === card.id ? "selected" : ""
+                }`}
+                onClick={() => handleFigureSelected(card)}
+              >
+                <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="card-container card-bottom">
-          {figureCards.bottom.map((card) => (
-            <div
-              key={card.id}
-              className={`card-bottomdata ${
-                selectedFigure?.id === card.id ? "selected" : ""
-              }`}
-              onClick={() => handleFigureSelected(card)}
-            >
-              <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
       <div className="card-container card-bottommove">
         {movementCards.length > 0 && (
@@ -798,7 +881,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           <div className="turn-info">
             <h2>Informacion de Turno:</h2>
             <p>Tiempo restante: {formatTime(timeLeft)}</p>
-            <p>Color Bloqueado: {turnInfo.forbiddenColor ? `${turnInfo.forbiddenColor}` : "Ninguno"} </p>
+            <p>
+              Color Bloqueado:{" "}
+              {turnInfo.forbiddenColor
+                ? `${turnInfo.forbiddenColor}`
+                : "Ninguno"}{" "}
+            </p>
             <p>
               Jugador Activo:{" "}
               {myTurn
@@ -807,7 +895,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 ? `${turnInfo.actualPlayer_name}`
                 : "Desconocido"}
             </p>
-            <p>Siguiente Jugador: {turnInfo.nextPlayer_name ? `${turnInfo.nextPlayer_name}` : "Desconocido"}</p>
+            <p>
+              Siguiente Jugador:{" "}
+              {turnInfo.nextPlayer_name
+                ? `${turnInfo.nextPlayer_name}`
+                : "Desconocido"}
+            </p>
           </div>
         )}
 
