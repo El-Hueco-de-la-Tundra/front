@@ -264,6 +264,50 @@
   color: white;
 }
 
+.player-name-left {
+  position: absolute;
+  bottom: 30%;
+  left: 9.5%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 15px;
+  border-radius: 15px;
+  color: white;
+  font-size: 18px;
+  text-align: center;
+  width: 165px;  /* Asegura el tamaño suficiente para el nombre */
+  z-index: 101;
+}
+
+/* Nombre del jugador en la derecha */
+.player-name-right {
+  position: absolute;
+  bottom: 30%;
+  right: 8%;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 15px;
+  border-radius: 15px;
+  color: white;
+  font-size: 18px;
+  text-align: center;
+  width: 165px;
+  z-index: 101;
+}
+
+/* Nombre del jugador en la parte superior */
+.player-name-top {
+  position: absolute;
+  top: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 15px;
+  color: white;
+  font-size: 18px;
+  text-align: center;
+  width: 250px;
+  z-index: 101;
+}
 /* Posicionar cartas alrededor del tablero */
 
 /* Cartas en la izquierda */
@@ -324,7 +368,7 @@
   left: 50%; /* Alineado al centro */
   transform: translateX(-50%);
   display: flex;
-  gap: 60px; /* Espacio entre las cartas */
+  gap: 7px; /* Espacio entre las cartas */
 }
 
 .card-topdata {
@@ -332,8 +376,8 @@
   padding: 20px;
   border-radius: 10px;
   text-align: center;
-  width: 70px;
-  height: 98px;
+  width: 125px;
+  height: 125px;
 }
 
 /* Cartas en la parte inferior */
