@@ -736,11 +736,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
               {reorderedPlayers[3]?.userName || ""}
             </div>
           )}
-          {reorderedPlayers[0] && (
-            <div className="player-name-bottom">
-              {reorderedPlayers[0]?.userName || ""}
-            </div>
-          )}
         </>
       )}
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
@@ -774,9 +769,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           className="ok-button" onClick={handleLeaveGame}>OK
         </button>
       </div>)}
-
-        </div>
-      )}
+      
       {playersReady && (
         <div className="cards">
           {reorderedPlayers[1] && (

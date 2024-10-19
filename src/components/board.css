@@ -317,7 +317,7 @@
   padding: 15px;
   border-radius: 15px;
   width: 165px;
-  height: 510px;
+  height: 540px;
   top: 11%; /* Alineado en la parte superior */
   left: 9.5%; /* Pegado al lado izquierdo */
   display: flex;
@@ -339,7 +339,7 @@
   background-color: rgba(255, 255, 255, 0.851);
   padding: 15px;
   width: 165px;
-  height: 510px;
+  height: 540px;
   border-radius: 15px;
   top: 11%; /* Alineado en la parte superior */
   right: 8%; /* Pegado al lado izquierdo */
