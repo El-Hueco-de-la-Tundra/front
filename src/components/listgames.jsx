@@ -7,41 +7,91 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   const [joining, setJoining] = useState(null); // Para manejar el estado de unirse a la partida
   const [userName, setUserName] = useState(''); // Estado para almacenar el nombre del usuario
   const [userNameSubmitted, setUserNameSubmitted] = useState(false); // Controla si se ha ingresado el nombre
+  const [filterName, setFilterName] = useState(''); // Estado para filtrar por nombre
+  const [filterPlayers, setFilterPlayers] = useState('');
   const ws = useRef(null); // Referencia a WebSocket
 
-  // Función para obtener la lista de partidas
-  const handleListGames = async () => {
+  const fetchGamesByName = async () => {
     try {
-      const response = await fetch('http://localhost:8000/games/list', {
+      const response = await fetch(`http://localhost:8000/games/list/name/${filterName}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
-      if (response.status === 404) {
-        // Si es un 404, significa que no hay partidas disponibles, pero sigue siendo un caso esperado
-        console.warn('No se encontraron partidas disponibles.');
-        setPartidas([]);  // Muestra el listado vacío
-        setLoading(false);
-        return;  // Salimos del bloque para no lanzar un error
-      }
-
-      if (!response.ok) {
-        throw new Error(`Error al obtener partidas: ${response.statusText}`);
-      }
+      if (!response.ok) throw new Error(`Error al filtrar por nombre: ${response.statusText}`);
 
       const data = await response.json();
-      const partidasDisponibles = data.filter((partida) => !partida.in_game);
-      setPartidas(partidasDisponibles); // Asigna solo las partidas no jugadas
-      setLoading(false);
+      return data;
     } catch (error) {
-      setError(error.message);
-      setLoading(false);
+      console.error("Error obteniendo partidas por nombre:", error);
+      return [];
     }
   };
 
+  const fetchGamesByPlayers = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/games/list/players/${filterPlayers}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
+      if (!response.ok) throw new Error(`Error al filtrar por jugadores: ${response.statusText}`);
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error obteniendo partidas por jugadores:", error);
+      return [];
+    }
+  };
+
+  // Función para obtener la lista de partidas
+const handleListGames = async () => {
+    setLoading(true);
+    setError(null);
+    setPartidas([]);
+
+    try {
+      let partidasResult = [];
+
+      if (filterName.trim()) {
+        partidasResult = await fetchGamesByName();
+      }
+
+      if (filterPlayers.trim()) {
+        const partidasByPlayers = await fetchGamesByPlayers();
+        partidasResult = partidasResult.length > 0
+          ? partidasResult.filter(p => partidasByPlayers.some(pp => pp.id === p.id)) // Intersección de resultados
+          : partidasByPlayers;
+      }
+
+      // Si no hay filtros, obtenemos todas las partidas
+      if (!filterName && !filterPlayers) {
+        const response = await fetch('http://localhost:8000/games/list', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) throw new Error(`Error al obtener todas las partidas: ${response.statusText}`);
+
+        const data = await response.json();
+        partidasResult = data;
+      }
+
+      const partidasDisponibles = partidasResult.filter(partida => !partida.in_game);
+      setPartidas(partidasDisponibles);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Función para unirse a una partida con el gameId, userName y password
   const handleJoinGame = async (gameId, password) => {
@@ -159,6 +209,21 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     <div className="partidas-container">
       <div className="list-title">
         <h1>Lista de Partidas</h1>
+      </div>
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="Buscar por nombre"
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)} // Actualiza el estado del filtro de nombre
+        />
+        <input
+          type="number"
+          placeholder="Buscar por jugadores"
+          value={filterPlayers}
+          onChange={(e) => setFilterPlayers(e.target.value)} // Actualiza el estado del filtro de jugadores
+        />
+        <button onClick={handleListGames}>Buscar</button>
       </div>
       <ul className="partidas-list">
         {partidas.map((partida) => (

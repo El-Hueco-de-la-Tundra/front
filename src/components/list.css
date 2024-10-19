@@ -67,7 +67,8 @@
 /* Contenedor de la lista de partidas */
 .partidas-container {
   position: absolute;
-  top:26%;
+  top:28%;
+  height: 540px;
   background-color: white;
   border-radius: 15px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
@@ -76,6 +77,39 @@
   text-align: center;
   width: 100%;
   margin: 0 auto;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  gap: 20px; /* Espacio entre los inputs de filtro */
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+  padding: 10px;
+  font-size: 18px;
+  border: 2px solid #A1A1A1;
+  border-radius: 10px;
+  width: 250px;
+  text-align: center;
+}
+
+.filters button {
+  padding: 10px 20px;
+  font-size: 18px;
+  background-color: #A1A1A1;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.filters button:hover {
+  background-color: #a1a1a1ec;
 }
 
 /* Estilo de los elementos de la lista */
