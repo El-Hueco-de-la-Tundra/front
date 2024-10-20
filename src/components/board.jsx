@@ -42,7 +42,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [highlightedTokens, setHighlightedTokens] = useState([]);
   const [gameCancel, setGameCancel] = useState(false);
   const [playersReady, setPlayersReady] = useState(false);
-  const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState("");
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -318,7 +318,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
-    if (!hasConnected.current) {
+    if (!hasConnected.current || ws.current.readyState === WebSocket.CLOSED) {
       ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
       hasConnected.current = true; // Marcamos que ya está conectado
 
@@ -509,7 +509,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
       if (data.count === 0) {
         // Si count es 0, establecemos al jugador como ganador
-        setWinner(userId);
+        setWinner("x");
       }
       return data.cards || [];
     } catch (error) {
@@ -563,6 +563,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             console.log(
               `No se encontraron cartas para el jugador ${playerUserId}`
             );
+            setWinner(player.userName);
           }
         } else {
           console.log(`Posición ${i} no tiene jugador.`);
@@ -791,7 +792,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         <div className="leave-notification"> {leaveMessage} </div>
       )}
       {/* Mostrar mensaje de ganador */}
-      {(winnerMessage || winner) && (<div className="winner-notification">{winner ? ("El ganador es usuario:", winner) : winnerMessage}
+      {(winnerMessage || winner) && (<div className="winner-notification">{winner ? `El ganador es el usuario "${winner}"` : winnerMessage}
         <button
           className="ok-button" onClick={handleLeaveGame}>OK
         </button>
