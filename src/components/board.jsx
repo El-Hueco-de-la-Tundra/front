@@ -354,7 +354,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           console.log("Figura usada, actualizando estado...");
           fetchTurnInfo();
           fetchAndSetTokens();
-          fetchAllFigureCards();
+          fetchAllFigureCards(players);
           setTokens([]);
           fetchGameInfo();
           setTokensh([]);
@@ -399,13 +399,15 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case "status_endturn":
           fetchTurnInfo();
+          fetchGameInfo();
+          fetchAllFigureCards(players);
           fetchAndSetTokens();
-          //fetchAllFigureCards(players);
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
           setTokensh([]);
           handleFiguresFetched();
+          fetchUserFigureCards(userId);
           setTriggerFetchFigures((prev) => prev + 1);
           setMoveCount((prev) => prev + 1);
           setTimeLeft(120);
@@ -573,7 +575,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       setPlayersReady(true);
       setFigureCards(cardsMap);
       console.log("Cartas mapeadas correctamente:", cardsMap);
-      console.log("Cartas de los jugadores:", cardsMap);
     } catch (error) {
       console.error(error);
     }
