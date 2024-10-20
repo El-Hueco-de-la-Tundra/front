@@ -122,6 +122,8 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
       if (response.status === 400) {
         // Si es un 404, significa que no es valido el movimiento.
         console.warn('Movimiento invalido.');
+        setSelectedCard(null);
+        setSelectedTokens([]);
         return;  // Salimos del bloque para no lanzar un error
       }
 
@@ -136,6 +138,8 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
     } catch (error) {
       console.error('Error al ejecutar el movimiento:', error);
     }
+    setSelectedCard(null);
+    setSelectedTokens([]);
   };
 
   return {
