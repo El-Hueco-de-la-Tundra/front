@@ -360,7 +360,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           console.log("Figura usada, actualizando estado...");
           fetchTurnInfo();
           fetchAndSetTokens();
-          fetchAllFigureCards();
+          fetchAllFigureCards(players);
           setTokens([]);
           fetchGameInfo();
           setTokensh([]);
@@ -373,7 +373,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchAndSetTokens();
           setTokensh([]);
           handleFiguresFetched();
-
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
