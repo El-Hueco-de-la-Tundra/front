@@ -96,6 +96,35 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     [players, userId]
   );
 
+  const handleResetFigureCards = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/${userId}/figure-cards-reset`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al resetear las cartas de figuras");
+      }
+
+      const data = await response.json(); // Parseamos la respuesta a JSON
+      console.log("Reset de cartas de figura exitoso:", data);
+
+      if (data.count === 0) {
+        // Si count es 0, establecemos al jugador como ganador
+        setWinner(userId);
+        alert(`¡El jugador ${userId} ha ganado!`);
+      } else {
+        alert("¡Cartas de figura reseteadas exitosamente!");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Hubo un error al resetear las cartas de figura.");
+    }
+  };
+
   //===================== Resaltado de figuras =============================//
 
   const useFigureCard = async (figureId, tokensid) => {
@@ -719,6 +748,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
+      <button className="reset-button" onClick={handleResetFigureCards}>
+        Resetear Cartas de Figura
+      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
