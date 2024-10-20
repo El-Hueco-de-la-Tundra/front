@@ -42,6 +42,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [highlightedTokens, setHighlightedTokens] = useState([]);
   const [gameCancel, setGameCancel] = useState(false);
   const [playersReady, setPlayersReady] = useState(false);
+  const [winner, setWinner] = useState(null);
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -112,13 +113,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       const data = await response.json(); // Parseamos la respuesta a JSON
       console.log("Reset de cartas de figura exitoso:", data);
 
-      if (data.count === 0) {
-        // Si count es 0, establecemos al jugador como ganador
-        setWinner(userId);
-        alert(`¡El jugador ${userId} ha ganado!`);
-      } else {
-        alert("¡Cartas de figura reseteadas exitosamente!");
-      }
     } catch (error) {
       console.error("Error:", error);
       alert("Hubo un error al resetear las cartas de figura.");
@@ -360,7 +354,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           console.log("Figura usada, actualizando estado...");
           fetchTurnInfo();
           fetchAndSetTokens();
-          fetchAllFigureCards(players);
+          fetchAllFigureCards();
           setTokens([]);
           fetchGameInfo();
           setTokensh([]);
@@ -406,6 +400,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_endturn":
           fetchTurnInfo();
           fetchAndSetTokens();
+          //fetchAllFigureCards(players);
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
@@ -507,9 +502,15 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         throw new Error("Error al obtener las cartas de figura");
       }
 
+
+      
       const data = await response.json();
       console.log(`Respuesta completa para el jugador ${userId}:`, data);
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
+      if (data.count === 0) {
+        // Si count es 0, establecemos al jugador como ganador
+        setWinner(userId);
+      }
       return data.cards || [];
     } catch (error) {
       console.error(error);
@@ -790,7 +791,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         <div className="leave-notification"> {leaveMessage} </div>
       )}
       {/* Mostrar mensaje de ganador */}
-      {winnerMessage && (<div className="winner-notification">{winnerMessage}
+      {(winnerMessage || winner) && (<div className="winner-notification">{winner ? ("El ganador es usuario:", winner) : winnerMessage}
         <button
           className="ok-button" onClick={handleLeaveGame}>OK
         </button>
