@@ -12,6 +12,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
+  const [minplayers, setminPlayers] = useState(1000); // Lista de jugadores que se han unido
+  const [lengthplayers, setlengthPlayers] = useState(0);
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
   const [turnInfo, setTurnInfo] = useState(null); // Información de la partida
   const [myTurn, setMyTurn] = useState(false); // Información de la partida
@@ -255,7 +257,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       }
 
       const data = await response.json();
+      setminPlayers(data.users.min);
+      const validPlayers = data.users.players.filter(player => player !== null);
+      setlengthPlayers(validPlayers.length);
 
+      console.log("lengthjugadores:", lengthplayers);
+      console.log("MINjugadores:",minplayers)
       const playersFromServer = data.users.players.map((playerObj) => {
         const [userId, userName] = Object.entries(playerObj)[0];
         return { userId: parseInt(userId), userName };
@@ -390,7 +397,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           break;
 
         case "status_winner":
-          setWinnerMessage(`¡El jugador ${userId} ha ganado la partida!`);
+          setWinnerMessage(`¡Has ganado la partida!`);
           break;
 
         case "info":
@@ -622,9 +629,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     const tokensData = await fetchGameTokens();
 
     if (!tokensData || tokensData.length === 0) {
-      console.error(
-        "No se recibieron fichas del servidor o el array está vacío"
-      );
       return;
     }
     console.log("tokensData:", tokensData); // Verifica lo que llega
@@ -777,10 +781,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         <div className="overlay">
           {!gameCancel && (<div className="waiting-message">
             <h2>Esperando jugadores...</h2>
-            {isHost && (
-              <button className="start-game-button" onClick={handleStartGame}>
+            {isHost && lengthplayers >= minplayers && (
+              <button className="start-game-button" onClick={handleStartGame} >
                 Iniciar Partida
-              </button>
+                </button>
+                
             )}
             <button className="leave-button" onClick={handleLeaveGame}>
               Abandonar Partida
