@@ -12,6 +12,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
   const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
+  const [minplayers, setminPlayers] = useState(1000); // Lista de jugadores que se han unido
+  const [lengthplayers, setlengthPlayers] = useState(0);
   const [gameInfo, setGameInfo] = useState(null); // Información de la partida
   const [turnInfo, setTurnInfo] = useState(null); // Información de la partida
   const [myTurn, setMyTurn] = useState(false); // Información de la partida
@@ -262,7 +264,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       }
 
       const data = await response.json();
+      setminPlayers(data.users.min);
+      const validPlayers = data.users.players.filter(player => player !== null);
+      setlengthPlayers(validPlayers.length);
 
+      console.log("lengthjugadores:", lengthplayers);
+      console.log("MINjugadores:",minplayers)
       const playersFromServer = data.users.players.map((playerObj) => {
         const [userId, userName] = Object.entries(playerObj)[0];
         return { userId: parseInt(userId), userName };
@@ -784,10 +791,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         <div className="overlay">
           {!gameCancel && (<div className="waiting-message">
             <h2>Esperando jugadores...</h2>
-            {isHost && (
-              <button className="start-game-button" onClick={handleStartGame}>
+            {isHost && lengthplayers >= minplayers && (
+              <button className="start-game-button" onClick={handleStartGame} >
                 Iniciar Partida
-              </button>
+                </button>
             )}
             <button className="leave-button" onClick={handleLeaveGame}>
               Abandonar Partida
