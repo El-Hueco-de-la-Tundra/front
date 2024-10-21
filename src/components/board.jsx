@@ -37,6 +37,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     movementCards,
   });
   const [selectedFigure, setSelectedFigure] = useState(null);
+  const [selectedMovement, setSelectedMovement] = useState(false);
   const [tokensh, setTokensh] = useState([]);
   const [triggerFetchFigures, setTriggerFetchFigures] = useState(0); // Disparador para volver a fetchear figuras
   const [fetchedFigures, setFetchedFigures] = useState([]); // Estado para guardar todas las figuras fetcheadas
@@ -44,7 +45,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [highlightedTokens, setHighlightedTokens] = useState([]);
   const [gameCancel, setGameCancel] = useState(false);
   const [playersReady, setPlayersReady] = useState(false);
-  const [winner, setWinner] = useState("");
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -98,28 +98,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     () => reorderPlayers(players, userId),
     [players, userId]
   );
-
-  const handleResetFigureCards = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/${userId}/figure-cards-reset`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al resetear las cartas de figuras");
-      }
-
-      const data = await response.json(); // Parseamos la respuesta a JSON
-      console.log("Reset de cartas de figura exitoso:", data);
-
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Hubo un error al resetear las cartas de figura.");
-    }
-  };
 
   //===================== Resaltado de figuras =============================//
 
@@ -243,6 +221,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     console.log("Tokens resaltados", highlightedTokens);
   };
 
+  const handleCardClickB = async (card) => {
+    if (selectedMovement){
+      setSelectedMovement(false);
+      return;
+    } else {
+      setSelectedMovement(true);
+      handleCardClick(card);
+    }
+  };
+
   const fetchGameInfo = async () => {
     try {
       const response = await fetch(`http://localhost:8000/games/${gameId}`, {
@@ -325,7 +313,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
-    if (!hasConnected.current || ws.current.readyState === WebSocket.CLOSED) {
+    if (!hasConnected.current) {
       ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
       hasConnected.current = true; // Marcamos que ya está conectado
 
@@ -361,7 +349,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           console.log("Figura usada, actualizando estado...");
           fetchTurnInfo();
           fetchAndSetTokens();
-          fetchAllFigureCards(players);
+          fetchAllFigureCards();
           setTokens([]);
           fetchGameInfo();
           setTokensh([]);
@@ -374,6 +362,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchAndSetTokens();
           setTokensh([]);
           handleFiguresFetched();
+          setSelectedMovement(false);
+
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
@@ -406,15 +396,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case "status_endturn":
           fetchTurnInfo();
-          fetchGameInfo();
-          fetchAllFigureCards(players);
           fetchAndSetTokens();
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
           setTokensh([]);
           handleFiguresFetched();
-          fetchUserFigureCards(userId);
           setTriggerFetchFigures((prev) => prev + 1);
           setMoveCount((prev) => prev + 1);
           setTimeLeft(120);
@@ -511,15 +498,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         throw new Error("Error al obtener las cartas de figura");
       }
 
-
-      
       const data = await response.json();
       console.log(`Respuesta completa para el jugador ${userId}:`, data);
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
-      if (data.count === 0) {
-        // Si count es 0, establecemos al jugador como ganador
-        setWinner("x");
-      }
       return data.cards || [];
     } catch (error) {
       console.error(error);
@@ -572,7 +553,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             console.log(
               `No se encontraron cartas para el jugador ${playerUserId}`
             );
-            setWinner(player.userName);
           }
         } else {
           console.log(`Posición ${i} no tiene jugador.`);
@@ -582,6 +562,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       setPlayersReady(true);
       setFigureCards(cardsMap);
       console.log("Cartas mapeadas correctamente:", cardsMap);
+      console.log("Cartas de los jugadores:", cardsMap);
     } catch (error) {
       console.error(error);
     }
@@ -754,9 +735,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
-      <button className="reset-button" onClick={handleResetFigureCards}>
-        Resetear Cartas de Figura
-      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
@@ -798,7 +776,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         <div className="leave-notification"> {leaveMessage} </div>
       )}
       {/* Mostrar mensaje de ganador */}
-      {(winnerMessage || winner) && (<div className="winner-notification">{winner ? `El ganador es el usuario "${winner}"` : winnerMessage}
+      {winnerMessage && (<div className="winner-notification">{winnerMessage}
         <button
           className="ok-button" onClick={handleLeaveGame}>OK
         </button>
@@ -865,7 +843,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             </button>
             <div className="card-movedata">
               <img
-                onClick={() => handleCardClick(movementCards[0])}
+                onClick={() => handleCardClickB(movementCards[0])}
                 src={`./src/designs/${movementCards[0].mov_type}.svg`}
                 alt={movementCards[0].mov_type}
               />
@@ -875,7 +853,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 <div
                   key={card.id}
                   className="card-movedata"
-                  onClick={() => myTurn && handleCardClick(card)}
+                  onClick={() => myTurn && handleCardClickB(card)}
                 >
                   <img
                     src={`./src/designs/${card.mov_type}.svg`}
@@ -902,7 +880,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                   highlightedTokens.includes(token.id) ? "high" : ""
                 } `}
                 onClick={() => {
-                  if (myTurn) {
+                  if (myTurn && selectedMovement) {
                     handleTokenClickHigh(token.id);
                   }
                   if (myTurn && selectedFigure) {
