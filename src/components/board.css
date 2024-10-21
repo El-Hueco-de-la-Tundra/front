@@ -266,42 +266,42 @@
 
 .player-name-left {
   position: absolute;
-  bottom: 30%;
+  bottom: 28%;
   left: 9.5%;
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 15px;
-  border-radius: 15px;
+  padding: 0px 15px;
+  border-radius: 10px;
   color: white;
   font-size: 18px;
   text-align: center;
   width: 110px;  /* Asegura el tamaño suficiente para el nombre */
-  z-index: 101;
+  z-index: 110;
 }
 
 /* Nombre del jugador en la derecha */
 .player-name-right {
   position: absolute;
-  bottom: 30%;
+  bottom: 28%;
   right: 8%;
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 15px;
-  border-radius: 15px;
+  padding: 0px 15px;
+  border-radius: 10px;
   color: white;
   font-size: 18px;
   text-align: center;
   width: 110px;
-  z-index: 101;
+  z-index: 10;
 }
 
 /* Nombre del jugador en la parte superior */
 .player-name-top {
   position: absolute;
-  top: 0%;
+  top: 14.5%;
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 20px;
-  border-radius: 15px;
+  padding: 0px 20px;
+  border-radius: 10px;
   color: white;
   font-size: 18px;
   text-align: center;
@@ -426,19 +426,21 @@
   bottom: 2%; /* Cercano a la parte inferior */
   left: 75.6%; /* Alineado al centro */
   display: flex;
+  align-items: center;
   gap: 58px;
 }
 .card-movedata {
   background-color: rgba(255, 255, 255, 0.851);
-  padding: 15px;
+  padding: 10px;
   border-radius: 10px;
   text-align: center;
+  align-items: center;
   width: 130px;
   height: 170px;
   cursor: pointer;
 }
 .card-movedata img {
-  width: 130px;
+  width: 115px;
   height: auto;
   pointer-events: auto; /* Asegura que los eventos de puntero están habilitados */
 }
@@ -448,7 +450,7 @@
   right: 205px;
   display: flex;
   flex-direction: column-reverse;
-  align-items: flex-end;
+  align-items: center;
   z-index: 10; /* Asegura que este contenedor está por encima de otros elementos */
 }
 /* Carta de movimiento al lado de las cartas en la parte inferior */
@@ -473,8 +475,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 300px; /* Ajusta según necesites */
-  padding: 20px;
+  width: 200px; /* Ajusta según necesites */
+  padding: 0px;
 }
 
 .turn-info {
@@ -482,24 +484,30 @@
   bottom: 3%;
   left: 3%;
   background-color: rgba(255, 255, 255, 0.84); /* Fondo translúcido */
-  padding: 10px 10px;
+  padding: 0px ;
   width: 310px;
+  height: 190px;
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   text-align: center;
   font-size: 18px;
+
 }
 
 .turn-info p {
-  margin: 0px 0 0;
+  position: relative;
+  top:-10px;
+  line-height: 0.9; /* Ajustar según necesites */
+  margin: 10px 10px 10px;
   font-size: 20px;
+  bottom: 100px;
   color: #666;
 }
 
 .cancel-move-button {
   position: absolute;
-  top: 10%;
-  left: 5%;
+  top: 147px;
+  left: 350px;
   background-color: rgba(255, 255, 255, 0.85);
   border: 0;
   padding: 15px 25px;

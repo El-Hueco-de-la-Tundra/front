@@ -931,7 +931,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       <div className="info-container">
         {gameStarted && turnInfo && Object.keys(turnInfo).length > 0 && (
           <div className="turn-info">
-            <h2>Informacion de Turno:</h2>
+            <h2>Informacion de Turno</h2>
             <p>Tiempo restante: {formatTime(timeLeft)}</p>
             <p>
               Color Bloqueado:{" "}
