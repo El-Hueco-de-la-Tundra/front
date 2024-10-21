@@ -398,7 +398,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           break;
 
         case "status_winner":
-          setWinnerMessage(`¡El jugador ${userId} ha ganado la partida!`);
+          setWinnerMessage(`¡Ganaste la partida!`);
           break;
 
         case "info":
