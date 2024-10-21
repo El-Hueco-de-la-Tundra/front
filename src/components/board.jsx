@@ -60,7 +60,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     );
 
     if (currentUserIndex === -1) {
-      console.error(
+      console.log(
         `No se encontró al usuario actual (ID: ${normalizedCurrentUserId}) en la lista de jugadores. Jugadores recibidos:`,
         players
       );
@@ -141,8 +141,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error al usar carta figura:", errorData.detail);
-        alert(`Error: ${errorData.detail}`);
+        console.log("Error al usar carta figura:", errorData.detail);
         return;
       }
 
@@ -151,7 +150,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
       // Refrescar las cartas figura después de usar una
     } catch (error) {
-      console.error("Error al usar la carta figura:", error);
+      console.log("Error al usar la carta figura:", error);
     }
   };
 
@@ -180,7 +179,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       );
       setTokensh(allTokensh);
     } else {
-      console.error("No se recibieron figuras o no es un array");
+      console.log("No se recibieron figuras o no es un array");
       setTokensh([]);
     }
   };
@@ -205,7 +204,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       const tokensForSelectedFigure = selectedFigureData.tokens.flat();
       setTokensh(tokensForSelectedFigure); // Resaltamos solo los tokens de esa figura
     } else {
-      console.error(
+      console.log(
         "La figura seleccionada no tiene tokens definidos o no es un array"
       );
     }
@@ -286,7 +285,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
       setGameInfo(data); // Guarda información del juego
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -445,7 +444,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
     // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
-      console.error("Error en el WebSocket:", error);
+      console.log("Error en el WebSocket:", error);
     };
 
     // Cerrar la conexión WebSocket
@@ -523,7 +522,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       }
       return data.cards || [];
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return [];
     }
   };
@@ -584,7 +583,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       setFigureCards(cardsMap);
       console.log("Cartas mapeadas correctamente:", cardsMap);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -630,7 +629,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     const tokensData = await fetchGameTokens();
 
     if (!tokensData || tokensData.length === 0) {
-      console.error(
+      console.log(
         "No se recibieron fichas del servidor o el array está vacío"
       );
       return;
@@ -681,11 +680,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       setTokensh([]);
       handleFiguresFetched();
     } else if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
-      console.error(
+      console.log(
         "El WebSocket aún se está conectando. Intenta de nuevo en unos momentos."
       );
     } else {
-      console.error(
+      console.log(
         "El WebSocket no está disponible. Estado:",
         ws.current ? ws.current.readyState : "desconocido"
       );
