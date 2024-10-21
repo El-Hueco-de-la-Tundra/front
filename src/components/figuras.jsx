@@ -20,7 +20,7 @@ const Figuras = ({ gameId, onFiguresFetched, triggerFetch }) => {
       console.log('FIGURAS OBTENIDAS');
     } catch (err) {
       setError(err.message);
-      console.error('Error al obtener las figuras:', err);
+      console.log('Error al obtener las figuras:', err);
     }
   };
 
