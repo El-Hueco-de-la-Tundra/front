@@ -274,7 +274,7 @@
   color: white;
   font-size: 18px;
   text-align: center;
-  width: 165px;  /* Asegura el tamaño suficiente para el nombre */
+  width: 110px;  /* Asegura el tamaño suficiente para el nombre */
   z-index: 101;
 }
 
@@ -289,7 +289,7 @@
   color: white;
   font-size: 18px;
   text-align: center;
-  width: 165px;
+  width: 110px;
   z-index: 101;
 }
 
@@ -305,7 +305,7 @@
   color: white;
   font-size: 18px;
   text-align: center;
-  width: 250px;
+  width: 110px;
   z-index: 101;
 }
 /* Posicionar cartas alrededor del tablero */
@@ -314,20 +314,21 @@
 .card-left {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.851);
+  align-items: center;
   padding: 15px;
   border-radius: 15px;
-  width: 165px;
-  height: 540px;
+  width: 110px;
+  height: 450px;
   top: 11%; /* Alineado en la parte superior */
   left: 9.5%; /* Pegado al lado izquierdo */
   display: flex;
   flex-direction: column; /* Para organizar las cartas en columna */
-  gap: 7px; /* Espacio entre las cartas */
+  gap: 40px; /* Espacio entre las cartas */
 }
 
 .card-leftdata {
   background-color: rgba(255, 255, 255, 0);
-  padding: 20px;
+  padding: 0px;
   border-radius: 10px;
   text-align: center;
   width: 125px;
@@ -336,21 +337,22 @@
 /* Cartas en la derecha */
 .card-right {
   position: absolute;
+  align-items: center;
   background-color: rgba(255, 255, 255, 0.851);
   padding: 15px;
-  width: 165px;
-  height: 540px;
+  width: 110px;
+  height: 450px;
   border-radius: 15px;
   top: 11%; /* Alineado en la parte superior */
   right: 8%; /* Pegado al lado izquierdo */
   display: flex;
   flex-direction: column; /* Para organizar las cartas en columna */
-  gap: 7px;
+  gap: 40px;
 }
 
 .card-rightdata {
   background-color: rgba(255, 255, 255, 0);
-  padding: 20px;
+  padding: 0px;
   border-radius: 10px;
   text-align: center;
   width: 125px;
@@ -359,16 +361,17 @@
 /* Cartas en la parte superior */
 .card-top {
   position: absolute;
+  align-items: center;
   background-color: rgba(255, 255, 255, 0.851);
   padding: 15px;
-  width: 510px;
-  height: 165px;
+  width: 450px;
+  height: 110px;
   border-radius: 15px;
   top: 0; /* Cercano a la parte superior */
   left: 50%; /* Alineado al centro */
   transform: translateX(-50%);
   display: flex;
-  gap: 7px; /* Espacio entre las cartas */
+  gap: 0px; /* Espacio entre las cartas */
 }
 
 .card-topdata {
@@ -384,11 +387,11 @@
 .card-bottom {
   position: absolute;
   background-color: rgba(255, 255, 255, 0.851);
-  padding: 15px;
+  padding: 10px;
   width: 510px;
   height: 165px;
   border-radius: 15px;
-  bottom: 0; /* Cercano a la parte inferior */
+  bottom: 0.5%; /* Cercano a la parte inferior */
   left: 50%; /* Alineado al centro */
   transform: translateX(-50%);
   display: flex;
@@ -411,6 +414,7 @@
 }
 
 .card-container.card-bottom {
+  align-items: center;
   display: flex; /* Distribuye las cartas horizontalmente */
   justify-content: space-between; /* Espacio entre las cartas */
   gap: 40px; /* Espaciado entre las cartas */
@@ -419,7 +423,7 @@
 
 .card-bottommove {
   position: absolute;
-  bottom: 1%; /* Cercano a la parte inferior */
+  bottom: 2%; /* Cercano a la parte inferior */
   left: 75.6%; /* Alineado al centro */
   display: flex;
   gap: 58px;

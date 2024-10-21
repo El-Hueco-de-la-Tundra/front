@@ -892,7 +892,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 }}
               />
             ))
-          : gameStarted && <p>No hay fichas para mostrar.</p>}
+          : gameStarted}
       </div>
 
       {/* Información del turno y cartas */}
