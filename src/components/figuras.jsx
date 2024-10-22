@@ -14,17 +14,13 @@ const Figuras = ({ gameId, onFiguresFetched, triggerFetch }) => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Error al obtener las figuras');
-      }
-
       const data = await response.json();
       setFigures(data.figures || []);  // Guardamos las figuras en el estado
       onFiguresFetched(data.figures || []);  // Pasamos las figuras obtenidas al padre (Board)
       console.log('FIGURAS OBTENIDAS');
     } catch (err) {
       setError(err.message);
-      console.error('Error al obtener las figuras:', err);
+      console.log('Error al obtener las figuras:', err);
     }
   };
 

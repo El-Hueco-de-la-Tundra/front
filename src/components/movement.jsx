@@ -34,7 +34,35 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
     }
   };
 
+  const handleUndoMove = async (gameId, playerId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/undo_last_movement`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          game_id: gameId,
+          player_id: playerId,
+        }),
+      });
 
+      if (response.status === 404) {
+        // Si es un 404, significa que no es valido el movimiento.
+        console.warn('Ultimo movimiento no encontrado.');
+        return;  // Salimos del bloque para no lanzar un error
+      }
+
+      if (!response.ok) {
+        throw new Error('Error al cancelar el último movimiento');
+      }
+
+      const data = await response.json();
+      console.log('Último movimiento cancelado:', data);
+    } catch (error) {
+      console.error('Error al cancelar el último movimiento:', error);
+    }
+  };
 
   // Función para seleccionar una carta de movimiento
   const handleCardClick = (card) => {
@@ -91,9 +119,11 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
         }),
       });
 
-      if (response.status === 404) {
+      if (response.status === 400) {
         // Si es un 404, significa que no es valido el movimiento.
         console.warn('Movimiento invalido.');
+        setSelectedCard(null);
+        setSelectedTokens([]);
         return;  // Salimos del bloque para no lanzar un error
       }
 
@@ -108,6 +138,8 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
     } catch (error) {
       console.error('Error al ejecutar el movimiento:', error);
     }
+    setSelectedCard(null);
+    setSelectedTokens([]);
   };
 
   return {
@@ -117,6 +149,7 @@ const Movement = ({ gameId, userId, movementCards, onMoveCompleted }) => {
     selectedCard,
     selectedTokens,
     fetchGameTokens,
+    handleUndoMove,
   };
 };
 
