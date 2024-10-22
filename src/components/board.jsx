@@ -48,7 +48,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [winner, setWinner] = useState("");
   const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
 
-  
+
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
       console.warn("Lista de jugadores vacía o indefinida.");
@@ -616,7 +616,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: "leave", gameId, userId }));
       handleEndTurn();
-      setMyTurn(False);
       setTimeout(() => {
         ws.current.close();
         onLeaveGame();
@@ -683,6 +682,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       // Solo enviar si el WebSocket está en estado OPEN
       ws.current.send(JSON.stringify({ type: "endturn", gameId, userId }));
       console.log("Turno finalizado, mensaje enviado.");
+      setMyTurn(false);
       fetchGameInfo();
       fetchTurnInfo();
       fetchUserMovementCards().then((cards) => {
@@ -818,7 +818,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 Iniciar Partida
               </button>
             )}
-            <button className="leave-button" onClick={handleLeaveGame}>
+            <button className="leave-button" onClick={handleLeaveGameAttempt}>
               Abandonar Partida
             </button>
           </div>)}
