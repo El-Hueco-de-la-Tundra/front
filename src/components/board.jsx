@@ -46,7 +46,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [gameCancel, setGameCancel] = useState(false);
   const [playersReady, setPlayersReady] = useState(false);
   const [winner, setWinner] = useState("");
+  const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
 
+  
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
       console.warn("Lista de jugadores vacía o indefinida.");
@@ -240,7 +242,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   };
 
   const handleCardClickB = async (card) => {
-    if (selectedMovement){
+    if (selectedMovement) {
       setSelectedMovement(false);
       return;
     } else {
@@ -269,7 +271,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       setlengthPlayers(validPlayers.length);
 
       console.log("lengthjugadores:", lengthplayers);
-      console.log("MINjugadores:",minplayers)
+      console.log("MINjugadores:", minplayers)
       const playersFromServer = data.users.players.map((playerObj) => {
         const [userId, userName] = Object.entries(playerObj)[0];
         return { userId: parseInt(userId), userName };
@@ -395,7 +397,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_leave":
           console.log("Recibido mensaje status_leave:", message);
           const leavingPlayerId = message.user_left;
-          
+
           fetchGameInfo();
           setLeaveMessage(
             `Jugador ${leavingPlayerId} ha abandonado la partida`
@@ -439,10 +441,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           });
           break;
 
-          case 'status_cancel_game':
-            console.log("Host abandono la partida");
-            setGameCancel(true);
-            break;
+        case 'status_cancel_game':
+          console.log("Host abandono la partida");
+          setGameCancel(true);
+          break;
 
         default:
           console.warn("Evento no reconocido:", message.type);
@@ -520,7 +522,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         throw new Error("Error al obtener las cartas de figura");
       }
 
-      
+
       const data = await response.json();
       console.log(`Respuesta completa para el jugador ${userId}:`, data);
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
@@ -613,7 +615,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const handleLeaveGame = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: "leave", gameId, userId }));
-
+      handleEndTurn();
+      setMyTurn(False);
       setTimeout(() => {
         ws.current.close();
         onLeaveGame();
@@ -751,6 +754,18 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     };
   }, [timeLeft, gameStarted, myTurn]);
 
+  // Función para abandonar la partida
+  const handleLeaveGameAttempt = () => {
+    if (myTurn) {
+      setWarningMessage("No puedes abandonar la partida hasta que termines tu turno.");
+      setTimeout(() => {
+        setWarningMessage(""); // Limpiar el mensaje después de 3 segundos
+      }, 3000);
+    } else {
+      handleLeaveGame();
+    }
+  };
+
   // Formatear tiempo
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -760,6 +775,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   return (
     <div className="game-page">
+        {warningMessage && (
+        <div className="warning-message">
+          {warningMessage}
+        </div>
+      )}
       {/* Component Figuras para manejar la lógica */}
       <Figuras
         gameId={gameId}
@@ -796,7 +816,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             {isHost && lengthplayers >= minplayers && (
               <button className="start-game-button" onClick={handleStartGame} >
                 Iniciar Partida
-                </button>
+              </button>
             )}
             <button className="leave-button" onClick={handleLeaveGame}>
               Abandonar Partida
@@ -853,9 +873,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             {figureCards.bottom.map((card) => (
               <div
                 key={card.id}
-                className={`card-bottomdata ${
-                  selectedFigure?.id === card.id ? "selected" : ""
-                }`}
+                className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                  }`}
                 onClick={() => handleFigureSelected(card)}
               >
                 <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
@@ -903,29 +922,28 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       >
         {tokens.length > 0
           ? tokens.map((token) => (
-              <div
-                key={token.id}
-                className={`
+            <div
+              key={token.id}
+              className={`
                 token 
                 ${token.color} 
                 ${getMovementClass(token)} 
-                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${
-                  highlightedTokens.includes(token.id) ? "high" : ""
+                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${highlightedTokens.includes(token.id) ? "high" : ""
                 } `}
-                onClick={() => {
-                  if (myTurn && selectedMovement) {
-                    handleTokenClickHigh(token.id);
-                  }
-                  if (myTurn && selectedFigure) {
-                    handleUseFigure(token);
-                  }
-                }}
-                style={{
-                  gridColumn: token.position.gridColumn,
-                  gridRow: token.position.gridRow,
-                }}
-              />
-            ))
+              onClick={() => {
+                if (myTurn && selectedMovement) {
+                  handleTokenClickHigh(token.id);
+                }
+                if (myTurn && selectedFigure) {
+                  handleUseFigure(token);
+                }
+              }}
+              style={{
+                gridColumn: token.position.gridColumn,
+                gridRow: token.position.gridRow,
+              }}
+            />
+          ))
           : gameStarted}
       </div>
 
@@ -946,8 +964,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
               {myTurn
                 ? "Tu turno"
                 : turnInfo?.actualPlayer_id
-                ? `${turnInfo.actualPlayer_name}`
-                : "Desconocido"}
+                  ? `${turnInfo.actualPlayer_name}`
+                  : "Desconocido"}
             </p>
             <p>
               Siguiente Jugador:{" "}
@@ -970,10 +988,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             ⟲
           </button>
         )}
-
-        <button className="leave-button" onClick={handleLeaveGame}>
-          Abandonar Partida
-        </button>
+        
+        <button className="leave-button" onClick={handleLeaveGameAttempt}>
+        Abandonar Partida
+      </button>
         {myTurn && (
           <button
             className="turno-finalizado"
@@ -983,6 +1001,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             Finalizar Turno
           </button>
         )}
+        
       </div>
     </div>
   );
