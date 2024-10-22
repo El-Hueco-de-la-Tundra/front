@@ -395,6 +395,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_leave":
           console.log("Recibido mensaje status_leave:", message);
           const leavingPlayerId = message.user_left;
+          
           fetchGameInfo();
           setLeaveMessage(
             `Jugador ${leavingPlayerId} ha abandonado la partida`
@@ -680,6 +681,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       ws.current.send(JSON.stringify({ type: "endturn", gameId, userId }));
       console.log("Turno finalizado, mensaje enviado.");
       fetchGameInfo();
+      fetchTurnInfo();
       fetchUserMovementCards().then((cards) => {
         setMovementCards(cards);
       });
