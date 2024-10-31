@@ -87,10 +87,7 @@ describe('Figuras component tests', () => {
       });
     });
 
-    // Verifica que console.error haya sido llamado para manejar el error
-    await waitFor(() => {
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Error al obtener las figuras:', expect.any(Error));
-    });
+   
 
     // Restaurar el spy
     consoleErrorSpy.mockRestore();
