@@ -254,7 +254,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 />
                 Pública
               </label>
-              {/* <label>
+              <label>
                 <input
                   type="radio"
                   name="gameType"
@@ -263,11 +263,11 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                   onChange={handleGameTypeChange}
                 />
                 Privada
-              </label> */}
+              </label>
             </div>
           </div>
 
-          {/* {gameType === 'private' && (
+          {gameType === 'private' && (
             <div className="form-group">
               <label htmlFor="password">Contraseña</label>
               <div className="input-container">
@@ -282,7 +282,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
                 />
               </div>
             </div>
-          )}  */}
+          )} 
           <button type="submit" className="custom-button1" disabled={loading} >Crear</button>
 
           <button className="back-button" onClick={onGoBack} disabled={loading}>Volver</button>

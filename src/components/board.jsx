@@ -776,7 +776,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   return (
     <div className="game-page">
-        {warningMessage && (
+      {warningMessage && (
         <div className="warning-message">
           {warningMessage}
         </div>
@@ -846,8 +846,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           {reorderedPlayers[1] && (
             <div className="card-container card-left">
               {figureCards.left.map((card) => (
-                <div key={card.id} className="card-leftdata">
-                  <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                  }`}
+                  onClick={() => handleFigureSelected(card)}>
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+ />
                 </div>
               ))}
             </div>
@@ -855,8 +858,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           {reorderedPlayers[2] && (
             <div className="card-container card-right">
               {figureCards.right.map((card) => (
-                <div key={card.id} className="card-rightdata">
-                  <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                  }`}
+                  onClick={() => handleFigureSelected(card)}>
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+                  />
                 </div>
               ))}
             </div>
@@ -864,8 +870,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           {reorderedPlayers[3] && (
             <div className="card-container card-top">
               {figureCards.top.map((card) => (
-                <div key={card.id} className="card-topdata">
-                  <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                  }`}
+                  onClick={() => handleFigureSelected(card)}>
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+                  />
                 </div>
               ))}
             </div>
@@ -878,7 +887,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                   }`}
                 onClick={() => handleFigureSelected(card)}
               >
-                <img src={`./src/designs/${card.type}.svg`} alt={card.type} />
+                <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`} />
               </div>
             ))}
           </div>
@@ -989,10 +998,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             ⟲
           </button>
         )}
-        
+
         <button className="leave-button" onClick={handleLeaveGameAttempt}>
-        Abandonar Partida
-      </button>
+          Abandonar Partida
+        </button>
         {myTurn && (
           <button
             className="turno-finalizado"
@@ -1002,7 +1011,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             Finalizar Turno
           </button>
         )}
-        
+
       </div>
     </div>
   );
