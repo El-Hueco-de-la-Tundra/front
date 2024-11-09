@@ -399,6 +399,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           const leavingPlayerId = message.user_left;
 
           fetchGameInfo();
+          fetchTurnInfo();
           setLeaveMessage(
             `Jugador ${leavingPlayerId} ha abandonado la partida`
           );
