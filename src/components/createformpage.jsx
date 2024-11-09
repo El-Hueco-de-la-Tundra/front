@@ -81,7 +81,9 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
         minPlayers: parseInt(minPlayers, 10),
       },
       player_model_data: {
-        name: userName  // Nombre del jugador
+        name: userName,  // Nombre del jugador
+        session_id: 1 //Cambiar agregar endpoint
+
       }
     };
 
