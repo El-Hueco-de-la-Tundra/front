@@ -11,7 +11,42 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   const [filterName, setFilterName] = useState(""); // Estado para filtrar por nombre
   const [filterPlayers, setFilterPlayers] = useState("");
   const [selectedTab, setSelectedTab] = useState("disponibles");
+  const [notify, setNotify] = useState("");
   const ws = useRef(null); // Referencia a WebSocket
+  const hasConnected = useRef(false);
+  const session_id = 1;
+
+  const connectWebSocket = async () => {
+    if (!hasConnected.current || ws.current.readyState === WebSocket.CLOSED) {
+      ws.current = new WebSocket(`ws://localhost:8000/ws/`);
+      hasConnected.current = true; // Marcamos que ya está conectado
+
+      ws.current.onopen = () => {
+        console.log("Conectado al WebSocket");
+      };
+    }
+    // Recibir mensajes del servidor
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log("Mensaje recibido del servidor:", message);
+
+      // Manejar diferentes tipos de mensajes del WebSocket
+      switch (message.type) {
+        case "status_update_games":
+          handleListGames();
+          handleListActiveGames(session_id);
+          break;
+        default:
+          console.warn("Evento no reconocido");
+      }
+    };
+  };
+
+  useEffect(() => {
+    if (!hasConnected.current) {
+      connectWebSocket();
+    }
+  });
 
   const fetchGamesByName = async () => {
     try {
@@ -121,7 +156,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     }
   };
 
-  const handleListActiveGames = async () => {
+  const handleListActiveGames = async (sessionId) => {
     setLoading(true);
     setError(null);
 
@@ -137,7 +172,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
       if (response.status === 404) {
         // Si es un 404, significa que no hay partidas disponibles, pero sigue siendo un caso esperado
         console.warn("No se encontraron partidas activas.");
-        setPartidas([]); // Muestra el listado vacío
+        setActiveGames([]); // Muestra el listado vacío
         setLoading(false);
         return; // Salimos del bloque para no lanzar un error
       }
@@ -194,14 +229,27 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
         console.log("Entrando al tablero...");
         console.log("User ID: %d Game ID: %d", userId, gameId);
         onJoinGame(userId, gameId); // Cambiar al frame del tablero
+      } else if (response.status === 401) {
+        // Error de partida llena
+        console.error("Error 401: Contraseña incorrecta.");
+        setNotify("Contraseña Incorrecta.");
+        setTimeout(() => {
+          setNotify(""); // Limpiar el mensaje después de 3 segundos
+        }, 3000);
       } else if (response.status === 403) {
         // Error de partida llena
         console.error("Error 403: El juego está lleno.");
-        throw new Error("El juego está lleno. No puedes unirte.");
+        setNotify("El juego esta lleno.");
+        setTimeout(() => {
+          setNotify(""); // Limpiar el mensaje después de 3 segundos
+        }, 3000);
       } else if (response.status === 404) {
         // Error de juego no encontrado
         console.error("Error 404: El juego no fue encontrado.");
-        throw new Error("El juego no fue encontrado.");
+        setNotify("El juego no fue encontrado.");
+        setTimeout(() => {
+          setNotify(""); // Limpiar el mensaje después de 3 segundos
+        }, 3000);
       } else if (response.status === 422) {
         // Error de validación
         const errorData = await response.json();
@@ -215,10 +263,9 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     } catch (error) {
       // Mostrar el mensaje de error en la interfaz y detener el flujo
       console.error("Error capturado:", error.message);
-      //setFeedbackMessage(error.message);
-      return; // Asegurarse de retornar aquí para detener completamente el flujo
+      return;
     } finally {
-      setJoining(null); // Restablecemos el estado de "unirse"
+      setJoining(null);
     }
   };
 
@@ -226,6 +273,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   useEffect(() => {
     if (userNameSubmitted && userName.trim()) {
       handleListGames();
+      handleListActiveGames(session_id);
     }
   }, [userNameSubmitted, userName]);
 
@@ -265,78 +313,81 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   }
 
   return (
-    <div className="partidas-container">
+    <div className="main1-container">
       <div className="tabs">
         <button
           className={selectedTab === "disponibles" ? "active-tab" : ""}
-          onClick={() => setSelectedTab("disponibles")}
+          onClick={() => {setSelectedTab("disponibles") && handleListGames}}
         >
           Disponibles
         </button>
         <button
           className={selectedTab === "activas" ? "active-tab" : ""}
-          onClick={() => setSelectedTab("activas") && handleListActiveGames()}
+          onClick={() => {setSelectedTab("activas") && handleListActiveGames(session_id)}}
         >
           Activas
         </button>
       </div>
-      <div className="list-title">
-        <h1>
-          {selectedTab === "disponibles"
-            ? "Lista de Partidas Disponibles"
-            : "Partidas Activas"}
-        </h1>
-      </div>
-      {selectedTab === "disponibles" && (
-        <div className="filters">
-          <input
-            type="text"
-            placeholder="Buscar por nombre"
-            value={filterName}
-            onChange={(e) => setFilterName(e.target.value)} // Actualiza el estado del filtro de nombre
-          />
-
-          <input
-            type="number"
-            placeholder="Buscar por jugadores"
-            value={filterPlayers}
-            onChange={(e) => setFilterPlayers(e.target.value)} // Actualiza el estado del filtro de jugadores
-          />
-          <button onClick={handleListGames}>Buscar</button>
+      <div className="partidas-container">
+        {notify && <div className="notify-message">{notify}</div>}
+        <div className="list-title">
+          <h1>
+            {selectedTab === "disponibles"
+              ? "Lista de Partidas Disponibles"
+              : "Lista de Partidas Activas"}
+          </h1>
         </div>
-      )}
-      <ul className="partidas-list">
-        {partidas.map((partida) => (
-          <li key={partida.id}>
-            <h3>{partida.name}</h3> {/* Muestra el nombre de la partida */}
-            <p>
-              Min/Max: {partida.users.min} - {partida.users.max}
-            </p>{" "}
-            {/* Muestra el rango de jugadores */}
-            <p>Jugadores: {partida.users.players.length}</p>
-            <p>Partida {partida.is_private ? "Privada" : "Pública"}</p>{" "}
-            {/* Muestra si es privada o pública */}
-            {partida.is_private && (
-              <input
-                type="password"
-                placeholder="Contraseña"
-                onChange={(e) => (partida.password = e.target.value)} // Guardar la contraseña temporalmente
-              />
-            )}
-            <button
-              className="join-button"
-              onClick={() => handleJoinGame(partida.id, partida.password)} // Pasa el gameId y password (si es privada)
-              disabled={joining === partida.id} // Deshabilita el botón si ya te estás uniendo a esa partida
-            >
-              {joining === partida.id ? "Uniéndote..." : "Unirse"}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <div className="back-button-container">
-        <button className="back-button1" onClick={onBack}>
-          Volver
-        </button>
+        {selectedTab === "disponibles" && (
+          <div className="filters">
+            <input
+              type="text"
+              placeholder="Buscar por nombre"
+              value={filterName}
+              onChange={(e) => setFilterName(e.target.value)} // Actualiza el estado del filtro de nombre
+            />
+
+            <input
+              type="number"
+              placeholder="Buscar por jugadores"
+              value={filterPlayers}
+              onChange={(e) => setFilterPlayers(e.target.value)} // Actualiza el estado del filtro de jugadores
+            />
+            <button onClick={handleListGames}>Buscar</button>
+          </div>
+        )}
+        <ul className="partidas-list">
+          {(selectedTab === "disponibles" ? partidas : activeGames).map((partida) => (
+            <li key={partida.id}>
+              <h3>{partida.name}</h3> {/* Muestra el nombre de la partida */}
+              <p>
+                Min/Max: {partida.users.min} - {partida.users.max}
+              </p>{" "}
+              {/* Muestra el rango de jugadores */}
+              <p>Jugadores: {partida.users.players.length}</p>
+              <p>Partida {partida.is_private ? "Privada" : "Pública"}</p>{" "}
+              {/* Muestra si es privada o pública */}
+              {partida.is_private && (
+                <input
+                  type="password"
+                  placeholder="Contraseña"
+                  onChange={(e) => (partida.password = e.target.value)} // Guardar la contraseña temporalmente
+                />
+              )}
+              <button
+                className="join-button"
+                onClick={() => handleJoinGame(partida.id, partida.password)} // Pasa el gameId y password (si es privada)
+                disabled={joining === partida.id} // Deshabilita el botón si ya te estás uniendo a esa partida
+              >
+                {joining === partida.id ? "Uniéndote..." : "Unirse"}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="back-button-container">
+          <button className="back-button1" onClick={onBack}>
+            Volver
+          </button>
+        </div>
       </div>
     </div>
   );
