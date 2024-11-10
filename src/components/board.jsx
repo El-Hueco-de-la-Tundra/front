@@ -861,7 +861,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
                   }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.png`}
                   />
                 </div>
               ))}
@@ -873,7 +873,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
                   }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.png`}
                   />
                 </div>
               ))}
@@ -887,7 +887,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                   }`}
                 onClick={() => handleFigureSelected(card)}
               >
-                <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`} />
+                <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.png`} />
               </div>
             ))}
           </div>
@@ -906,7 +906,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             <div className="card-movedata">
               <img
                 onClick={() => handleCardClickB(movementCards[0])}
-                src={`./src/designs/${movementCards[0].mov_type}.svg`}
+                src={`./src/designs/${movementCards[0].mov_type}.png`}
                 alt={movementCards[0].mov_type}
               />
             </div>
