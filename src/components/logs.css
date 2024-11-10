@@ -8,20 +8,20 @@
    }
    
    .log-toggle {
-     background-color: #6c757d00;
+     background-color: #ffffff00;
      color: white;
      border: none;
      border-radius: 50%;
      position: fixed;
-     top: 8px;
+     top: 5px;
      left: 60px;
      padding: 10px;
-     font-size: 16px;
+     font-size: 19px;
      cursor: pointer;
    }
    
    .log-toggle:hover {
-     background-color: #5a6268;
+     background-color: #ffffff;
    }
    
    /* Estilo de la ventana de logs en la misma posición que el chat */

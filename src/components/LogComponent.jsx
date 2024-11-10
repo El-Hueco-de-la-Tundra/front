@@ -4,12 +4,6 @@ import "./logs.css";
 const LogComponent = ({ gameId, logs, fetchLogs }) => {
   const [isLogOpen, setIsLogOpen] = useState(false);
 
-  useEffect(() => {
-    if (isLogOpen) {
-      fetchLogs();
-    }
-  }, [isLogOpen, fetchLogs]);
-
   return (
      <div className="log-container">
        <button className="log-toggle" onClick={() => setIsLogOpen(!isLogOpen)}>

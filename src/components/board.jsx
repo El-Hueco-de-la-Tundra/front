@@ -359,6 +359,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           if (!gameStarted) {
             console.log("Partida iniciada, obteniendo jugadores y cartas...");
             setGameStarted(true);
+            fetchLogs();
             fetchGameInfo();
             fetchAndSetTokens();
             fetchTurnInfo();
@@ -369,7 +370,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_join":
           if (!gameStarted) {
             fetchGameInfo();
+
           }
+          fetchLogs();
+
           break;
 
         case "status_used_figure":
@@ -379,6 +383,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchAllFigureCards(players);
           setTokens([]);
           fetchGameInfo();
+          fetchLogs();
+
           setTokensh([]);
           handleFiguresFetched();
           setTriggerFetchFigures((prev) => prev + 1);
@@ -388,6 +394,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           console.log("Movimiento detectado, actualizando fichas...");
           fetchAndSetTokens();
           setTokensh([]);
+          fetchLogs();
           handleFiguresFetched();
           setSelectedMovement(false)
           fetchUserMovementCards().then((cards) => {
@@ -403,7 +410,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_leave":
           console.log("Recibido mensaje status_leave:", message);
           const leavingPlayerId = message.user_left;
-
+          fetchLogs();
           fetchGameInfo();
           fetchTurnInfo();
           setLeaveMessage(
@@ -415,6 +422,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           break;
 
         case "status_winner":
+          fetchLogs();
           setWinnerMessage(`¡Ganaste la partida!`);
           break;
 
@@ -425,6 +433,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_endturn":
           fetchTurnInfo();
           fetchGameInfo();
+          fetchLogs();
           fetchAllFigureCards(players);
           fetchAndSetTokens();
           fetchUserMovementCards().then((cards) => {
@@ -443,6 +452,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_last_movement_undone":
           console.log("Movimiento cancelado, actualizando fichas...");
           fetchAndSetTokens();
+          fetchLogs();
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
@@ -455,6 +465,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case "chat_message":
           console.log("ENTROOOO");
+          fetchLogs();
           addMessage(message); 
           setHasUnreadMessages(true);
           break;
@@ -857,9 +868,6 @@ const addMessage = (newMessage) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
-      <button className="reset-button" onClick={handleResetFigureCards}>
-        Resetear Cartas de Figura
-      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
