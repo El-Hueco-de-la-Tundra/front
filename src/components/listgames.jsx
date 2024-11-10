@@ -115,6 +115,7 @@ const handleListGames = async () => {
           game_id: gameId,
           user_name: userName,
           password: password || "", // Contraseña (o vacío si no es privada)
+          session_id:2,
         }),
       });
   
