@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "./board.css";
 import Movement from "./movement";
 import Figuras from "./figuras";
+import Chat from "./chat";
+
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const { fetchGameTokens } = Movement({ gameId, userId });
@@ -47,6 +49,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [playersReady, setPlayersReady] = useState(false);
   const [winner, setWinner] = useState("");
   const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [messages, setMessages] = useState([]); // Estado para los mensajes
 
 
   const reorderPlayers = (players, currentUserId) => {
@@ -447,11 +451,20 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           setGameCancel(true);
           break;
 
+        case "chat_message":
+          console.log("ENTROOOO");
+          addMessage(message); 
+          setHasUnreadMessages(true);
+          break;
+
+
         default:
           console.warn("Evento no reconocido:", message.type);
           console.log(message);
       }
     };
+
+   
 
     // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
@@ -464,7 +477,33 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       hasConnected.current = false; // Permitimos reconexión en caso de cierre
     };
   };
+// -----------------Chat-----------------------//
+const addMessage = (newMessage) => {
+  if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
+    setMessages((prevMessages) => {
+      const isDuplicate = prevMessages.some((msg) => msg.id === newMessage.id);
+      if (!isDuplicate) {
+        return [...prevMessages, newMessage];
+      }
+      return prevMessages;
+    });
+  }
+};
 
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}`);
+      if (response.ok) {
+        const data = await response.json();
+        data.forEach((msg) => addMessage(msg)); // Agrega cada mensaje si aún no está en la lista
+      } else {
+        console.error("Failed to fetch messages");
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+//------------------------------------------------//
   useEffect(() => {
     if (players.length > 0 && gameStarted) {
       console.log("Players actualizados, obteniendo cartas...");
@@ -774,8 +813,14 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
+  const clearUnreadMessages = () => {
+    setHasUnreadMessages(false);
+  };
+
   return (
     <div className="game-page">
+      {/* Botón de chat */}
+      <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages}/>
       {warningMessage && (
         <div className="warning-message">
           {warningMessage}
@@ -849,8 +894,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
                 <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
                   }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
- />
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}/>
                 </div>
               ))}
             </div>
