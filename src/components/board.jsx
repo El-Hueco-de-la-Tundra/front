@@ -938,7 +938,7 @@ const addMessage = (newMessage) => {
                 <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
                   }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.png`}
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
                   />
                 </div>
               ))}
@@ -950,7 +950,7 @@ const addMessage = (newMessage) => {
                 <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
                   }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.png`}
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
                   />
                 </div>
               ))}
@@ -964,7 +964,7 @@ const addMessage = (newMessage) => {
                   }`}
                 onClick={() => handleFigureSelected(card)}
               >
-                <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.png`} />
+                <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`} />
               </div>
             ))}
           </div>
@@ -983,7 +983,7 @@ const addMessage = (newMessage) => {
             <div className="card-movedata">
               <img
                 onClick={() => handleCardClickB(movementCards[0])}
-                src={`./src/designs/${movementCards[0].mov_type}.png`}
+                src={`./src/designs/${movementCards[0].mov_type}.svg`}
                 alt={movementCards[0].mov_type}
               />
             </div>
