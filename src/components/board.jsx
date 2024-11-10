@@ -3,6 +3,7 @@ import "./board.css";
 import Movement from "./movement";
 import Figuras from "./figuras";
 import Chat from "./chat";
+import LogComponent from "./LogComponent";
 
 
 const BoardPage = ({ onLeaveGame, gameId, userId }) => {
@@ -51,6 +52,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [messages, setMessages] = useState([]); // Estado para los mensajes
+  const [logs, setLogs] = useState([]);
 
 
   const reorderPlayers = (players, currentUserId) => {
@@ -477,6 +479,23 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       hasConnected.current = false; // Permitimos reconexión en caso de cierre
     };
   };
+
+//------------------logs-----------------------//
+const fetchLogs = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/game/${gameId}/logs`);
+    if (response.ok) {
+      const data = await response.json();
+      setLogs(data);
+    } else {
+      console.error("Failed to fetch logs");
+    }
+  } catch (error) {
+    console.error("Error fetching logs:", error);
+  }
+};
+//--------------------------------------------//
+
 // -----------------Chat-----------------------//
 const addMessage = (newMessage) => {
   if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
@@ -504,6 +523,7 @@ const addMessage = (newMessage) => {
     }
   };
 //------------------------------------------------//
+
   useEffect(() => {
     if (players.length > 0 && gameStarted) {
       console.log("Players actualizados, obteniendo cartas...");
@@ -826,6 +846,11 @@ const addMessage = (newMessage) => {
           {warningMessage}
         </div>
       )}
+       <LogComponent
+        gameId={gameId}
+        logs={logs}
+        fetchLogs={fetchLogs} 
+      />
       {/* Component Figuras para manejar la lógica */}
       <Figuras
         gameId={gameId}

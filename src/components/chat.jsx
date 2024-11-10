@@ -64,8 +64,8 @@ const Chat = ({ gameId, userId, messages,fetchMessages, addMessage, hasUnreadMes
           <div className="chat-messages">
             {messages.map((msg, index) => (
               <div key={index} className="chat-message">
-                <strong>{msg.userId === userId ? "You" : msg.userName}:</strong> {msg.content}
-              </div>
+                <strong>{msg.name}:</strong> {msg.content || "Mensaje vacío"}
+                </div>
             ))}
           </div>
           <div className="chat-input">
