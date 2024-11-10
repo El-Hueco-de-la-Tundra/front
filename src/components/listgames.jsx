@@ -40,7 +40,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
           console.warn("Evento no reconocido");
       }
     };
-  };
+  }; 
 
   useEffect(() => {
     if (!hasConnected.current) {
