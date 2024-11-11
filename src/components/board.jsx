@@ -56,6 +56,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [messages, setMessages] = useState([]); // Estado para los mensajes
   const [logs, setLogs] = useState([]);
 
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+
+  const handleBeforeUnload = () => {
+    sessionStorage.setItem("gameId",gameId);
+    sessionStorage.setItem("userId_${gameId}", userId);
+  }
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  
+  // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
       console.warn("Lista de jugadores vacía o indefinida.");

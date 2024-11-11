@@ -14,12 +14,14 @@ import './components/successpage.css';
 function App() {
   const [gameId, setGameId] = useState(null); // Almacena el gameId
   const [userId, setUserId] = useState(null);
-  const [currentFrame, setCurrentFrame] = useState('initial');  // Controla en qué "frame" estamos
+  const [currentFrame, setCurrentFrame] = useState(sessionStorage.getItem('currentFrame') || 'initial');  // Controla en qué "frame" estamos
   const [fade, setFade] = useState(false); 
   const storedDictionary = JSON.parse(sessionStorage.getItem("myDictionary")) || {};
 
   useEffect(() => {
     let initialTimer, transitionTimer, boardTimer;
+
+    sessionStorage.setItem("currentFrame", currentFrame);
   
     if (currentFrame === 'initial') {
       initialTimer = setTimeout(() => {
