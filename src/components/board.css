@@ -161,10 +161,25 @@
   color: white;
 }
 
+.error-message {
+  color: red;
+  background-color: #f8d7da;
+  position: fixed;
+  top: 350px;
+  right:500px;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid red;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+
 .noleave-button {
-  position: absolute;
-  top: 2%;
-  left: 5%;
+  position: fixed;
+  top: 2px;
+  left: 150px;
   background-color: rgba(255, 255, 255, 0.851);
   border: 0px solid #ffffffd4;
   padding: 15px 25px;

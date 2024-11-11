@@ -6,7 +6,7 @@ import Chat from "./chat";
 import LogComponent from "./LogComponent";
 
 
-const BoardPage = ({ onLeaveGame, gameId, userId}) => {
+const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const { fetchGameTokens } = Movement({ gameId, userId });
   const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ["red", "blue", "green", "yellow"];
@@ -53,6 +53,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [messages, setMessages] = useState([]); // Estado para los mensajes
   const [logs, setLogs] = useState([]);
+  const [errorMessage, setErrorMessage] = useState(""); // Estado para el mensaje de error
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -154,17 +155,31 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
       if (!response.ok) {
         const errorData = await response.json();
         console.log("Error al usar carta figura:", errorData.detail);
+        setErrorMessage("Error al usar carta figura: " + errorData.detail); // Actualiza el estado de error
         return;
       }
 
       const data = await response.json();
       console.log("Carta figura usada con éxito:", data);
-
+      setErrorMessage("");
       // Refrescar las cartas figura después de usar una
     } catch (error) {
       console.log("Error al usar la carta figura:", error);
+      setErrorMessage("Error al usar carta figura: " + errorData.detail); // Actualiza el estado de error
+
     }
   };
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(""); // Limpia el mensaje de error después de 2 segundos
+      }, 3000);
+
+      // Limpia el temporizador si el componente se desmonta o errorMessage cambia
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
 
   // Función para usar la carta figura
   const handleUseFigure = (token) => {
@@ -426,6 +441,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
 
         case "status_winner":
           fetchLogs();
+          if (message.user_left != userId) {
+            setWinner(message.winner);
+          }          
           setWinnerMessage(`¡Ganaste la partida!`);
           break;
 
@@ -469,7 +487,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "chat_message":
           console.log("ENTROOOO");
           fetchLogs();
-          addMessage(message); 
+          addMessage(message);
           setHasUnreadMessages(true);
           break;
 
@@ -480,7 +498,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
       }
     };
 
-   
+
 
     // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
@@ -494,34 +512,34 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
     };
   };
 
-//------------------logs-----------------------//
-const fetchLogs = async () => {
-  try {
-    const response = await fetch(`http://localhost:8000/game/${gameId}/logs`);
-    if (response.ok) {
-      const data = await response.json();
-      setLogs(data);
-    } else {
-      console.error("Failed to fetch logs");
-    }
-  } catch (error) {
-    console.error("Error fetching logs:", error);
-  }
-};
-//--------------------------------------------//
-
-// -----------------Chat-----------------------//
-const addMessage = (newMessage) => {
-  if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
-    setMessages((prevMessages) => {
-      const isDuplicate = prevMessages.some((msg) => msg.id === newMessage.id);
-      if (!isDuplicate) {
-        return [...prevMessages, newMessage];
+  //------------------logs-----------------------//
+  const fetchLogs = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/logs`);
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data);
+      } else {
+        console.error("Failed to fetch logs");
       }
-      return prevMessages;
-    });
-  }
-};
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
+  //--------------------------------------------//
+
+  // -----------------Chat-----------------------//
+  const addMessage = (newMessage) => {
+    if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
+      setMessages((prevMessages) => {
+        const isDuplicate = prevMessages.some((msg) => msg.id === newMessage.id);
+        if (!isDuplicate) {
+          return [...prevMessages, newMessage];
+        }
+        return prevMessages;
+      });
+    }
+  };
 
   const fetchMessages = async () => {
     try {
@@ -536,7 +554,7 @@ const addMessage = (newMessage) => {
       console.error("Error fetching messages:", error);
     }
   };
-//------------------------------------------------//
+  //------------------------------------------------//
 
   useEffect(() => {
     if (players.length > 0 && gameStarted) {
@@ -599,9 +617,6 @@ const addMessage = (newMessage) => {
       const data = await response.json();
       console.log(`Respuesta completa para el jugador ${userId}:`, data);
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
-      if (data.count === 0) {
-        setWinner("x");
-      }
       return data.cards || [];
     } catch (error) {
       console.log(error);
@@ -653,8 +668,7 @@ const addMessage = (newMessage) => {
           } else {
             console.log(
               `No se encontraron cartas para el jugador ${playerUserId}`
-            );
-            setWinner(player.userName);
+            );            
           }
         } else {
           console.log(`Posición ${i} no tiene jugador.`);
@@ -840,7 +854,7 @@ const addMessage = (newMessage) => {
 
   const handleNoLeaveGame = () => {
     const confirm = window.confirm("Deseas volver al menu?");
-    if(confirm){
+    if (confirm) {
       onLeaveGame();
     }
   };
@@ -858,15 +872,21 @@ const addMessage = (newMessage) => {
 
   return (
     <div className="game-page">
+      {/* Error al querer bloquear una carta de un jugador bloqueado */}
+      {errorMessage && (
+        <div className="error-message">
+          {errorMessage}
+        </div>
+      )}
       {/* Botón de chat */}
-      <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages}/>
+      <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages} />
       {warningMessage && (
         <div className="warning-message">{warningMessage}</div>
       )}
-       <LogComponent
+      <LogComponent
         gameId={gameId}
         logs={logs}
-        fetchLogs={fetchLogs} 
+        fetchLogs={fetchLogs}
       />
       {/* Component Figuras para manejar la lógica */}
       <Figuras
@@ -874,6 +894,9 @@ const addMessage = (newMessage) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
+        <button className="reset-button" onClick={handleResetFigureCards}>
+        Resetear Cartas de Figura
+      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
@@ -940,11 +963,10 @@ const addMessage = (newMessage) => {
               {figureCards.left.map((card) => (
                 <div
                   key={card.id}
-                  className={`card-bottomdata ${
-                    selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                  className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                    }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}/>
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`} />
                 </div>
               ))}
             </div>
@@ -954,15 +976,13 @@ const addMessage = (newMessage) => {
               {figureCards.right.map((card) => (
                 <div
                   key={card.id}
-                  className={`card-bottomdata ${
-                    selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                  className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                    }`}
                   onClick={() => handleFigureSelected(card)}
                 >
                   <img
-                    src={`./src/designs/${
-                      card.blocked ? "Blocked" : card.type
-                    }.svg`}
+                    src={`./src/designs/${card.blocked ? "Blocked" : card.type
+                      }.svg`}
                   />
                 </div>
               ))}
@@ -973,15 +993,13 @@ const addMessage = (newMessage) => {
               {figureCards.top.map((card) => (
                 <div
                   key={card.id}
-                  className={`card-bottomdata ${
-                    selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                  className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                    }`}
                   onClick={() => handleFigureSelected(card)}
                 >
                   <img
-                    src={`./src/designs/${
-                      card.blocked ? "Blocked" : card.type
-                    }.svg`}
+                    src={`./src/designs/${card.blocked ? "Blocked" : card.type
+                      }.svg`}
                   />
                 </div>
               ))}
@@ -991,15 +1009,13 @@ const addMessage = (newMessage) => {
             {figureCards.bottom.map((card) => (
               <div
                 key={card.id}
-                className={`card-bottomdata ${
-                  selectedFigure?.id === card.id ? "selected" : ""
-                }`}
+                className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                  }`}
                 onClick={() => handleFigureSelected(card)}
               >
                 <img
-                  src={`./src/designs/${
-                    card.blocked ? "Blocked" : card.type
-                  }.svg`}
+                  src={`./src/designs/${card.blocked ? "Blocked" : card.type
+                    }.svg`}
                 />
               </div>
             ))}
@@ -1045,29 +1061,28 @@ const addMessage = (newMessage) => {
       >
         {tokens.length > 0
           ? tokens.map((token) => (
-              <div
-                key={token.id}
-                className={`
+            <div
+              key={token.id}
+              className={`
                 token 
                 ${token.color} 
                 ${getMovementClass(token)} 
-                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${
-                  highlightedTokens.includes(token.id) ? "high" : ""
+                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${highlightedTokens.includes(token.id) ? "high" : ""
                 } `}
-                onClick={() => {
-                  if (myTurn && selectedMovement) {
-                    handleTokenClickHigh(token.id);
-                  }
-                  if (myTurn && selectedFigure) {
-                    handleUseFigure(token);
-                  }
-                }}
-                style={{
-                  gridColumn: token.position.gridColumn,
-                  gridRow: token.position.gridRow
-                }}
-              />
-            ))
+              onClick={() => {
+                if (myTurn && selectedMovement) {
+                  handleTokenClickHigh(token.id);
+                }
+                if (myTurn && selectedFigure) {
+                  handleUseFigure(token);
+                }
+              }}
+              style={{
+                gridColumn: token.position.gridColumn,
+                gridRow: token.position.gridRow
+              }}
+            />
+          ))
           : gameStarted}
       </div>
 
@@ -1088,8 +1103,8 @@ const addMessage = (newMessage) => {
               {myTurn
                 ? "Tu turno"
                 : turnInfo?.actualPlayer_id
-                ? `${turnInfo.actualPlayer_name}`
-                : "Desconocido"}
+                  ? `${turnInfo.actualPlayer_name}`
+                  : "Desconocido"}
             </p>
             <p>
               Siguiente Jugador:{" "}
