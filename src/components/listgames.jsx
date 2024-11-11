@@ -14,7 +14,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   const [notify, setNotify] = useState("");
   const ws = useRef(null); // Referencia a WebSocket
   const hasConnected = useRef(false);
-  const session_id = 1;
+  const session_id = sessionStorage.getItem("sessionID");
 
   const connectWebSocket = async () => {
     if (!hasConnected.current || ws.current.readyState === WebSocket.CLOSED) {
@@ -34,7 +34,8 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
       switch (message.type) {
         case "status_update_games":
           handleListGames();
-          handleListActiveGames(session_id);
+          console.log("Session ID listado (update):", session_id);
+          handleListActiveGames();
           break;
         default:
           console.warn("Evento no reconocido");
@@ -156,13 +157,15 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     }
   };
 
-  const handleListActiveGames = async (sessionId) => {
+  const handleListActiveGames = async () => {
     setLoading(true);
     setError(null);
+    console.log("Session ID listado (funcion):", session_id);
+    console.log(`URL de solicitud: http://localhost:8000/games/get_session_id_games/${session_id}`);
 
     try {
       const response = await fetch(
-        `http://localhost:8000/games/get_session_id_games/${sessionId}`,
+        `http://localhost:8000/get_session_id_games/${session_id}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" }
@@ -182,6 +185,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
           `Error al obtener partidas activas: ${response.statusText}`
         );
       const data = await response.json();
+      console.log("Partidas activas:", data);
       setActiveGames(data); // Almacena las partidas activas
     } catch (error) {
       setError(error.message);
@@ -273,7 +277,8 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   useEffect(() => {
     if (userNameSubmitted && userName.trim()) {
       handleListGames();
-      handleListActiveGames(session_id);
+      console.log("Session ID listado (primero):", session_id);
+      handleListActiveGames();
     }
   }, [userNameSubmitted, userName]);
 
@@ -317,13 +322,13 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
       <div className="tabs">
         <button
           className={selectedTab === "disponibles" ? "active-tab" : ""}
-          onClick={() => {setSelectedTab("disponibles") && handleListGames}}
+          onClick={() => {setSelectedTab("disponibles"); handleListGames}}
         >
           Disponibles
         </button>
         <button
           className={selectedTab === "activas" ? "active-tab" : ""}
-          onClick={() => {setSelectedTab("activas") && handleListActiveGames(session_id)}}
+          onClick={() => {setSelectedTab("activas"); console.log("Session ID listado (pestaña):", session_id); handleListActiveGames()}}
         >
           Activas
         </button>

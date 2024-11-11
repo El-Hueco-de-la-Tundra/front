@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './form.css';
 
 const CreateFormPage = ({ onGoBack, onGameCreated}) => {
@@ -17,6 +17,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
   const [gameNameError, setGameNameError] = useState('');
   const [maxPlayersError, setMaxPlayersError] = useState('');
   const [minPlayersError, setMinPlayersError] = useState('');
+  const sessionID = sessionStorage.getItem("sessionID");
 
   const fetchHostUserId = async (gameId) => {
     if (!gameId) {
@@ -82,7 +83,7 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
       },
       player_model_data: {
         name: userName,  // Nombre del jugador
-        session_id: 1 //Cambiar agregar endpoint
+        session_id: sessionID//Cambiar agregar endpoint
 
       }
     };
@@ -164,6 +165,10 @@ const CreateFormPage = ({ onGoBack, onGameCreated}) => {
   const handleGameTypeChange = (event) => {
     setGameType(event.target.value);
   };
+
+  useEffect(() => {
+    console.log("Id sesion:", sessionID);
+  });
 
   return (
     <div>
