@@ -6,7 +6,7 @@ import Chat from "./chat";
 import LogComponent from "./LogComponent";
 
 
-const BoardPage = ({ onLeaveGame, gameId, userId }) => {
+const BoardPage = ({ onLeaveGame, gameId, userId}) => {
   const { fetchGameTokens } = Movement({ gameId, userId });
   const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ["red", "blue", "green", "yellow"];
@@ -28,7 +28,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     left: [],
     right: [],
     top: [],
-    bottom: [],
+    bottom: []
   });
   const [showAllMovementCards, setShowAllMovementCards] = useState(false);
   const [movementCards, setMovementCards] = useState([]);
@@ -37,7 +37,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const { handleCardClick, handleTokenClick, handleUndoMove } = Movement({
     gameId,
     userId,
-    movementCards,
+    movementCards
   });
   const [selectedFigure, setSelectedFigure] = useState(null);
   const [selectedMovement, setSelectedMovement] = useState(false);
@@ -53,7 +53,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [messages, setMessages] = useState([]); // Estado para los mensajes
   const [logs, setLogs] = useState([]);
-
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -87,7 +86,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     // Reorganizar el resto de los jugadores en las posiciones izquierda, derecha y arriba
     let remainingPlayers = [
       ...players.slice(currentUserIndex + 1),
-      ...players.slice(0, currentUserIndex),
+      ...players.slice(0, currentUserIndex)
     ];
 
     // Asignar jugadores a las posiciones left, right, y top
@@ -110,12 +109,15 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   const handleResetFigureCards = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/${userId}/figure-cards-reset`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8000/${userId}/figure-cards-reset`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
       if (!response.ok) {
         throw new Error("Error al resetear las cartas de figuras");
       }
@@ -138,14 +140,14 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
             game_id: gameId,
             player_id: userId,
             figure_id: figureId, // ID de la carta figura seleccionada
-            token_id: tokensid, // Lista de tokens asociados a la figura
-          }),
+            token_id: tokensid // Lista de tokens asociados a la figura
+          })
         }
       );
 
@@ -257,14 +259,13 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
-
   const fetchGameInfo = async () => {
     try {
       const response = await fetch(`http://localhost:8000/games/${gameId}`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
-        },
+          "Content-Type": "application/json"
+        }
       });
 
       if (!response.ok) {
@@ -273,11 +274,13 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
       const data = await response.json();
       setminPlayers(data.users.min);
-      const validPlayers = data.users.players.filter(player => player !== null);
+      const validPlayers = data.users.players.filter(
+        (player) => player !== null
+      );
       setlengthPlayers(validPlayers.length);
 
       console.log("lengthjugadores:", lengthplayers);
-      console.log("MINjugadores:", minplayers)
+      console.log("MINjugadores:", minplayers);
       const playersFromServer = data.users.players.map((playerObj) => {
         const [userId, userName] = Object.entries(playerObj)[0];
         return { userId: parseInt(userId), userName };
@@ -311,8 +314,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         }
       );
 
@@ -396,7 +399,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           setTokensh([]);
           fetchLogs();
           handleFiguresFetched();
-          setSelectedMovement(false)
+          setSelectedMovement(false);
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
@@ -458,7 +461,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           });
           break;
 
-        case 'status_cancel_game':
+        case "status_cancel_game":
           console.log("Host abandono la partida");
           setGameCancel(true);
           break;
@@ -555,8 +558,8 @@ const addMessage = (newMessage) => {
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         }
       );
       console.log("Respuesta del servidor:", response);
@@ -584,8 +587,8 @@ const addMessage = (newMessage) => {
         {
           method: "GET",
           headers: {
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         }
       );
 
@@ -593,12 +596,10 @@ const addMessage = (newMessage) => {
         throw new Error("Error al obtener las cartas de figura");
       }
 
-
       const data = await response.json();
       console.log(`Respuesta completa para el jugador ${userId}:`, data);
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
       if (data.count === 0) {
-        // Si count es 0, establecemos al jugador como ganador
         setWinner("x");
       }
       return data.cards || [];
@@ -615,7 +616,7 @@ const addMessage = (newMessage) => {
         left: [],
         right: [],
         top: [],
-        bottom: [],
+        bottom: []
       };
       console.log("Jugadores OBTENIDOS:", playersList);
       const currentPlayerIndex = players.findIndex(
@@ -710,9 +711,7 @@ const addMessage = (newMessage) => {
     const tokensData = await fetchGameTokens();
 
     if (!tokensData || tokensData.length === 0) {
-      console.log(
-        "No se recibieron fichas del servidor o el array está vacío"
-      );
+      console.log("No se recibieron fichas del servidor o el array está vacío");
       return;
     }
     console.log("tokensData:", tokensData); // Verifica lo que llega
@@ -723,8 +722,8 @@ const addMessage = (newMessage) => {
         color: token.color,
         position: {
           gridRow: token.y_coordinate,
-          gridColumn: token.x_coordinate,
-        },
+          gridColumn: token.x_coordinate
+        }
       };
       console.log("Mapped token:", mappedToken);
       return mappedToken;
@@ -828,12 +827,21 @@ const addMessage = (newMessage) => {
   // Función para abandonar la partida
   const handleLeaveGameAttempt = () => {
     if (myTurn) {
-      setWarningMessage("No puedes abandonar la partida hasta que termines tu turno.");
+      setWarningMessage(
+        "No puedes abandonar la partida hasta que termines tu turno."
+      );
       setTimeout(() => {
         setWarningMessage(""); // Limpiar el mensaje después de 3 segundos
       }, 3000);
     } else {
       handleLeaveGame();
+    }
+  };
+
+  const handleNoLeaveGame = () => {
+    const confirm = window.confirm("Deseas volver al menu?");
+    if(confirm){
+      onLeaveGame();
     }
   };
 
@@ -853,9 +861,7 @@ const addMessage = (newMessage) => {
       {/* Botón de chat */}
       <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages}/>
       {warningMessage && (
-        <div className="warning-message">
-          {warningMessage}
-        </div>
+        <div className="warning-message">{warningMessage}</div>
       )}
        <LogComponent
         gameId={gameId}
@@ -890,17 +896,19 @@ const addMessage = (newMessage) => {
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
       {!gameStarted && (
         <div className="overlay">
-          {!gameCancel && (<div className="waiting-message">
-            <h2>Esperando jugadores...</h2>
-            {isHost && lengthplayers >= minplayers && (
-              <button className="start-game-button" onClick={handleStartGame} >
-                Iniciar Partida
+          {!gameCancel && (
+            <div className="waiting-message">
+              <h2>Esperando jugadores...</h2>
+              {isHost && lengthplayers >= minplayers && (
+                <button className="start-game-button" onClick={handleStartGame}>
+                  Iniciar Partida
+                </button>
+              )}
+              <button className="leave-button" onClick={handleLeaveGameAttempt}>
+                Abandonar Partida
               </button>
-            )}
-            <button className="leave-button" onClick={handleLeaveGameAttempt}>
-              Abandonar Partida
-            </button>
-          </div>)}
+            </div>
+          )}
         </div>
       )}
       {/* Mostrar mensaje cuando un jugador abandona */}
@@ -908,23 +916,32 @@ const addMessage = (newMessage) => {
         <div className="leave-notification"> {leaveMessage} </div>
       )}
       {/* Mostrar mensaje de ganador */}
-      {(winnerMessage || winner) && (<div className="winner-notification">{winner ? `El ganador es el usuario "${winner}"` : winnerMessage}
-        <button
-          className="ok-button" onClick={handleLeaveGame}>OK
-        </button>
-      </div>)}
-      {gameCancel && (<div className="game-cancel">{'El host ha cancelado la partida'}
-        <button
-          className="ok-button" onClick={handleLeaveGame}>OK
-        </button>
-      </div>)}
+      {(winnerMessage || winner) && (
+        <div className="winner-notification">
+          {winner ? `El ganador es el usuario "${winner}"` : winnerMessage}
+          <button className="ok-button" onClick={handleLeaveGame}>
+            OK
+          </button>
+        </div>
+      )}
+      {gameCancel && (
+        <div className="game-cancel">
+          {"El host ha cancelado la partida"}
+          <button className="ok-button" onClick={handleLeaveGame}>
+            OK
+          </button>
+        </div>
+      )}
 
       {playersReady && (
         <div className="cards">
           {reorderedPlayers[1] && (
             <div className="card-container card-left">
               {figureCards.left.map((card) => (
-                <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                <div
+                  key={card.id}
+                  className={`card-bottomdata ${
+                    selectedFigure?.id === card.id ? "selected" : ""
                   }`}
                   onClick={() => handleFigureSelected(card)}>
                   <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}/>
@@ -935,10 +952,17 @@ const addMessage = (newMessage) => {
           {reorderedPlayers[2] && (
             <div className="card-container card-right">
               {figureCards.right.map((card) => (
-                <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                <div
+                  key={card.id}
+                  className={`card-bottomdata ${
+                    selectedFigure?.id === card.id ? "selected" : ""
                   }`}
-                  onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+                  onClick={() => handleFigureSelected(card)}
+                >
+                  <img
+                    src={`./src/designs/${
+                      card.blocked ? "Blocked" : card.type
+                    }.svg`}
                   />
                 </div>
               ))}
@@ -947,10 +971,17 @@ const addMessage = (newMessage) => {
           {reorderedPlayers[3] && (
             <div className="card-container card-top">
               {figureCards.top.map((card) => (
-                <div key={card.id} className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                <div
+                  key={card.id}
+                  className={`card-bottomdata ${
+                    selectedFigure?.id === card.id ? "selected" : ""
                   }`}
-                  onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}
+                  onClick={() => handleFigureSelected(card)}
+                >
+                  <img
+                    src={`./src/designs/${
+                      card.blocked ? "Blocked" : card.type
+                    }.svg`}
                   />
                 </div>
               ))}
@@ -960,11 +991,16 @@ const addMessage = (newMessage) => {
             {figureCards.bottom.map((card) => (
               <div
                 key={card.id}
-                className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                className={`card-bottomdata ${
+                  selectedFigure?.id === card.id ? "selected" : ""
+                }`}
                 onClick={() => handleFigureSelected(card)}
               >
-                <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`} />
+                <img
+                  src={`./src/designs/${
+                    card.blocked ? "Blocked" : card.type
+                  }.svg`}
+                />
               </div>
             ))}
           </div>
@@ -1009,28 +1045,29 @@ const addMessage = (newMessage) => {
       >
         {tokens.length > 0
           ? tokens.map((token) => (
-            <div
-              key={token.id}
-              className={`
+              <div
+                key={token.id}
+                className={`
                 token 
                 ${token.color} 
                 ${getMovementClass(token)} 
-                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${highlightedTokens.includes(token.id) ? "high" : ""
+                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${
+                  highlightedTokens.includes(token.id) ? "high" : ""
                 } `}
-              onClick={() => {
-                if (myTurn && selectedMovement) {
-                  handleTokenClickHigh(token.id);
-                }
-                if (myTurn && selectedFigure) {
-                  handleUseFigure(token);
-                }
-              }}
-              style={{
-                gridColumn: token.position.gridColumn,
-                gridRow: token.position.gridRow,
-              }}
-            />
-          ))
+                onClick={() => {
+                  if (myTurn && selectedMovement) {
+                    handleTokenClickHigh(token.id);
+                  }
+                  if (myTurn && selectedFigure) {
+                    handleUseFigure(token);
+                  }
+                }}
+                style={{
+                  gridColumn: token.position.gridColumn,
+                  gridRow: token.position.gridRow
+                }}
+              />
+            ))
           : gameStarted}
       </div>
 
@@ -1051,8 +1088,8 @@ const addMessage = (newMessage) => {
               {myTurn
                 ? "Tu turno"
                 : turnInfo?.actualPlayer_id
-                  ? `${turnInfo.actualPlayer_name}`
-                  : "Desconocido"}
+                ? `${turnInfo.actualPlayer_name}`
+                : "Desconocido"}
             </p>
             <p>
               Siguiente Jugador:{" "}
@@ -1079,6 +1116,11 @@ const addMessage = (newMessage) => {
         <button className="leave-button" onClick={handleLeaveGameAttempt}>
           Abandonar Partida
         </button>
+        {gameStarted && (
+          <button className="noleave-button" onClick={handleNoLeaveGame}>
+            Volver a Menu
+          </button>
+        )}
         {myTurn && (
           <button
             className="turno-finalizado"
@@ -1088,7 +1130,6 @@ const addMessage = (newMessage) => {
             Finalizar Turno
           </button>
         )}
-
       </div>
     </div>
   );
