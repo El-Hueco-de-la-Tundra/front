@@ -313,6 +313,25 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
+
+  useEffect(() => {
+    if (sessionStorage.getItem(gameId) === "true") {
+      fetchTurnInfo();
+      fetchGameInfo();
+      fetchLogs();
+      fetchAllFigureCards(players);
+      fetchAndSetTokens();
+      fetchUserMovementCards().then((cards) => {
+        setMovementCards(cards);
+      });
+      setTokensh([]);
+      handleFiguresFetched();
+      fetchUserFigureCards(userId);
+      setTriggerFetchFigures((prev) => prev + 1);
+    }
+  }, [gameStarted]);
+  
+
   const fetchTurnInfo = async () => {
     try {
 

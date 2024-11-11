@@ -418,7 +418,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
               <p>Jugadores: {partida.users.players.length}</p>
               <p>Partida {partida.is_private ? "Privada" : "Pública"}</p>{" "}
               {/* Muestra si es privada o pública */}
-              {partida.is_private && (
+              {partida.is_private && selectedTab === "disponibles" && (
                 <input
                   type="password"
                   placeholder="Contraseña"
@@ -434,8 +434,8 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
                   {joining === partida.id ? "Uniéndote..." : "Unirse"}
                 </button>
               ) : (
-                <button // SAIDJKFJHIKDSFHIGERSGHJIF3ERGIUHIR3FGHJI3RGHIFEGRWHIUYFHIJR3GHJFR3HGJFEGHJFGHJWFGHJEWGHJFEWGHJFGHJERW
-                  className="reconnect-button"
+                <button
+                  className="join-button"
                   onClick={() => handleReconnectGame(partida.id)}
                   disabled={joining === partida.id}
                 >
