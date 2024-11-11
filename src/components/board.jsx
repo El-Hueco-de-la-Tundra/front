@@ -6,14 +6,16 @@ import Chat from "./chat";
 import LogComponent from "./LogComponent";
 
 
-const BoardPage = ({ onLeaveGame, gameId, userId}) => {
+const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const { fetchGameTokens } = Movement({ gameId, userId });
   const [previousTokens, setPreviousTokens] = useState([]); // Estado para almacenar las fichas anteriores
   const colors = ["red", "blue", "green", "yellow"];
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
   const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
-  const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
+  const [gameStarted, setGameStarted] = useState(() => {
+    return sessionStorage.getItem(gameId) === "true";
+  });
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [minplayers, setminPlayers] = useState(1000); // Lista de jugadores que se han unido
   const [lengthplayers, setlengthPlayers] = useState(0);
@@ -298,7 +300,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
       }
 
       if (data.status === "started") {
-        setGameStarted(true);
+        sessionStorage.setItem(gameId, true);
+        console.log("En started, se seteo como true el gameId:", gameId)
+        setGameStarted(sessionStorage.getItem(gameId) === "true");
+        console.log("en session se guardo:", sessionStorage.getItem(gameId) )
+        console.log("La comparacion dio: ", sessionStorage.getItem(gameId) === "true")
       }
 
       setGameInfo(data); // Guarda información del juego
@@ -309,6 +315,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
 
   const fetchTurnInfo = async () => {
     try {
+
       const response = await fetch(
         `http://localhost:8000/game/${gameId}/turn`,
         {
@@ -324,7 +331,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
       }
 
       const data = await response.json();
-
+      console.log("Llego la data del turno papa:",data)
       setTurnInfo(data);
 
       const current_turn = data?.actualPlayer_id;
@@ -344,6 +351,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
     if (!hasConnected.current || ws.current.readyState === WebSocket.CLOSED) {
+      console.log("Conectando o reconectando a ws", gameId)
       ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
       hasConnected.current = true; // Marcamos que ya está conectado
 
@@ -361,7 +369,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "status_start":
           if (!gameStarted) {
             console.log("Partida iniciada, obteniendo jugadores y cartas...");
-            setGameStarted(true);
+            sessionStorage.setItem(gameId, true);
+            console.log("En ws start,se seteo true el gameID es:", gameId)
+            setGameStarted(sessionStorage.getItem(gameId) === "true");
+            console.log("en session se guardo:", sessionStorage.getItem(gameId) )
+            console.log("En ws start, comparacion es:", sessionStorage.getItem(gameId) === "true")
+
             fetchLogs();
             fetchGameInfo();
             fetchAndSetTokens();
@@ -427,6 +440,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "status_winner":
           fetchLogs();
           setWinnerMessage(`¡Ganaste la partida!`);
+          sessionStorage.setItem(gameId, false)
           break;
 
         case "info":
@@ -469,10 +483,26 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "chat_message":
           console.log("ENTROOOO");
           fetchLogs();
-          addMessage(message); 
+          addMessage(message);
           setHasUnreadMessages(true);
           break;
 
+        case "status_reconect":
+          console.log("SOY CORDOBES ME GUSTA EL VINO Y LA JODA")
+          sessionStorage.setItem(gameId, true)
+          setGameStarted(sessionStorage.getItem(gameId) === "true")
+          fetchTurnInfo();
+          fetchGameInfo();
+          fetchLogs();
+          fetchAllFigureCards(players);
+          fetchAndSetTokens();
+          fetchUserMovementCards().then((cards) => {
+            setMovementCards(cards);
+          });
+          
+          handleFiguresFetched();
+          fetchUserFigureCards(userId);    
+          break;
 
         default:
           console.warn("Evento no reconocido:", message.type);
@@ -480,7 +510,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
       }
     };
 
-   
+
 
     // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
@@ -494,34 +524,34 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
     };
   };
 
-//------------------logs-----------------------//
-const fetchLogs = async () => {
-  try {
-    const response = await fetch(`http://localhost:8000/game/${gameId}/logs`);
-    if (response.ok) {
-      const data = await response.json();
-      setLogs(data);
-    } else {
-      console.error("Failed to fetch logs");
-    }
-  } catch (error) {
-    console.error("Error fetching logs:", error);
-  }
-};
-//--------------------------------------------//
-
-// -----------------Chat-----------------------//
-const addMessage = (newMessage) => {
-  if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
-    setMessages((prevMessages) => {
-      const isDuplicate = prevMessages.some((msg) => msg.id === newMessage.id);
-      if (!isDuplicate) {
-        return [...prevMessages, newMessage];
+  //------------------logs-----------------------//
+  const fetchLogs = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}/logs`);
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data);
+      } else {
+        console.error("Failed to fetch logs");
       }
-      return prevMessages;
-    });
-  }
-};
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
+  //--------------------------------------------//
+
+  // -----------------Chat-----------------------//
+  const addMessage = (newMessage) => {
+    if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
+      setMessages((prevMessages) => {
+        const isDuplicate = prevMessages.some((msg) => msg.id === newMessage.id);
+        if (!isDuplicate) {
+          return [...prevMessages, newMessage];
+        }
+        return prevMessages;
+      });
+    }
+  };
 
   const fetchMessages = async () => {
     try {
@@ -536,7 +566,7 @@ const addMessage = (newMessage) => {
       console.error("Error fetching messages:", error);
     }
   };
-//------------------------------------------------//
+  //------------------------------------------------//
 
   useEffect(() => {
     if (players.length > 0 && gameStarted) {
@@ -686,6 +716,7 @@ const addMessage = (newMessage) => {
   // Función para abandonar la partida
   const handleLeaveGame = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      sessionStorage.setItem(gameId,false)
       ws.current.send(JSON.stringify({ type: "leave", gameId, userId }));
       handleEndTurn();
       setTimeout(() => {
@@ -700,7 +731,11 @@ const addMessage = (newMessage) => {
   const handleStartGame = async () => {
     if (isHost && !gameStarted) {
       console.log("Iniciando partida como host...");
-      setGameStarted(true);
+     
+      sessionStorage.setItem(gameId, true)
+      console.log("en session se guardo:", sessionStorage.getItem(gameId) )
+      setGameStarted(sessionStorage.getItem(gameId) === "true");
+    
       fetchTurnInfo();
       ws.current.send(JSON.stringify({ type: "start", gameId, userId }));
     }
@@ -840,7 +875,7 @@ const addMessage = (newMessage) => {
 
   const handleNoLeaveGame = () => {
     const confirm = window.confirm("Deseas volver al menu?");
-    if(confirm){
+    if (confirm) {
       onLeaveGame();
     }
   };
@@ -859,14 +894,14 @@ const addMessage = (newMessage) => {
   return (
     <div className="game-page">
       {/* Botón de chat */}
-      <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages}/>
+      <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages} />
       {warningMessage && (
         <div className="warning-message">{warningMessage}</div>
       )}
-       <LogComponent
+      <LogComponent
         gameId={gameId}
         logs={logs}
-        fetchLogs={fetchLogs} 
+        fetchLogs={fetchLogs}
       />
       {/* Component Figuras para manejar la lógica */}
       <Figuras
@@ -894,7 +929,7 @@ const addMessage = (newMessage) => {
         </>
       )}
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
-      {!gameStarted && (
+      {!gameStarted  && (
         <div className="overlay">
           {!gameCancel && (
             <div className="waiting-message">
@@ -940,11 +975,10 @@ const addMessage = (newMessage) => {
               {figureCards.left.map((card) => (
                 <div
                   key={card.id}
-                  className={`card-bottomdata ${
-                    selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                  className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                    }`}
                   onClick={() => handleFigureSelected(card)}>
-                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}/>
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`} />
                 </div>
               ))}
             </div>
@@ -954,15 +988,13 @@ const addMessage = (newMessage) => {
               {figureCards.right.map((card) => (
                 <div
                   key={card.id}
-                  className={`card-bottomdata ${
-                    selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                  className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                    }`}
                   onClick={() => handleFigureSelected(card)}
                 >
                   <img
-                    src={`./src/designs/${
-                      card.blocked ? "Blocked" : card.type
-                    }.svg`}
+                    src={`./src/designs/${card.blocked ? "Blocked" : card.type
+                      }.svg`}
                   />
                 </div>
               ))}
@@ -973,15 +1005,13 @@ const addMessage = (newMessage) => {
               {figureCards.top.map((card) => (
                 <div
                   key={card.id}
-                  className={`card-bottomdata ${
-                    selectedFigure?.id === card.id ? "selected" : ""
-                  }`}
+                  className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                    }`}
                   onClick={() => handleFigureSelected(card)}
                 >
                   <img
-                    src={`./src/designs/${
-                      card.blocked ? "Blocked" : card.type
-                    }.svg`}
+                    src={`./src/designs/${card.blocked ? "Blocked" : card.type
+                      }.svg`}
                   />
                 </div>
               ))}
@@ -991,15 +1021,13 @@ const addMessage = (newMessage) => {
             {figureCards.bottom.map((card) => (
               <div
                 key={card.id}
-                className={`card-bottomdata ${
-                  selectedFigure?.id === card.id ? "selected" : ""
-                }`}
+                className={`card-bottomdata ${selectedFigure?.id === card.id ? "selected" : ""
+                  }`}
                 onClick={() => handleFigureSelected(card)}
               >
                 <img
-                  src={`./src/designs/${
-                    card.blocked ? "Blocked" : card.type
-                  }.svg`}
+                  src={`./src/designs/${card.blocked ? "Blocked" : card.type
+                    }.svg`}
                 />
               </div>
             ))}
@@ -1045,29 +1073,28 @@ const addMessage = (newMessage) => {
       >
         {tokens.length > 0
           ? tokens.map((token) => (
-              <div
-                key={token.id}
-                className={`
+            <div
+              key={token.id}
+              className={`
                 token 
                 ${token.color} 
                 ${getMovementClass(token)} 
-                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${
-                  highlightedTokens.includes(token.id) ? "high" : ""
+                ${isTokenHighlighted(token.id) ? "highlighted" : ""}  ${highlightedTokens.includes(token.id) ? "high" : ""
                 } `}
-                onClick={() => {
-                  if (myTurn && selectedMovement) {
-                    handleTokenClickHigh(token.id);
-                  }
-                  if (myTurn && selectedFigure) {
-                    handleUseFigure(token);
-                  }
-                }}
-                style={{
-                  gridColumn: token.position.gridColumn,
-                  gridRow: token.position.gridRow
-                }}
-              />
-            ))
+              onClick={() => {
+                if (myTurn && selectedMovement) {
+                  handleTokenClickHigh(token.id);
+                }
+                if (myTurn && selectedFigure) {
+                  handleUseFigure(token);
+                }
+              }}
+              style={{
+                gridColumn: token.position.gridColumn,
+                gridRow: token.position.gridRow
+              }}
+            />
+          ))
           : gameStarted}
       </div>
 
@@ -1088,8 +1115,8 @@ const addMessage = (newMessage) => {
               {myTurn
                 ? "Tu turno"
                 : turnInfo?.actualPlayer_id
-                ? `${turnInfo.actualPlayer_name}`
-                : "Desconocido"}
+                  ? `${turnInfo.actualPlayer_name}`
+                  : "Desconocido"}
             </p>
             <p>
               Siguiente Jugador:{" "}
