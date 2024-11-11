@@ -13,7 +13,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [timeLeft, setTimeLeft] = useState(120); // 120 segundos = 2 minutos
   const [tokens, setTokens] = useState([]);
   const [isHost, setIsHost] = useState(false); // Saber si el jugador es el host
-  const [gameStarted, setGameStarted] = useState(false); // Saber si la partida ha comenzado
+  const [gameStarted, setGameStarted] = useState(() => {
+    return sessionStorage.getItem(gameId) === "true";
+  });
   const [players, setPlayers] = useState([]); // Lista de jugadores que se han unido
   const [minplayers, setminPlayers] = useState(1000); // Lista de jugadores que se han unido
   const [lengthplayers, setlengthPlayers] = useState(0);
@@ -313,7 +315,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       }
 
       if (data.status === "started") {
-        setGameStarted(true);
+        sessionStorage.setItem(gameId, true);
+        console.log("En started, se seteo como true el gameId:", gameId)
+        setGameStarted(sessionStorage.getItem(gameId) === "true");
+        console.log("en session se guardo:", sessionStorage.getItem(gameId) )
+        console.log("La comparacion dio: ", sessionStorage.getItem(gameId) === "true")
       }
 
       setGameInfo(data); // Guarda información del juego
@@ -322,8 +328,28 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
+
+  useEffect(() => {
+    if (sessionStorage.getItem(gameId) === "true") {
+      fetchTurnInfo();
+      fetchGameInfo();
+      fetchLogs();
+      fetchAllFigureCards(players);
+      fetchAndSetTokens();
+      fetchUserMovementCards().then((cards) => {
+        setMovementCards(cards);
+      });
+      setTokensh([]);
+      handleFiguresFetched();
+      fetchUserFigureCards(userId);
+      setTriggerFetchFigures((prev) => prev + 1);
+    }
+  }, [gameStarted]);
+  
+
   const fetchTurnInfo = async () => {
     try {
+
       const response = await fetch(
         `http://localhost:8000/game/${gameId}/turn`,
         {
@@ -339,7 +365,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       }
 
       const data = await response.json();
-
+      console.log("Llego la data del turno papa:",data)
       setTurnInfo(data);
 
       const current_turn = data?.actualPlayer_id;
@@ -359,6 +385,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
     if (!hasConnected.current || ws.current.readyState === WebSocket.CLOSED) {
+      console.log("Conectando o reconectando a ws", gameId)
       ws.current = new WebSocket(`ws://localhost:8000/ws/${gameId}/${userId}`);
       hasConnected.current = true; // Marcamos que ya está conectado
 
@@ -376,7 +403,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         case "status_start":
           if (!gameStarted) {
             console.log("Partida iniciada, obteniendo jugadores y cartas...");
-            setGameStarted(true);
+            sessionStorage.setItem(gameId, true);
+            console.log("En ws start,se seteo true el gameID es:", gameId)
+            setGameStarted(sessionStorage.getItem(gameId) === "true");
+            console.log("en session se guardo:", sessionStorage.getItem(gameId) )
+            console.log("En ws start, comparacion es:", sessionStorage.getItem(gameId) === "true")
+
             fetchLogs();
             fetchGameInfo();
             fetchAndSetTokens();
@@ -445,6 +477,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
             setWinner(message.winner);
           }          
           setWinnerMessage(`¡Ganaste la partida!`);
+          sessionStorage.setItem(gameId, false)
           break;
 
         case "info":
@@ -491,6 +524,22 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           setHasUnreadMessages(true);
           break;
 
+        case "status_reconect":
+          console.log("SOY CORDOBES ME GUSTA EL VINO Y LA JODA")
+          sessionStorage.setItem(gameId, true)
+          setGameStarted(sessionStorage.getItem(gameId) === "true")
+          fetchTurnInfo();
+          fetchGameInfo();
+          fetchLogs();
+          fetchAllFigureCards(players);
+          fetchAndSetTokens();
+          fetchUserMovementCards().then((cards) => {
+            setMovementCards(cards);
+          });
+          
+          handleFiguresFetched();
+          fetchUserFigureCards(userId);    
+          break;
 
         default:
           console.warn("Evento no reconocido:", message.type);
@@ -700,6 +749,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   // Función para abandonar la partida
   const handleLeaveGame = () => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      sessionStorage.setItem(gameId,false)
       ws.current.send(JSON.stringify({ type: "leave", gameId, userId }));
       handleEndTurn();
       setTimeout(() => {
@@ -714,7 +764,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const handleStartGame = async () => {
     if (isHost && !gameStarted) {
       console.log("Iniciando partida como host...");
-      setGameStarted(true);
+     
+      sessionStorage.setItem(gameId, true)
+      console.log("en session se guardo:", sessionStorage.getItem(gameId) )
+      setGameStarted(sessionStorage.getItem(gameId) === "true");
+    
       fetchTurnInfo();
       ws.current.send(JSON.stringify({ type: "start", gameId, userId }));
     }
@@ -917,7 +971,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         </>
       )}
       {/* Contenedor de la capa oscura y el mensaje "Esperando jugadores" */}
-      {!gameStarted && (
+      {!gameStarted  && (
         <div className="overlay">
           {!gameCancel && (
             <div className="waiting-message">
