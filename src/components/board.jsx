@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import "./board.css";
 import Movement from "./movement";
 import Figuras from "./figuras";
+import Chat from "./chat";
+import LogComponent from "./LogComponent";
+
 
 const BoardPage = ({ onLeaveGame, gameId, userId}) => {
   const { fetchGameTokens } = Movement({ gameId, userId });
@@ -47,6 +50,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
   const [playersReady, setPlayersReady] = useState(false);
   const [winner, setWinner] = useState("");
   const [warningMessage, setWarningMessage] = useState(""); // Estado para el mensaje de advertencia
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [messages, setMessages] = useState([]); // Estado para los mensajes
+  const [logs, setLogs] = useState([]);
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -356,6 +362,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
           if (!gameStarted) {
             console.log("Partida iniciada, obteniendo jugadores y cartas...");
             setGameStarted(true);
+            fetchLogs();
             fetchGameInfo();
             fetchAndSetTokens();
             fetchTurnInfo();
@@ -366,7 +373,10 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "status_join":
           if (!gameStarted) {
             fetchGameInfo();
+
           }
+          fetchLogs();
+
           break;
 
         case "status_used_figure":
@@ -376,6 +386,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
           fetchAllFigureCards(players);
           setTokens([]);
           fetchGameInfo();
+          fetchLogs();
+
           setTokensh([]);
           handleFiguresFetched();
           setTriggerFetchFigures((prev) => prev + 1);
@@ -385,6 +397,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
           console.log("Movimiento detectado, actualizando fichas...");
           fetchAndSetTokens();
           setTokensh([]);
+          fetchLogs();
           handleFiguresFetched();
           setSelectedMovement(false);
           fetchUserMovementCards().then((cards) => {
@@ -400,7 +413,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "status_leave":
           console.log("Recibido mensaje status_leave:", message);
           const leavingPlayerId = message.user_left;
-
+          fetchLogs();
           fetchGameInfo();
           fetchTurnInfo();
           setLeaveMessage(
@@ -412,6 +425,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
           break;
 
         case "status_winner":
+          fetchLogs();
           setWinnerMessage(`¡Ganaste la partida!`);
           break;
 
@@ -422,6 +436,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "status_endturn":
           fetchTurnInfo();
           fetchGameInfo();
+          fetchLogs();
           fetchAllFigureCards(players);
           fetchAndSetTokens();
           fetchUserMovementCards().then((cards) => {
@@ -440,6 +455,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
         case "status_last_movement_undone":
           console.log("Movimiento cancelado, actualizando fichas...");
           fetchAndSetTokens();
+          fetchLogs();
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
@@ -450,11 +466,21 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
           setGameCancel(true);
           break;
 
+        case "chat_message":
+          console.log("ENTROOOO");
+          fetchLogs();
+          addMessage(message); 
+          setHasUnreadMessages(true);
+          break;
+
+
         default:
           console.warn("Evento no reconocido:", message.type);
           console.log(message);
       }
     };
+
+   
 
     // Manejar errores en la conexión WebSocket
     ws.current.onerror = (error) => {
@@ -467,6 +493,50 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
       hasConnected.current = false; // Permitimos reconexión en caso de cierre
     };
   };
+
+//------------------logs-----------------------//
+const fetchLogs = async () => {
+  try {
+    const response = await fetch(`http://localhost:8000/game/${gameId}/logs`);
+    if (response.ok) {
+      const data = await response.json();
+      setLogs(data);
+    } else {
+      console.error("Failed to fetch logs");
+    }
+  } catch (error) {
+    console.error("Error fetching logs:", error);
+  }
+};
+//--------------------------------------------//
+
+// -----------------Chat-----------------------//
+const addMessage = (newMessage) => {
+  if (newMessage.content && newMessage.content.trim() !== "") { // Asegura que el mensaje tenga contenido
+    setMessages((prevMessages) => {
+      const isDuplicate = prevMessages.some((msg) => msg.id === newMessage.id);
+      if (!isDuplicate) {
+        return [...prevMessages, newMessage];
+      }
+      return prevMessages;
+    });
+  }
+};
+
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/game/${gameId}`);
+      if (response.ok) {
+        const data = await response.json();
+        data.forEach((msg) => addMessage(msg)); // Agrega cada mensaje si aún no está en la lista
+      } else {
+        console.error("Failed to fetch messages");
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
+//------------------------------------------------//
 
   useEffect(() => {
     if (players.length > 0 && gameStarted) {
@@ -782,20 +852,28 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
+  const clearUnreadMessages = () => {
+    setHasUnreadMessages(false);
+  };
+
   return (
     <div className="game-page">
+      {/* Botón de chat */}
+      <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages}/>
       {warningMessage && (
         <div className="warning-message">{warningMessage}</div>
       )}
+       <LogComponent
+        gameId={gameId}
+        logs={logs}
+        fetchLogs={fetchLogs} 
+      />
       {/* Component Figuras para manejar la lógica */}
       <Figuras
         gameId={gameId}
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
-      <button className="reset-button" onClick={handleResetFigureCards}>
-        Resetear Cartas de Figura
-      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
@@ -865,13 +943,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId}) => {
                   className={`card-bottomdata ${
                     selectedFigure?.id === card.id ? "selected" : ""
                   }`}
-                  onClick={() => handleFigureSelected(card)}
-                >
-                  <img
-                    src={`./src/designs/${
-                      card.blocked ? "Blocked" : card.type
-                    }.svg`}
-                  />
+                  onClick={() => handleFigureSelected(card)}>
+                  <img src={`./src/designs/${card.blocked ? "Blocked" : card.type}.svg`}/>
                 </div>
               ))}
             </div>
