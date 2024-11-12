@@ -55,6 +55,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [messages, setMessages] = useState([]); // Estado para los mensajes
   const [logs, setLogs] = useState([]);
+  const [confirm, setConfirm] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -906,11 +908,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   };
 
   const handleNoLeaveGame = () => {
-    const confirm = window.confirm("Deseas volver al menu?");
-    if (confirm) {
-      onLeaveGame();
-    }
+    setConfirmMessage("¿Deseas volver al menu?");
   };
+
+  const confirmedLeave = () => {
+    if(confirm){
+      onLeaveGame();
+    } else {
+      setConfirmMessage("");
+    }
+  }
 
   // Formatear tiempo
   const formatTime = (seconds) => {
@@ -988,6 +995,17 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           {winner ? `El ganador es el usuario "${winner}"` : winnerMessage}
           <button className="ok-button" onClick={handleLeaveGame}>
             OK
+          </button>
+        </div>
+      )}
+      {confirmMessage && (
+        <div className="confirm-notification">
+          confirmMessage
+          <button className="ok-button" onClick={confirmedLeave}>
+            Acepatar
+          </button>
+          <button className="ok-button" onClick={handleLeaveGame}>
+            Cancelar
           </button>
         </div>
       )}
