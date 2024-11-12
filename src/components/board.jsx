@@ -55,7 +55,11 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [messages, setMessages] = useState([]); // Estado para los mensajes
   const [logs, setLogs] = useState([]);
+  const [confirm, setConfirm] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+
   const [errorMessage, setErrorMessage] = useState(""); // Estado para el mensaje de error
+
 
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
@@ -331,6 +335,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   useEffect(() => {
     if (sessionStorage.getItem(gameId) === "true") {
+      if (sessionStorage.getItem("currentframe") === "list") {
+        setTimeLeft(parseInt(sessionStorage.getItem("timer")));
+        sessionStorage.setItem("currentframe", false);
+      }
+      if (sessionStorage.getItem("backmenu") === "true"){
+        handlegetTimeLeft();
+        sessionStorage.setItem("backmenu", false);
+      }
+      sessionStorage.getItem(gameId)
+      console.log("gamestarted en session es:",sessionStorage.getItem(gameId));
       fetchTurnInfo();
       fetchGameInfo();
       fetchLogs();
@@ -343,6 +357,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       handleFiguresFetched();
       fetchUserFigureCards(userId);
       setTriggerFetchFigures((prev) => prev + 1);
+    } else{
+      setGameStarted(sessionStorage.getItem(gameId) === "true");
     }
   }, [gameStarted]);
   
@@ -381,6 +397,35 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.error(error);
     }
   };
+
+  const handlegetTimeLeft = async () => {
+
+    const get_time = await fetch(`http://localhost:8000/time/${gameId}`,
+      {
+        method : 'GET',
+        headers : {"Content-Type": "application/json"}
+      }
+    );
+
+    const data = await get_time.json()
+    setTimeLeft(data)
+  }
+
+
+  const handleBeforeUnload = (e) => {
+    // Guardamos el dato en sessionStorage antes de que se recargue la página
+    sessionStorage.setItem("currentframe", 'list');
+    sessionStorage.setItem("gameid", gameId);
+    
+    console.log("la var time es:", timeLeft)
+    sessionStorage.setItem("timer", timeLeft - 2);
+  };
+
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+
+
 
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
@@ -498,7 +543,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchUserFigureCards(userId);
           setTriggerFetchFigures((prev) => prev + 1);
           setMoveCount((prev) => prev + 1);
-          setTimeLeft(120);
+          setTimeLeft(120); // --> Usar este pasandole el 
           setMoveCount(0);
           setUndoCount(0);
           break;
@@ -527,9 +572,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case "status_reconect":
           console.log("SOY CORDOBES ME GUSTA EL VINO Y LA JODA")
-          sessionStorage.setItem(gameId, true)
-          setGameStarted(sessionStorage.getItem(gameId) === "true")
-          fetchTurnInfo();
+          //sessionStorage.setItem(gameId, true)
+          //setGameStarted(sessionStorage.getItem(gameId) === "true")
+          /*fetchTurnInfo();
           fetchGameInfo();
           fetchLogs();
           fetchAllFigureCards(players);
@@ -537,9 +582,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
-          
           handleFiguresFetched();
-          fetchUserFigureCards(userId);    
+          fetchUserFigureCards(userId);  */  
           break;
 
         default:
@@ -908,11 +952,19 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   };
 
   const handleNoLeaveGame = () => {
-    const confirm = window.confirm("Deseas volver al menu?");
-    if (confirm) {
-      onLeaveGame();
-    }
+    setConfirmMessage("¿Deseas volver al menu?");
+    sessionStorage.setItem("backmenu", true);
+    setConfirm(true);
   };
+
+  const confirmedLeave = () => {
+    setConfirm(false);
+    onLeaveGame();
+  }
+
+  const canceledLeave = () => {
+    setConfirm(false);
+  }
 
   // Formatear tiempo
   const formatTime = (seconds) => {
@@ -999,6 +1051,17 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           {winner ? `El ganador es el usuario "${winner}"` : winnerMessage}
           <button className="ok-button" onClick={handleLeaveGame}>
             OK
+          </button>
+        </div>
+      )}
+      {confirm && (
+        <div className="confirm-notification">
+          <p>{confirmMessage}</p>
+          <button className="confirm-button" onClick={confirmedLeave}>
+            Aceptar
+          </button>
+          <button className="cancel-button" onClick={canceledLeave}>
+            Cancelar
           </button>
         </div>
       )}

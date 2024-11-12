@@ -16,11 +16,14 @@ function App() {
   const [userId, setUserId] = useState(null);
   const [currentFrame, setCurrentFrame] = useState('initial');  // Controla en qué "frame" estamos
   const [fade, setFade] = useState(false); 
-  const storedDictionary = JSON.parse(sessionStorage.getItem("myDictionary")) || {};
 
   useEffect(() => {
     let initialTimer, transitionTimer, boardTimer;
   
+    if (sessionStorage.getItem("currentframe") === 'list'){
+      handleListGames();
+    }
+
     if (currentFrame === 'initial') {
       initialTimer = setTimeout(() => {
         setFade(true);  // Inicia el fade de frame4

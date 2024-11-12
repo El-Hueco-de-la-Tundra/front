@@ -3,7 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 const ListGames = ({ onBack, onJoinGame, userId }) => {
   const [partidas, setPartidas] = useState([]);
   const [activeGames, setActiveGames] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    sessionStorage.getItem("currentframe") === "list";
+  });
   const [error, setError] = useState(null);
   const [joining, setJoining] = useState(null); // Para manejar el estado de unirse a la partida
   const [userName, setUserName] = useState(""); // Estado para almacenar el nombre del usuario
@@ -48,6 +50,12 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
       connectWebSocket();
     }
   });
+
+ useEffect(() =>{
+  if (sessionStorage.getItem("currentframe") === 'list'){
+    handleReconnectGame(sessionStorage.getItem("gameid"));
+  }
+ })
 
   const fetchGamesByName = async () => {
     try {
@@ -330,8 +338,8 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
   }, [userNameSubmitted, userName]);
 
   // Si el nombre de usuario no se ha ingresado, muestra un formulario para ingresarlo
-  if (!userNameSubmitted) {
-    return (
+  if (!userNameSubmitted && sessionStorage.getItem("currentframe") !== "list") {
+    return ( 
       <div className="username-container">
         <h1>Ingresa tu nombre para continuar</h1>
         <form
