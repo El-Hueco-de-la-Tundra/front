@@ -38,7 +38,6 @@ const Chat = ({ gameId, userId, messages,fetchMessages, addMessage, hasUnreadMes
 
   useEffect(() => {
      if (isChatOpen) {
-       fetchMessages();
        clearUnreadMessages();
      }
    }, [isChatOpen, fetchMessages, clearUnreadMessages]);

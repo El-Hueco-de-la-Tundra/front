@@ -55,6 +55,48 @@
   color: white;
 }
 
+.confirm-button {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.851);
+  border: 0px solid #ffffffd4;
+  padding: 15px 25px;
+  font-size: 25px;
+  left: 18%;
+  bottom: 15%;
+  color: #a1a1a1;
+  font-family: Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  border-radius: 20px;
+}
+
+.confirm-button:hover {
+  transform: translateY(-3px);
+  background-color: #a1a1a1f3;
+  color: white;
+}
+
+.cancel-button {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.851);
+  border: 0px solid #ffffffd4;
+  padding: 15px 25px;
+  font-size: 25px;
+  right: 18%;
+  bottom: 15%;
+  color: #a1a1a1;
+  font-family: Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  border-radius: 20px;
+}
+
+.cancel-button:hover {
+  transform: translateY(-3px);
+  background-color: #a1a1a1f3;
+  color: white;
+}
+
 /* Contenedor del tablero */
 .board-container {
   display: grid;
@@ -161,6 +203,42 @@
   color: white;
 }
 
+.error-message {
+  color: red;
+  background-color: #f8d7da;
+  position: fixed;
+  top: 350px;
+  right:500px;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid red;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+
+.noleave-button {
+  position: fixed;
+  top: 2px;
+  left: 150px;
+  background-color: rgba(255, 255, 255, 0.851);
+  border: 0px solid #ffffffd4;
+  padding: 15px 25px;
+  font-size: 25px;
+  color: #a1a1a1;
+  font-family: Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  transition: transform 0.3s, background-color 0.3s;
+  border-radius: 20px;
+}
+
+.noleave-button:hover {
+  transform: translateY(-3px);
+  background-color: #a1a1a1f3;
+  color: white;
+}
+
 .leave-notification {
   position: relative;
   top: 5%;
@@ -181,6 +259,23 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: #28a745; /* Color verde de éxito */
+  color: white;
+  padding: 30px 50px 80px;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.confirm-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #a1a1a1; /* Color verde de éxito */
   color: white;
   padding: 30px 50px 80px;
   font-size: 2rem;

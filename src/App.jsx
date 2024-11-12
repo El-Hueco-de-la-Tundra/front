@@ -20,6 +20,10 @@ function App() {
   useEffect(() => {
     let initialTimer, transitionTimer, boardTimer;
   
+    if (sessionStorage.getItem("currentframe") === 'list'){
+      handleListGames();
+    }
+
     if (currentFrame === 'initial') {
       initialTimer = setTimeout(() => {
         setFade(true);  // Inicia el fade de frame4
