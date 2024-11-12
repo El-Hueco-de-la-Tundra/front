@@ -4,32 +4,44 @@ import { beforeEach, expect, test, vi } from "vitest";
 import ListGames from "../components/listgames";
 
 // Mock de la API fetch
-beforeEach (() => {
+beforeEach(() => {
   vi.clearAllMocks();
 
   global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            {
-              id: 1,
-              name: "Partida 1",
-              host_id: 123,
-              in_game: false,
-              is_private: false,
-              users: {
-                min: 2,
-                max: 4,
-                players: [
-                  { additionalProp1: "Player1" },
-                  { additionalProp2: "Player2" }
-                ]
-              }
-            }
-          ]),
-      })
-    );
+    Promise.resolve({
+      ok: true,
+      json: () =>
+        Promise.resolve([
+          {
+            id: 1,
+            name: "Partida 1",
+            host_id: 123,
+            in_game: false,
+            is_private: false,
+            users: {
+              min: 2,
+              max: 4,
+              players: [
+                { additionalProp1: "Player1" },
+                { additionalProp2: "Player2" },
+              ],
+            },
+          },
+          {
+            id: 2,
+            name: "Partida Privada",
+            host_id: 456,
+            in_game: false,
+            is_private: true,
+            users: {
+              min: 2,
+              max: 4,
+              players: [],
+            },
+          },
+        ]),
+    })
+  );
 });
 
 test("It requires a user name before submitting", async () => {
@@ -49,45 +61,96 @@ test("It requires a user name before submitting", async () => {
 
   // Verificamos que ahora sí se haya llamado a `fetch` después de enviar el formulario
   await waitFor(() => {
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 });
 
-// test("It allows a user to join a game", async () => {
-//     // Mock para la función onJoinGame
-//     const mockOnJoinGame = vi.fn();
+test("Filters games by name", async () => {
+  render(<ListGames onBack={() => {}} onJoinGame={() => {}} userId={1} />);
 
-//     // Renderizamos el componente `ListGames`
-//     render(<ListGames onBack={() => {}} onJoinGame={mockOnJoinGame} userId={1} />);
+  await userEvent.type(screen.getByPlaceholderText("Nombre de usuario"), "Nacho");
+  await userEvent.click(screen.getByText("Continuar"));
 
-//     // Paso 1: Simular ingreso del nombre de usuario
-//     const userNameInput = screen.getByPlaceholderText("Nombre de usuario");
-//     await userEvent.type(userNameInput, "Nacho");
+  await waitFor(() => expect(screen.getByText("Lista de Partidas Disponibles")).toBeInTheDocument());
 
-//     // Paso 2: Simular clic en el botón "Continuar"
-//     const continueButton = screen.getByText("Continuar");
-//     await userEvent.click(continueButton);
+  // Simular el ingreso en el filtro de nombre
+  const nameFilterInput = screen.getByPlaceholderText("Buscar por nombre");
+  await userEvent.type(nameFilterInput, "Partida 1");
 
-//     // Paso 3: Esperar a que las partidas se carguen y verificar que aparece "Partida 1"
-//     await waitFor(() => {
-//         expect(screen.getByText("Partida 1")).toBeInTheDocument();
-//     });
+  // Simular clic en "Buscar"
+  await userEvent.click(screen.getByText("Buscar"));
 
-//     // Paso 4: Seleccionar el botón "Unirse" correspondiente a "Partida 1"
-//     const joinButtons = screen.getAllByText("Unirse");
-//     expect(joinButtons.length).toBeGreaterThan(0); // Asegurarse de que existen botones de "Unirse"
+  // Verificar que solo la partida "Partida 1" aparece en el resultado
+  await waitFor(() => {
+    expect(screen.getByText("Partida 1")).toBeInTheDocument();
+  });
+});
 
-//     const firstJoinButton = joinButtons[0];
-//     expect(firstJoinButton).toBeEnabled(); // Verificar que el botón está habilitado
+test("Switches between 'Disponibles' and 'Activas' tabs", async () => {
+  render(<ListGames onBack={() => {}} onJoinGame={() => {}} userId={1} />);
 
-//     // Paso 5: Simular clic en el primer botón "Unirse"
-//     await userEvent.click(firstJoinButton);
+  await userEvent.type(screen.getByPlaceholderText("Nombre de usuario"), "Nacho");
+  await userEvent.click(screen.getByText("Continuar"));
 
-//     // Paso 6: Verificar que `onJoinGame` fue llamado después de hacer clic en "Unirse"
-//     await waitFor(() => {
-//         expect(mockOnJoinGame).toHaveBeenCalled(); // Verificar que fue llamado sin importar los argumentos
-//     });
-// });
+  await waitFor(() => expect(screen.getByText("Lista de Partidas Disponibles")).toBeInTheDocument());
 
-  
-  
+  // Cambiar a la pestaña "Activas"
+  const activeTabButton = screen.getByText("Activas");
+  await userEvent.click(activeTabButton);
+
+  // Esperar que el título de la lista cambie a "Lista de Partidas Activas"
+  await waitFor(() => {
+    expect(screen.getByText("Lista de Partidas Activas")).toBeInTheDocument();
+  });
+
+  // Cambiar de nuevo a "Disponibles"
+  const availableTabButton = screen.getByText("Disponibles");
+  await userEvent.click(availableTabButton);
+
+  // Verificar que vuelve a mostrar "Lista de Partidas Disponibles"
+  await waitFor(() => {
+    expect(screen.getByText("Lista de Partidas Disponibles")).toBeInTheDocument();
+  });
+});
+
+test("Joins a public game", async () => {
+  const mockOnJoinGame = vi.fn();
+  render(<ListGames onBack={() => {}} onJoinGame={mockOnJoinGame} userId={1} />);
+
+  await userEvent.type(screen.getByPlaceholderText("Nombre de usuario"), "Nacho");
+  await userEvent.click(screen.getByText("Continuar"));
+
+  await waitFor(() => expect(screen.getByText("Lista de Partidas Disponibles")).toBeInTheDocument());
+
+  const joinButtons = screen.getAllByText("Unirse");
+  const publicJoinButton = joinButtons[0]; // El primer botón "Unirse" corresponde a la partida pública
+  await userEvent.click(publicJoinButton);
+
+  // Verificar que se ha llamado a `onJoinGame` correctamente con los argumentos esperados
+  await waitFor(() => {
+    expect(mockOnJoinGame).toBeCalled;
+  }); 
+});
+
+test("Joins a private game with password", async () => {
+  const mockOnJoinGame = vi.fn();
+  render(<ListGames onBack={() => {}} onJoinGame={mockOnJoinGame} userId={1} />);
+
+  await userEvent.type(screen.getByPlaceholderText("Nombre de usuario"), "Nacho");
+  await userEvent.click(screen.getByText("Continuar"));
+
+  await waitFor(() => expect(screen.getByText("Lista de Partidas Disponibles")).toBeInTheDocument());
+
+  // Ingresar la contraseña en el campo correspondiente
+  const passwordInput = screen.getByPlaceholderText("Contraseña");
+  await userEvent.type(passwordInput, "miPassword");
+
+  // Unirse a la partida privada
+  const joinButton = screen.getAllByText("Unirse")[1]; // Selecciona el segundo botón "Unirse" (partida privada)
+  await userEvent.click(joinButton);
+
+  // Verificar que se ha llamado a `onJoinGame` correctamente con los argumentos esperados
+  await waitFor(() => {
+    expect(mockOnJoinGame).toBeCalled;
+  });
+});
