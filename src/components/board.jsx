@@ -58,6 +58,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [confirm, setConfirm] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
 
+  const [errorMessage, setErrorMessage] = useState(""); // Estado para el mensaje de error
+
+
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
       console.warn("Lista de jugadores vacía o indefinida.");
@@ -158,17 +161,31 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       if (!response.ok) {
         const errorData = await response.json();
         console.log("Error al usar carta figura:", errorData.detail);
+        setErrorMessage("Error al usar carta figura: " + errorData.detail); // Actualiza el estado de error
         return;
       }
 
       const data = await response.json();
       console.log("Carta figura usada con éxito:", data);
-
+      setErrorMessage("");
       // Refrescar las cartas figura después de usar una
     } catch (error) {
       console.log("Error al usar la carta figura:", error);
+      setErrorMessage("Error al usar carta figura: " + errorData.detail); // Actualiza el estado de error
+
     }
   };
+
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(""); // Limpia el mensaje de error después de 2 segundos
+      }, 3000);
+
+      // Limpia el temporizador si el componente se desmonta o errorMessage cambia
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
 
   // Función para usar la carta figura
   const handleUseFigure = (token) => {
@@ -501,6 +518,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case "status_winner":
           fetchLogs();
+          if (message.user_left != userId) {
+            setWinner(message.winner);
+          }          
           setWinnerMessage(`¡Ganaste la partida!`);
           sessionStorage.setItem(gameId, false)
           break;
@@ -543,8 +563,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           break;
 
         case "chat_message":
-          console.log("ENTROOOO");
           fetchLogs();
+          fetchMessages();
+          clearUnreadMessages();
           addMessage(message);
           setHasUnreadMessages(true);
           break;
@@ -690,9 +711,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       const data = await response.json();
       console.log(`Respuesta completa para el jugador ${userId}:`, data);
       console.log(`Cartas recibidas para el jugador ${userId}:`, data);
-      if (data.count === 0) {
-        setWinner("x");
-      }
       return data.cards || [];
     } catch (error) {
       console.log(error);
@@ -744,8 +762,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           } else {
             console.log(
               `No se encontraron cartas para el jugador ${playerUserId}`
-            );
-            setWinner(player.userName);
+            );            
           }
         } else {
           console.log(`Posición ${i} no tiene jugador.`);
@@ -962,6 +979,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   return (
     <div className="game-page">
+      {/* Error al querer bloquear una carta de un jugador bloqueado */}
+      {errorMessage && (
+        <div className="error-message">
+          {errorMessage}
+        </div>
+      )}
       {/* Botón de chat */}
       <Chat gameId={gameId} fetchMessages={fetchMessages} userId={userId} messages={messages} addMessage={addMessage} hasUnreadMessages={hasUnreadMessages} clearUnreadMessages={clearUnreadMessages} />
       {warningMessage && (
@@ -978,6 +1001,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
+        <button className="reset-button" onClick={handleResetFigureCards}>
+        Resetear Cartas de Figura
+      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
