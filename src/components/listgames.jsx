@@ -3,7 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 const ListGames = ({ onBack, onJoinGame, userId }) => {
   const [partidas, setPartidas] = useState([]);
   const [activeGames, setActiveGames] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    sessionStorage.getItem("currentframe") === "list";
+  });
   const [error, setError] = useState(null);
   const [joining, setJoining] = useState(null); // Para manejar el estado de unirse a la partida
   const [userName, setUserName] = useState(""); // Estado para almacenar el nombre del usuario

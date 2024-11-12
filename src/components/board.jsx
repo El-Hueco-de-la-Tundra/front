@@ -318,12 +318,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   useEffect(() => {
     if (sessionStorage.getItem(gameId) === "true") {
-      console.log("El timer es: ", parseInt(sessionStorage.getItem("timer")))
       if (sessionStorage.getItem("currentframe") === "list") {
-        console.log("Entre a setear el timer",parseInt(sessionStorage.getItem("timer")) )
         setTimeLeft(parseInt(sessionStorage.getItem("timer")));
         sessionStorage.setItem("currentframe", false);
       }
+      if (sessionStorage.getItem("backmenu") === "true"){
+        handlegetTimeLeft();
+        sessionStorage.setItem("backmenu", false);
+      }
+      sessionStorage.getItem(gameId)
+      console.log("gamestarted en session es:",sessionStorage.getItem(gameId));
       fetchTurnInfo();
       fetchGameInfo();
       fetchLogs();
@@ -336,6 +340,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       handleFiguresFetched();
       fetchUserFigureCards(userId);
       setTriggerFetchFigures((prev) => prev + 1);
+    } else{
+      setGameStarted(sessionStorage.getItem(gameId) === "true");
     }
   }, [gameStarted]);
   
@@ -375,6 +381,19 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     }
   };
 
+  const handlegetTimeLeft = async () => {
+
+    const get_time = await fetch(`http://localhost:8000/time/${gameId}`,
+      {
+        method : 'GET',
+        headers : {"Content-Type": "application/json"}
+      }
+    );
+
+    const data = await get_time.json()
+    setTimeLeft(data)
+  }
+
 
   const handleBeforeUnload = (e) => {
     // Guardamos el dato en sessionStorage antes de que se recargue la página
@@ -383,8 +402,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
     
     console.log("la var time es:", timeLeft)
     sessionStorage.setItem("timer", timeLeft - 2);
-    console.log("el timer guardado es:", sessionStorage.getItem("timer"));
-    
   };
 
 
@@ -534,9 +551,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
         case "status_reconect":
           console.log("SOY CORDOBES ME GUSTA EL VINO Y LA JODA")
-          sessionStorage.setItem(gameId, true)
-          setGameStarted(sessionStorage.getItem(gameId) === "true")
-          fetchTurnInfo();
+          //sessionStorage.setItem(gameId, true)
+          //setGameStarted(sessionStorage.getItem(gameId) === "true")
+          /*fetchTurnInfo();
           fetchGameInfo();
           fetchLogs();
           fetchAllFigureCards(players);
@@ -544,9 +561,8 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchUserMovementCards().then((cards) => {
             setMovementCards(cards);
           });
-          
           handleFiguresFetched();
-          fetchUserFigureCards(userId);    
+          fetchUserFigureCards(userId);  */  
           break;
 
         default:
@@ -920,6 +936,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   const handleNoLeaveGame = () => {
     setConfirmMessage("¿Deseas volver al menu?");
+    sessionStorage.setItem("backmenu", true);
     setConfirm(true);
   };
 
