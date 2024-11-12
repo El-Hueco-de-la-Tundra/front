@@ -920,14 +920,16 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   const handleNoLeaveGame = () => {
     setConfirmMessage("¿Deseas volver al menu?");
+    setConfirm(true);
   };
 
   const confirmedLeave = () => {
-    if(confirm){
-      onLeaveGame();
-    } else {
-      setConfirmMessage("");
-    }
+    setConfirm(false);
+    onLeaveGame();
+  }
+
+  const canceledLeave = () => {
+    setConfirm(false);
   }
 
   // Formatear tiempo
@@ -1009,13 +1011,13 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           </button>
         </div>
       )}
-      {confirmMessage && (
+      {confirm && (
         <div className="confirm-notification">
-          confirmMessage
-          <button className="ok-button" onClick={confirmedLeave}>
-            Acepatar
+          <p>{confirmMessage}</p>
+          <button className="confirm-button" onClick={confirmedLeave}>
+            Aceptar
           </button>
-          <button className="ok-button" onClick={handleLeaveGame}>
+          <button className="cancel-button" onClick={canceledLeave}>
             Cancelar
           </button>
         </div>
