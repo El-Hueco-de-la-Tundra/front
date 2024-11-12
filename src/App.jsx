@@ -16,6 +16,7 @@ function App() {
   const [userId, setUserId] = useState(null);
   const [currentFrame, setCurrentFrame] = useState('initial');  // Controla en qué "frame" estamos
   const [fade, setFade] = useState(false); 
+  const storedDictionary = JSON.parse(sessionStorage.getItem("myDictionary")) || {};
 
   useEffect(() => {
     let initialTimer, transitionTimer, boardTimer;

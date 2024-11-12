@@ -41,7 +41,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
           console.warn("Evento no reconocido");
       }
     };
-  }; 
+  };
 
   useEffect(() => {
     if (!hasConnected.current) {
@@ -115,8 +115,8 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
         partidasResult =
           partidasResult.length > 0
             ? partidasResult.filter((p) =>
-                partidasByPlayers.some((pp) => pp.id === p.id)
-              ) // Intersección de resultados
+              partidasByPlayers.some((pp) => pp.id === p.id)
+            ) // Intersección de resultados
             : partidasByPlayers;
       }
 
@@ -208,7 +208,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
           game_id: gameId,
           user_name: userName,
           password: password || "", // Contraseña (o vacío si no es privada)
-          session_id: 2
+          session_id: session_id
         })
       });
 
@@ -273,6 +273,53 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     }
   };
 
+  // Handle de games activas
+  const handleReconnectGame = async (gameId) => {
+
+    try {
+      const player_id = await fetch(`http://localhost:8000/games/${gameId}/${session_id}/get_player_id`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (player_id.status == 200) {
+
+        const game = await fetch(`http://localhost:8000/games/${gameId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        console.log("NO QUIERO JUGAR")
+        const dataplayer = await player_id.json()
+        console.log("Toda data player", dataplayer)
+        console.log("Data player.id es:", dataplayer.player_id)
+        const data = await game.json()
+        console.log("Toda data de game es:", data)
+
+        for (let i = 0; i < 4; i++) {
+          // Obtén el ID del jugador como clave del objeto
+          const playerId = Object.keys(data.users.players[i])[0];
+          
+          // Compara el ID con el que tienes en dataplayer
+          if (parseInt(playerId) === dataplayer.player_id) {
+            console.log("APARECI");
+            sessionStorage.setItem("reconecting", true);
+            console.log("Este sapo asqueroso es: ", playerId);
+            console.log("El id del game en list es:", gameId);
+
+            
+            onJoinGame(dataplayer.player_id, gameId);
+          }
+        }
+        
+      }
+
+    } catch (error) {
+      return;
+    }
+  }
+
+
   // Ejecuta la función de obtener partidas al montar el componente
   useEffect(() => {
     if (userNameSubmitted && userName.trim()) {
@@ -322,13 +369,13 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
       <div className="tabs">
         <button
           className={selectedTab === "disponibles" ? "active-tab" : ""}
-          onClick={() => {setSelectedTab("disponibles"); handleListGames}}
+          onClick={() => { setSelectedTab("disponibles"); handleListGames }}
         >
           Disponibles
         </button>
         <button
           className={selectedTab === "activas" ? "active-tab" : ""}
-          onClick={() => {setSelectedTab("activas"); console.log("Session ID listado (pestaña):", session_id); handleListActiveGames()}}
+          onClick={() => { setSelectedTab("activas"); console.log("Session ID listado (pestaña):", session_id); handleListActiveGames() }}
         >
           Activas
         </button>
@@ -371,20 +418,30 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
               <p>Jugadores: {partida.users.players.length}</p>
               <p>Partida {partida.is_private ? "Privada" : "Pública"}</p>{" "}
               {/* Muestra si es privada o pública */}
-              {partida.is_private && (
+              {partida.is_private && selectedTab === "disponibles" && (
                 <input
                   type="password"
                   placeholder="Contraseña"
                   onChange={(e) => (partida.password = e.target.value)} // Guardar la contraseña temporalmente
                 />
               )}
-              <button
-                className="join-button"
-                onClick={() => handleJoinGame(partida.id, partida.password)} // Pasa el gameId y password (si es privada)
-                disabled={joining === partida.id} // Deshabilita el botón si ya te estás uniendo a esa partida
-              >
-                {joining === partida.id ? "Uniéndote..." : "Unirse"}
-              </button>
+              {selectedTab === "disponibles" ? (
+                <button
+                  className="join-button"
+                  onClick={() => handleJoinGame(partida.id, partida.password)} // Pasa el gameId y password (si es privada)
+                  disabled={joining === partida.id} // Deshabilita el botón si ya te estás uniendo a esa partida
+                >
+                  {joining === partida.id ? "Uniéndote..." : "Unirse"}
+                </button>
+              ) : (
+                <button
+                  className="join-button"
+                  onClick={() => handleReconnectGame(partida.id)}
+                  disabled={joining === partida.id}
+                >
+                  {joining === partida.id ? "Reconectando..." : "Reconectarse"}
+                </button>
+              )}
             </li>
           ))}
         </ul>
