@@ -316,6 +316,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
 
   useEffect(() => {
     if (sessionStorage.getItem(gameId) === "true") {
+      console.log("El timer es: ", parseInt(sessionStorage.getItem("timer")))
+      if (sessionStorage.getItem("currentframe") === "list") {
+        console.log("Entre a setear el timer",parseInt(sessionStorage.getItem("timer")) )
+        setTimeLeft(parseInt(sessionStorage.getItem("timer")));
+        sessionStorage.setItem("currentframe", false);
+      }
       fetchTurnInfo();
       fetchGameInfo();
       fetchLogs();
@@ -371,7 +377,12 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const handleBeforeUnload = (e) => {
     // Guardamos el dato en sessionStorage antes de que se recargue la página
     sessionStorage.setItem("currentframe", 'list');
-    sessionStorage.setItem("gameid", gameId)
+    sessionStorage.setItem("gameid", gameId);
+    
+    console.log("la var time es:", timeLeft)
+    sessionStorage.setItem("timer", timeLeft - 2);
+    console.log("el timer guardado es:", sessionStorage.getItem("timer"));
+    
   };
 
 
@@ -493,7 +504,7 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           fetchUserFigureCards(userId);
           setTriggerFetchFigures((prev) => prev + 1);
           setMoveCount((prev) => prev + 1);
-          setTimeLeft(120);
+          setTimeLeft(120); // --> Usar este pasandole el 
           setMoveCount(0);
           setUndoCount(0);
           break;
