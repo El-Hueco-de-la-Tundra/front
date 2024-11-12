@@ -1001,9 +1001,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
         onFiguresFetched={handleFiguresFetched}
         triggerFetch={triggerFetchFigures}
       />
-        <button className="reset-button" onClick={handleResetFigureCards}>
-        Resetear Cartas de Figura
-      </button>
       {playersReady && (
         <>
           {reorderedPlayers[1] && (
