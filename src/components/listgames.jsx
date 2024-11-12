@@ -49,6 +49,13 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
     }
   });
 
+ useEffect(() =>{
+  if (sessionStorage.getItem("currentframe") === 'list'){
+    sessionStorage.setItem("currentframe", false)
+    handleReconnectGame(sessionStorage.getItem("gameid"));
+  }
+ })
+
   const fetchGamesByName = async () => {
     try {
       const response = await fetch(
@@ -331,7 +338,7 @@ const ListGames = ({ onBack, onJoinGame, userId }) => {
 
   // Si el nombre de usuario no se ha ingresado, muestra un formulario para ingresarlo
   if (!userNameSubmitted) {
-    return (
+    return ( 
       <div className="username-container">
         <h1>Ingresa tu nombre para continuar</h1>
         <form

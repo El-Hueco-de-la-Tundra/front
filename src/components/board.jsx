@@ -56,16 +56,6 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
   const [messages, setMessages] = useState([]); // Estado para los mensajes
   const [logs, setLogs] = useState([]);
 
-  // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-
-  const handleBeforeUnload = () => {
-    sessionStorage.setItem("gameId",gameId);
-    sessionStorage.setItem("userId_${gameId}", userId);
-  }
-
-  window.addEventListener('beforeunload', handleBeforeUnload);
-  
-  // = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
   const reorderPlayers = (players, currentUserId) => {
     if (!players || players.length === 0) {
       console.warn("Lista de jugadores vacía o indefinida.");
@@ -376,6 +366,19 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
       console.error(error);
     }
   };
+
+
+  const handleBeforeUnload = (e) => {
+    // Guardamos el dato en sessionStorage antes de que se recargue la página
+    sessionStorage.setItem("currentframe", 'list');
+    sessionStorage.setItem("gameid", gameId)
+  };
+
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+
+
 
   // Conectar al WebSocket
   const connectWebSocket = async (gameId, userId) => {
