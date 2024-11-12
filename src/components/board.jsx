@@ -485,8 +485,9 @@ const BoardPage = ({ onLeaveGame, gameId, userId }) => {
           break;
 
         case "chat_message":
-          console.log("ENTROOOO");
           fetchLogs();
+          fetchMessages();
+          clearUnreadMessages();
           addMessage(message);
           setHasUnreadMessages(true);
           break;
